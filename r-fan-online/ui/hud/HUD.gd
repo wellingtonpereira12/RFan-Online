@@ -6,6 +6,7 @@ class_name HUD
 @onready var fp_bar: ProgressBar = $MarginContainer/VBoxContainer/FPBar
 @onready var run_button: Button = $RunButton
 @onready var auto_button: Button = $AutoAttackButton
+@onready var skill_bar: Control = $SkillBar
 
 @onready var target_frame: PanelContainer = $TargetFrame
 @onready var target_hp_bar: ProgressBar = $TargetFrame/VBoxContainer/TargetHPBar
@@ -88,3 +89,33 @@ func unbind_target() -> void:
 func _on_target_hp_changed(current: int, max_val: int) -> void:
 	target_hp_bar.max_value = max_val
 	target_hp_bar.value = current
+
+# --- Efeito Visual de Clique do Mouse ---
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		spawn_click_effect(event.position)
+
+func spawn_click_effect(pos: Vector2) -> void:
+	var effect = Panel.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.8, 0.9, 1.0, 0.7) # Bolinha meio azulada brilhante (estilo Sci-Fi/RF)
+	style.corner_radius_top_left = 10
+	style.corner_radius_top_right = 10
+	style.corner_radius_bottom_left = 10
+	style.corner_radius_bottom_right = 10
+	
+	effect.add_theme_stylebox_override("panel", style)
+	effect.custom_minimum_size = Vector2(20, 20)
+	effect.size = Vector2(20, 20)
+	effect.pivot_offset = Vector2(10, 10) # Centro da bolinha para escalar perfeitamente
+	effect.position = pos - Vector2(10, 10)
+	effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	add_child(effect)
+	
+	# Animação da bolinha crescendo e sumindo
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(effect, "scale", Vector2(2.5, 2.5), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(effect, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.chain().tween_callback(effect.queue_free)

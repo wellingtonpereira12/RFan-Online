@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/hud/HUD.gd" id="1_hud"]
+[ext_resource type="PackedScene" uid="uid://1xkillbarx" path="res://ui/hud/SkillBar.tscn" id="2_skillbar"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -78,3 +79,6 @@ custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 step = 1.0
 value = 100.0
+
+[node name="SkillBar" parent="." instance=ExtResource("2_skillbar")]
+layout_mode = 1

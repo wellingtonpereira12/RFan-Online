@@ -38,6 +38,7 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 # --- Variáveis do Sistema de Combate / Auto-Attack ---
 var auto_attack_mode_enabled: bool = false
+var run_mode_enabled: bool = false
 var is_pursuing_and_attacking: bool = false
 var basic_attack_cooldown_timer: float = 0.0
 var basic_attack_interval: float = 1.0 # 1 hit por segundo fixo na mão
@@ -104,15 +105,26 @@ func _ready() -> void:
 			# Lógica de Morte / Respawn
 			vitals_component.died.connect(_on_player_died)
 
-	# Inicializar a primeira Magia em Código pra teste ("Wild Smash")
-	if combat_component:
+	# Inicializar a primeira Magia em Código pra teste ("Wild Smash") e Injetar Item na SkillBar
+	if combat_component and hud_instance.skill_bar:
 		var wild_smash = SkillResource.new()
-		wild_smash.skill_name = "Golpe Selvagem (Wild Smash)"
+		wild_smash.skill_name = "Golpe Selvagem"
 		wild_smash.sp_cost = 20
 		wild_smash.cooldown = 3.0
 		wild_smash.damage_multiplier = 2.5
 		wild_smash.skill_range = 3.5
-		combat_component.register_skill(1, wild_smash) # Slot 1 = F1
+		hud_instance.skill_bar.set_slot_action(1, wild_smash)
+		
+		var fake_potion = SkillResource.new()
+		fake_potion.skill_name = "Pote de HP"
+		fake_potion.cooldown = 10.0
+		hud_instance.skill_bar.set_slot_action(2, fake_potion)
+		
+		# Amarra a barra gráfica ao motor de dano do CombatComponent!
+		hud_instance.skill_bar.action_triggered.connect(func(idx): 
+			var act_data = hud_instance.skill_bar.slots[idx - 1].action_data
+			combat_component.process_action(idx, act_data, hud_instance.skill_bar)
+		)
 
 	# Conectar modos da UI ao Player
 	hud_instance.run_toggled.connect(_on_hud_run_toggled)
@@ -122,15 +134,10 @@ func _on_hud_auto_mode_toggled(is_auto: bool) -> void:
 	auto_attack_mode_enabled = is_auto
 
 func _on_hud_run_toggled(is_run_mode: bool) -> void:
-	# Só pode correr se tiver FP
-	if is_run_mode and vitals_component and vitals_component.fp > 0:
-		move_speed = run_speed
-		vitals_component.is_running = true
-	else:
-		move_speed = walk_speed
-		vitals_component.is_running = false
-		if is_run_mode: # Se ele tentou correr e não tinha FP
-			hud_instance.force_walk_mode()
+	run_mode_enabled = is_run_mode
+	if is_run_mode and vitals_component and vitals_component.fp <= 0:
+		run_mode_enabled = false
+		hud_instance.force_walk_mode()
 
 # --- Sistema de Morte e Renascimento ---
 func _on_player_died() -> void:
@@ -181,11 +188,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		handle_mouse_click(event.double_click)
 
-	# Dispara a Magia do slot 1 se apertar F1
-	if event.is_action_pressed("skill_1"):
-		if combat_component:
-			combat_component.try_cast_skill(1)
-
 func handle_mouse_click(is_double_click: bool) -> void:
 	var space_state = get_world_3d().direct_space_state
 	var mouse_pos = get_viewport().get_mouse_position()
@@ -229,12 +231,6 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = jump_velocity
 
-	# Se estiver tentando correr mas o FP zerou, força a andar
-	if vitals_component and vitals_component.is_running and vitals_component.fp == 0:
-		move_speed = walk_speed
-		vitals_component.is_running = false
-		hud_instance.force_walk_mode()
-
 	# Obter direção de Input baseada no Teclado mas com referência absoluta da CÂMERA
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var cam_dir = camera_pivot.global_basis * Vector3(input_dir.x, 0, input_dir.y)
@@ -244,6 +240,20 @@ func _physics_process(delta: float) -> void:
 	# Condições de Interrupção de teclado
 	if input_dir.length() > 0:
 		is_pursuing_and_attacking = false # O usuário tocou no WASD, cancelar perseguição automátiCa!
+
+	# --- Lógica de Consumo de FP Dinâmico ---
+	var is_moving = direction.length() > 0.0 or is_pursuing_and_attacking
+	if run_mode_enabled and is_moving and vitals_component and vitals_component.fp > 0:
+		move_speed = run_speed
+		vitals_component.is_running = true
+	else:
+		move_speed = walk_speed
+		vitals_component.is_running = false
+		
+		# Se tentou correr sem FP, desativa
+		if run_mode_enabled and is_moving and vitals_component and vitals_component.fp == 0:
+			run_mode_enabled = false
+			hud_instance.force_walk_mode()
 	
 	# Processar movimentação de Auto Attack Autônoma
 	if is_pursuing_and_attacking:
