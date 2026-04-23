@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" uid="uid://cxqj2euek2qpx" path="res://entities/player/Player.tscn" id="1_player"]
+[ext_resource type="Script" path="res://components/HealthComponent.gd" id="2_health"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(50, 1, 50)
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(50, 1, 50)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_enemy"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_enemy"]
+
+[node name="TestWorld" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_floor")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="DummyEnemy" type="CharacterBody3D" parent="." groups=["enemies"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+
+[node name="HealthComponent" type="Node" parent="DummyEnemy"]
+script = ExtResource("2_health")
+max_health = 500
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DummyEnemy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_enemy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DummyEnemy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_enemy")
