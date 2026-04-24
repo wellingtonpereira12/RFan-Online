@@ -1,0 +1,48 @@
+{
+	"melee_skills": [
+		{
+			"id": 1,
+			"key": "slash",
+			"nome": "Corte Rápido",
+			"descricao": "Um ataque rápido com arma corpo a corpo que causa dano leve.",
+			"dano": 35,
+			"custo_sp": 5,
+			"cooldown": 1.5,
+			"nivel_minimo": 1,
+			"icon": "res://assets/icons/skills/slash.png"
+		},
+		{
+			"id": 2,
+			"key": "heavy_strike",
+			"nome": "Golpe Pesado",
+			"descricao": "Um golpe concentrado que causa grande dano, mas é mais lento.",
+			"dano": 80,
+			"custo_sp": 15,
+			"cooldown": 5.0,
+			"nivel_minimo": 5,
+			"icon": "res://assets/icons/skills/heavy_strike.png"
+		},
+		{
+			"id": 3,
+			"key": "whirlwind",
+			"nome": "Ataque Giratório",
+			"descricao": "Gira com a arma atingindo todos ao redor (Dano em Área).",
+			"dano": 60,
+			"custo_sp": 25,
+			"cooldown": 8.0,
+			"nivel_minimo": 10,
+			"icon": "res://assets/icons/skills/whirlwind.png"
+		},
+		{
+			"id": 4,
+			"key": "bash",
+			"nome": "Esmagar",
+			"descricao": "Um golpe brutal que ignora parte da defesa do alvo.",
+			"dano": 120,
+			"custo_sp": 30,
+			"cooldown": 12.0,
+			"nivel_minimo": 15,
+			"icon": "res://assets/icons/skills/bash.png"
+		}
+	]
+}

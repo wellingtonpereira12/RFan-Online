@@ -4,7 +4,11 @@ class_name HUD
 @onready var hp_bar: ProgressBar = $MarginContainer/VBoxContainer/HPBar
 @onready var sp_bar: ProgressBar = $MarginContainer/VBoxContainer/SPBar
 @onready var fp_bar: ProgressBar = $MarginContainer/VBoxContainer/FPBar
-@onready var skill_bar: Control = $SkillBar
+@onready var exp_bar: ProgressBar = $BottomUI/EXPBottomContainer/EXPBarPremium
+@onready var exp_label: Label = $BottomUI/EXPBottomContainer/EXPLabel
+@onready var level_label: Label = $MarginContainer/VBoxContainer/LevelLabel
+@onready var skill_bar: Control = $BottomUI/SkillBarContainer/SkillBar
+@onready var skill_window: Control = $SkillWindow
 
 @onready var target_frame: PanelContainer = $TargetFrame
 @onready var target_hp_bar: ProgressBar = $TargetFrame/VBoxContainer/TargetHPBar
@@ -19,6 +23,7 @@ func _ready() -> void:
 	# Conecta os sinais da SkillBar (os botões de correr/auto ficam nela agora)
 	skill_bar.run_mode_changed.connect(func(v): run_toggled.emit(v))
 	skill_bar.auto_attack_changed.connect(func(v): auto_attack_mode_toggled.emit(v))
+	skill_bar.skills_pressed.connect(func(): skill_window.toggle())
 
 # Atualizadores das Barras
 func update_hp(current: int, max_val: int) -> void:
@@ -32,6 +37,17 @@ func update_sp(current: int, max_val: int) -> void:
 func update_fp(current: int, max_val: int) -> void:
 	fp_bar.max_value = max_val
 	fp_bar.value = current
+
+func update_exp(current: int, max_val: int) -> void:
+	exp_bar.max_value = max_val
+	exp_bar.value = current
+	
+	var percent = 0.0
+	if max_val > 0:
+		percent = (float(current) / float(max_val)) * 100.0
+	
+	exp_label.text = str(current) + " / " + str(max_val) + " (" + str(snapped(percent, 0.01)) + "%)"
+	level_label.text = "Lv. " + str(ExperienceManager.current_level)
 
 # Atualiza a UI quando a lógica interna do Player força a voltar a andar (FP zerada)
 func force_walk_mode() -> void:
@@ -65,6 +81,13 @@ func _on_target_hp_changed(current: int, max_val: int) -> void:
 
 # --- Efeito Visual de Clique do Mouse ---
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var focus_owner = get_viewport().gui_get_focus_owner()
+		if not (focus_owner is LineEdit):
+			if event.keycode == KEY_B:
+				skill_window.toggle()
+				get_viewport().set_input_as_handled()
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		spawn_click_effect(event.position)
 

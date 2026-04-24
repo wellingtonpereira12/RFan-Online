@@ -1,0 +1,40 @@
+{
+	"ranged_skills": [
+		{
+			"id": 101,
+			"key": "arrow_shot",
+			"nome": "Disparo Preciso",
+			"descricao": "Atira uma flecha no inimigo à distância causando dano focado.",
+			"dano": 50,
+			"custo_fp": 15,
+			"cooldown": 2.5,
+			"nivel_minimo": 1,
+			"alcance": 25.0,
+			"icon": "res://assets/icons/skills/arrow_shot.png"
+		},
+		{
+			"id": 102,
+			"key": "double_shot",
+			"nome": "Disparo Duplo",
+			"descricao": "Atira duas flechas rapidamente no mesmo alvo.",
+			"dano": 90,
+			"custo_fp": 25,
+			"cooldown": 4.5,
+			"nivel_minimo": 8,
+			"alcance": 22.0,
+			"icon": "res://assets/icons/skills/double_shot.png"
+		},
+		{
+			"id": 103,
+			"key": "piercing_arrow",
+			"nome": "Flecha Perfurante",
+			"descricao": "Uma flecha potente que atravessa defesas leves.",
+			"dano": 130,
+			"custo_fp": 40,
+			"cooldown": 10.0,
+			"nivel_minimo": 15,
+			"alcance": 30.0,
+			"icon": "res://assets/icons/skills/piercing_arrow.png"
+		}
+	]
+}

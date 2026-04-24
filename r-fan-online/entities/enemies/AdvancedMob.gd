@@ -206,6 +206,11 @@ func _perform_attack() -> void:
 
 func _on_death() -> void:
 	print("[Mob ", name, "] Morreu!")
+	
+	# Dá XP ao jogador
+	var xp_reward = mob_data.get("exp", 0)
+	ExperienceManager.add_exp(xp_reward)
+	
 	_roll_drops()
 	died.emit()
 	queue_free()

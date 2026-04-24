@@ -121,10 +121,30 @@ func _ready() -> void:
 			else:
 				# Personagem novo ou sem itens salvos, dá itens iniciais
 				_give_initial_items()
+			
+			# Carrega Level e XP
+			var p_level = char_data.get("level", 1)
+			var p_exp = char_data.get("exp", 0)
+			ExperienceManager.setup_player(p_level, p_exp)
 			break
 	
 	if not character_found:
 		_give_initial_items()
+
+	# Conectar sinais de XP ao HUD
+	ExperienceManager.exp_changed.connect(hud_instance.update_exp)
+	ExperienceManager.level_up.connect(func(nl): 
+		ChatManager.receive_message({
+			"sender": "SISTEMA",
+			"text": "LEVEL UP! Você agora é nível " + str(nl),
+			"race": GameManager.player_race,
+			"channel": ChatManager.Channel.LOCAL
+		})
+	)
+	
+	# Forçar atualização inicial da UI
+	hud_instance.update_exp(ExperienceManager.current_exp, ExperienceManager.max_exp)
+
 
 	# Timer para Salvar Automaticamente a cada 30 segundos
 	var save_timer = Timer.new()
@@ -385,6 +405,15 @@ func handle_mouse_click(is_double_click: bool) -> void:
 				var resto = inv_ui.inventory_manager.add_item(i_data["id"], i_amount)
 				if resto <= 0:
 					hit_obj.queue_free()
+					var msg_text = "Você pegou: [color=cyan]" + i_data.get("nome", "Item") + "[/color]"
+					if i_amount > 1: msg_text += " x" + str(i_amount)
+					
+					ChatManager.receive_message({
+						"sender": "SISTEMA",
+						"text": msg_text,
+						"race": GameManager.player_race,
+						"channel": ChatManager.Channel.LOCAL
+					})
 					print("Pegou do chão: ", i_data.get("nome", "Item"), " x", i_amount)
 				elif resto < i_amount:
 					hit_obj.set_meta("item_amount", resto)
@@ -432,7 +461,12 @@ func _physics_process(delta: float) -> void:
 		velocity.y = jump_velocity
 
 	# Obter direção de Input baseada no Teclado mas com referência absoluta da CÂMERA
-	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	var input_dir := Vector2.ZERO
+	var focus_owner = get_viewport().gui_get_focus_owner()
+	
+	if not (focus_owner is LineEdit):
+		input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+		
 	var cam_dir = camera_pivot.global_basis * Vector3(input_dir.x, 0, input_dir.y)
 	cam_dir.y = 0
 	var direction := cam_dir.normalized()
@@ -442,7 +476,13 @@ func _physics_process(delta: float) -> void:
 		is_pursuing_and_attacking = false # O usuário tocou no WASD, cancelar perseguição automátiCa!
 
 	# --- Lógica de Consumo de FP Dinâmico ---
-	var is_moving = direction.length() > 0.0 or is_pursuing_and_attacking
+	var target_dist = 0.0
+	if current_target:
+		target_dist = global_position.distance_to(current_target.global_position)
+		
+	# Só considera movimento se houver input ou se estiver perseguindo ALÉM do alcance de ataque
+	var is_moving = direction.length() > 0.0 or (is_pursuing_and_attacking and target_dist > base_attack_range)
+	
 	if run_mode_enabled and is_moving and vitals_component and vitals_component.fp > 0:
 		move_speed = run_speed
 		vitals_component.is_running = true
@@ -531,8 +571,11 @@ func _give_initial_items():
 	_save_player_to_db()
 
 func _save_player_to_db():
+	var exp_data = ExperienceManager.get_data_to_save()
 	var data_to_save = {
-		"inventory": inventory_manager.get_inventory_data()
+		"inventory": inventory_manager.get_inventory_data(),
+		"level": exp_data["level"],
+		"exp": exp_data["exp"]
 	}
 	AccountManager.update_character_data(GameManager.player_name, data_to_save)
 	print("[DB] Progresso de ", GameManager.player_name, " salvo automaticamente.")

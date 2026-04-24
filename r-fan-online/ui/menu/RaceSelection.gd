@@ -174,7 +174,9 @@ func _on_play_pressed() -> void:
 		"class": selected_class,
 		"created_at": Time.get_datetime_string_from_system(),
 		"inventory": [],
-		"equipment": {}
+		"equipment": {},
+		"level": 1,
+		"exp": 0
 	}
 	AccountManager.add_character_to_account(new_char_data)
 	

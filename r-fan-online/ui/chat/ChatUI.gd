@@ -8,6 +8,11 @@ extends Control
 @onready var close_btn = $Background/VBox/InputRow/CloseBtn
 @onready var resize_handle = $Background/ResizeHandle
 @onready var background = $Background
+@onready var settings_btn = $Background/SettingsBtn
+@onready var settings_panel = $SettingsPanel
+@onready var check_local = $SettingsPanel/VBox/CheckLocal
+@onready var check_global = $SettingsPanel/VBox/CheckGlobal
+@onready var check_sistema = $SettingsPanel/VBox/CheckSistema
 
 var current_channel = ChatManager.Channel.GLOBAL
 
@@ -37,6 +42,13 @@ func _ready() -> void:
 	
 	# Conecta sinal para mover a janela clicando no fundo
 	background.gui_input.connect(_on_bg_input)
+	
+	# Configurações de Filtro
+	settings_btn.pressed.connect(func(): settings_panel.visible = !settings_panel.visible)
+	check_local.toggled.connect(func(_v): _refresh_chat())
+	check_global.toggled.connect(func(_v): _refresh_chat())
+	check_sistema.toggled.connect(func(_v): _refresh_chat())
+	
 	_update_channel_ui()
 
 func _process(_delta: float) -> void:
@@ -65,13 +77,14 @@ func _on_toggle_channel():
 	_update_channel_ui()
 
 func _load_history():
+	_refresh_chat()
+
+func _refresh_chat():
 	message_list.clear()
-	message_list.append_text("[color=#888]--- Chat History Loaded ---[/color]")
+	message_list.append_text("[color=#888]--- Filtros Aplicados ---[/color]")
 	
 	for msg in ChatManager.chat_history:
-		# Só mostra se for da mesma raça
-		if msg["race"] == GameManager.player_race:
-			_on_message_received(msg)
+		_add_message_to_list(msg, true)
 
 func _update_channel_ui():
 	if current_channel == ChatManager.Channel.GLOBAL:
@@ -99,14 +112,34 @@ func _hide_input():
 
 
 func _on_message_received(data: Dictionary):
+	_add_message_to_list(data)
+
+func _add_message_to_list(data: Dictionary, is_refresh: bool = false):
+	# 1. Filtro de Raça (Segurança Extra)
+	if data["race"] != GameManager.player_race:
+		return
+		
+	# 2. Filtro de Canais do Usuário
+	var is_system = data["sender"] == "SISTEMA"
+	
+	if is_system and not check_sistema.button_pressed: return
+	if not is_system:
+		if data["channel"] == ChatManager.Channel.GLOBAL and not check_global.button_pressed: return
+		if data["channel"] == ChatManager.Channel.LOCAL and not check_local.button_pressed: return
+	
+	# Exibe
 	var race_color = ChatManager.RACE_COLORS.get(data["race"], "#ffffff")
 	var channel_tag = "[G]" if data["channel"] == ChatManager.Channel.GLOBAL else "[L]"
+	if is_system: channel_tag = "[S]"
+	
 	var formatted_msg = "\n[color=#888]" + channel_tag + "[/color] [color=" + race_color + "][b]" + data["sender"] + "[/b][/color]: " + data["text"]
 	message_list.append_text(formatted_msg)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_T and not input_field.has_focus():
+		# Só abre o chat se o T for pressionado e NENHUM input estiver focado
+		var focus_owner = get_viewport().gui_get_focus_owner()
+		if event.keycode == KEY_T and not (focus_owner is LineEdit):
 			_show_input()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_ESCAPE and input_row.visible:

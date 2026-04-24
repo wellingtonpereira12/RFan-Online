@@ -21,6 +21,8 @@ GameManager="*res://core/GameManager.gd"
 ChatManager="*res://core/ChatManager.gd"
 AccountManager="*res://core/AccountManager.gd"
 MobDatabase="*res://core/MobDatabase.gd"
+ExperienceManager="*res://core/ExperienceManager.gd"
+SkillDatabase="*res://core/SkillDatabase.gd"
 
 [input]
 

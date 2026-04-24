@@ -58,6 +58,11 @@ func consume_sp(amount: int) -> void:
 	sp = clampi(sp - amount, 0, max_sp)
 	sp_changed.emit(sp, max_sp)
 
+func consume_fp(amount: int) -> void:
+	fp_pool = clampf(fp_pool - float(amount), 0.0, float(max_fp))
+	fp = int(fp_pool)
+	fp_changed.emit(fp, max_fp)
+
 func _process(delta: float) -> void:
 	# Sistema de consumo e regeneração de FP
 	if is_running:

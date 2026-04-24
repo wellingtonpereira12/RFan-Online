@@ -100,8 +100,14 @@ func _on_text_submitted(new_text: String) -> void:
 		_cmd_reload(parts)
 	elif command == "clear":
 		history.text = "[color=yellow]=== Painel Administrativo GM Iniciado ===[/color]"
-	elif command == "help":
-		print_to_console("Comandos: item <id> <qtd> | mob <id> [qtd] | mob list | reload mobs | clear | help", "cyan")
+	elif command == "help" or command == "ajuda":
+		print_to_console("=== Lista de Comandos Disponíveis (GM) ===", "yellow")
+		print_to_console("/item <id> <quantidade> - Adiciona item ao seu inventário", "cyan")
+		print_to_console("/mob <id> [quantidade] - Spawna mobs perto de você", "cyan")
+		print_to_console("/mob list - Lista todos os IDs de mobs cadastrados", "cyan")
+		print_to_console("/reload mobs - Remove mobs do mapa e recarrega o mobs.json", "cyan")
+		print_to_console("/clear - Limpa o histórico deste console", "cyan")
+		print_to_console("/ajuda - Mostra esta lista", "cyan")
 	else:
 		print_to_console("Comando inválido: " + command, "red")
 

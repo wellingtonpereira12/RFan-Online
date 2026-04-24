@@ -100,7 +100,7 @@ func _notification(what: int) -> void:
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if is_on_cooldown: return false
 	if typeof(data) != TYPE_DICTIONARY or not data.has("type"): return false
-	return data["type"] == "action_slot" or data["type"] == "inventory_slot"
+	return data["type"] == "action_slot" or data["type"] == "inventory_slot" or data["type"] == "skill"
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	if data["type"] == "action_slot":
@@ -108,6 +108,9 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	elif data["type"] == "inventory_slot":
 		# Avisa a SkillBar para gerenciar duplicatas e então setar a action
 		inventory_item_dropped.emit(data["data"], slot_index)
+	elif data["type"] == "skill":
+		# Habilidades vêm da SkillWindow
+		inventory_item_dropped.emit(data["skill_data"], slot_index)
 
 # Clique Direto com o Mouse
 func _gui_input(event: InputEvent) -> void:

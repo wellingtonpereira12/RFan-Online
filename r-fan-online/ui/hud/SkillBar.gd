@@ -12,6 +12,7 @@ var atk_cooldown_bar: ProgressBar = null
 signal action_triggered(slot_index: int)
 signal run_mode_changed(is_run: bool)
 signal auto_attack_changed(is_auto: bool)
+signal skills_pressed()
 
 func _ready() -> void:
 	# Montador Dinâmico de Vagas (Gera visualmente 1 a 0)
@@ -105,16 +106,16 @@ func _ready() -> void:
 	self.add_child(macro_btn)
 	macro_btn.position = Vector2(size.x + 110, 10)
 
-	# --- CRIAR SKILLS DE TESTE PARA VOCÊ PODER ARRASTAR ---
-	var fake_skill1 = SkillResource.new()
-	fake_skill1.skill_name = "Ataque Básico"
-	fake_skill1.cooldown = 1.0
-	set_slot_action(1, fake_skill1)
-	
-	var fake_skill2 = SkillResource.new()
-	fake_skill2.skill_name = "Pote de HP"
-	fake_skill2.cooldown = 2.0
-	set_slot_action(2, fake_skill2)
+	# --- Botão de Skills (Emoji) ---
+	var skills_btn = Button.new()
+	skills_btn.text = "⚔️" 
+	skills_btn.tooltip_text = "Habilidades (B)"
+	skills_btn.focus_mode = Control.FOCUS_NONE
+	skills_btn.pressed.connect(func(): skills_pressed.emit())
+	self.add_child(skills_btn)
+	skills_btn.position = Vector2(size.x + 145, 10)
+
+	# --- BOTÕES DE SISTEMA FINALIZADOS ---
 
 func _on_lock_button_toggled(toggled_on: bool) -> void:
 	toggle_lock(toggled_on)
