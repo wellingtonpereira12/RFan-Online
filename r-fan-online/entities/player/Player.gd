@@ -103,13 +103,50 @@ func _ready() -> void:
 	hud_instance.add_child(inv_ui)
 	inv_ui.setup(inventory_manager)
 	
-	# Adiciona itens usando o banco de dados oficial!
-	inventory_manager.add_item("pote_hp_p", 120)
-	inventory_manager.add_item("pote_sp_p", 50)
-	inventory_manager.add_item("pote_fp", 99) # Adicionando a pote de FP!
-	inventory_manager.add_item("pote_fp", 10)
+	# Inicializar Chat UI
+	var chat_scene = preload("res://ui/chat/ChatUI.tscn")
+	var chat_ui = chat_scene.instantiate()
+	hud_instance.add_child(chat_ui)
+	
+	# --- PERSISTÊNCIA DE PERSONAGEM ---
+	var acc = AccountManager.get_logged_in_account()
+	var character_found = false
+	for char_data in acc.get("characters", []):
+		if char_data["name"] == GameManager.player_name:
+			character_found = true
+			# Carrega o inventário salvo se houver
+			if char_data.get("inventory", []).size() > 0:
+				inventory_manager.load_inventory_data(char_data["inventory"])
+				print("[DB] Inventário carregado para ", GameManager.player_name)
+			else:
+				# Personagem novo ou sem itens salvos, dá itens iniciais
+				_give_initial_items()
+			break
+	
+	if not character_found:
+		_give_initial_items()
 
-	# --- ALQUIMIA GLOBAL (Injeção de Seleção do Singleton) ---
+	# Timer para Salvar Automaticamente a cada 30 segundos
+	var save_timer = Timer.new()
+	save_timer.wait_time = 30.0
+	save_timer.autostart = true
+	save_timer.timeout.connect(_save_player_to_db)
+	add_child(save_timer)
+
+func _give_initial_items():
+	inventory_manager.add_item("espada_ferro", 1)
+	inventory_manager.add_item("pote_hp_p", 20)
+	inventory_manager.add_item("pote_sp_p", 10)
+	_save_player_to_db()
+
+func _save_player_to_db():
+	var data_to_save = {
+		"inventory": inventory_manager.get_inventory_data()
+	}
+	AccountManager.update_character_data(GameManager.player_name, data_to_save)
+	print("[DB] Progresso de ", GameManager.player_name, " salvo automaticamente.")
+
+func _alquimia_global(): # Marcador para o próximo bloco
 	var p_name = GameManager.player_name
 	var p_race = GameManager.player_race
 	

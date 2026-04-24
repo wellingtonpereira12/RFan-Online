@@ -1,0 +1,105 @@
+[gd_scene format=3 uid="uid://dloginui456"]
+
+[ext_resource type="Script" path="res://ui/menu/LoginUI.gd" id="1_login"]
+[ext_resource type="Shader" path="res://shaders/ui_grid.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("2_shader")
+shader_parameter/bg_color = Color(0.02, 0.02, 0.03, 1)
+shader_parameter/grid_color = Color(0.1, 0.1, 0.15, 1)
+shader_parameter/grid_size = 40.0
+shader_parameter/line_width = 1.0
+
+[node name="LoginUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_login")
+
+[node name="BG" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(400, 450)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "RFAN ONLINE"
+horizontal_alignment = 1
+
+[node name="SubTitle" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
+text = "Authentication"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="EmailLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "E-mail"
+
+[node name="EmailInput" type="LineEdit" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+placeholder_text = "your@email.com"
+
+[node name="PassLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Password"
+
+[node name="PassInput" type="LineEdit" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+placeholder_text = "********"
+secret = true
+
+[node name="ErrorLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ActionBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "LOGIN"
+
+[node name="SwitchBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+flat = true
+text = "Don't have an account? Create one"

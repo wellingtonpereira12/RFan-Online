@@ -11,6 +11,16 @@ func _ready() -> void:
 	for i in range(inventory_size):
 		slots.append({"id": "", "amount": 0})
 
+func get_inventory_data() -> Array:
+	return slots
+
+func load_inventory_data(data: Array):
+	if data.size() == 0: return # Usa o inicial vazio
+	
+	for i in range(min(data.size(), slots.size())):
+		slots[i] = data[i]
+		inventory_updated.emit(i)
+
 func add_item(item_id: String, amount: int) -> int:
 	var item_data = ItemDatabase.get_item(item_id)
 	if item_data.is_empty(): return amount # Rejeita se não existe no DB

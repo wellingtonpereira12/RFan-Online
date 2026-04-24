@@ -1,0 +1,117 @@
+[
+	{
+		"characters": [
+			{
+				"class": "Warrior",
+				"created_at": "2026-04-23T23:45:24",
+				"inventory": [
+					{
+						"amount": 1,
+						"id": "espada_ferro"
+					},
+					{
+						"amount": 1,
+						"id": "capacete_couro"
+					},
+					{
+						"amount": 1,
+						"id": "armadura_couro"
+					},
+					{
+						"amount": 1,
+						"id": "anel_forca"
+					},
+					{
+						"amount": 1,
+						"id": "anel_forca"
+					},
+					{
+						"amount": 1,
+						"id": "espada_ferro"
+					},
+					{
+						"amount": 1,
+						"id": "anel_defesa"
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 13,
+						"id": "pote_hp_p"
+					},
+					{
+						"amount": 9,
+						"id": "pote_sp_p"
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 1,
+						"id": "brinco_agilidade"
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					}
+				],
+				"name": "oi",
+				"race": "Bellato"
+			}
+		],
+		"created_at": "2026-04-23T23:41:56",
+		"email": "lleco12@gmail.com",
+		"password": "88143590"
+	}
+]

@@ -166,4 +166,17 @@ func _on_play_pressed() -> void:
 	GameManager.player_name = final_name
 	GameManager.player_race = selected_race
 	GameManager.player_class = selected_class
+	
+	# PERSISTÊNCIA: Salva o novo personagem na conta logada!
+	var new_char_data = {
+		"name": final_name,
+		"race": selected_race,
+		"class": selected_class,
+		"created_at": Time.get_datetime_string_from_system(),
+		"inventory": [],
+		"equipment": {}
+	}
+	AccountManager.add_character_to_account(new_char_data)
+	
+	# Inicia o jogo
 	get_tree().change_scene_to_file("res://levels/TestWorld.tscn")

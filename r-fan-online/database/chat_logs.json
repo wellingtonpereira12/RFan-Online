@@ -1,0 +1,44 @@
+[
+	{
+		"channel": 0.0,
+		"race": "Bellato",
+		"sender": "oioi",
+		"text": "oi",
+		"timestamp": "23:36:34"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "oioi",
+		"text": "oi",
+		"timestamp": "23:36:36"
+	},
+	{
+		"channel": 0.0,
+		"race": "Cora",
+		"sender": "oi",
+		"text": "oioi",
+		"timestamp": "23:38:26"
+	},
+	{
+		"channel": 1.0,
+		"race": "Cora",
+		"sender": "oi",
+		"text": "oi",
+		"timestamp": "23:38:28"
+	},
+	{
+		"channel": 0,
+		"race": "Accretia",
+		"sender": "oioi",
+		"text": "oioi",
+		"timestamp": "23:38:39"
+	},
+	{
+		"channel": 1,
+		"race": "Accretia",
+		"sender": "oioi",
+		"text": "oioi",
+		"timestamp": "23:38:44"
+	}
+]
