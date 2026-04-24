@@ -51,20 +51,32 @@ func _on_slot_dragged(from_index: int, to_index: int) -> void:
 
 func _on_slot_clicked(index: int) -> void:
 	var data = inventory_manager.slots[index]
-	if data["id"] != "":
-		var item_info = ItemDatabase.get_item(data["id"])
-		if item_info.is_empty(): return
-		
-		# Procura o jogador e aciona o CombatComponent para usar o item
+	if data["id"] == "": return
+	
+	var item_info = ItemDatabase.get_item(data["id"])
+	if item_info.is_empty(): return
+	
+	var tipo = item_info.get("tipo", "")
+	
+	# === EQUIPAMENTO: equipa automaticamente ===
+	if tipo == "equipment":
+		var eq_ui = get_tree().get_first_node_in_group("equipment_ui")
+		if eq_ui and eq_ui.equipment_manager:
+			var success = eq_ui.equipment_manager.auto_equip(data["id"])
+			if not success:
+				print("[Inventário] Não foi possível equipar automaticamente: ", item_info.get("nome", ""))
+		return
+	
+	# === POÇÃO: consome e aplica efeito ===
+	if tipo == "potion":
 		var players = get_tree().get_nodes_in_group("players")
 		if players.size() > 0:
 			var player = players[0]
 			if player.has_node("CombatComponent"):
 				var combat = player.get_node("CombatComponent")
-				# Passamos -1 como slot index, pois ele não veio da barra de atalhos
 				combat.process_action(-1, item_info, null)
 				
-				# Aplica cooldown dinâmico baseado no ItemDatabase em todos os slots do mesmo item
+				# Aplica cooldown dinâmico em todos os slots do mesmo item
 				var item_id = item_info.get("id", "")
 				var cooldown_duration = item_info.get("cooldown_ms", 1000) / 1000.0
 				for i in range(slot_uis.size()):

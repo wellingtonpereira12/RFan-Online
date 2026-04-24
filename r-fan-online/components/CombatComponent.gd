@@ -19,6 +19,10 @@ func process_action(slot_index: int, action_data, skill_bar) -> void:
 		
 	# Processamento Real de ItemDatabase (Dicionário)
 	if typeof(action_data) == TYPE_DICTIONARY:
+		# Só processa poções — equipamentos não têm "efeito"
+		if action_data.get("tipo", "") != "potion":
+			return
+			
 		var inv_manager = get_tree().get_first_node_in_group("inventory_manager")
 		if inv_manager and inv_manager.has_method("consume_item_by_id"):
 			# Tenta consumir 1 do inventário
@@ -38,8 +42,8 @@ func process_action(slot_index: int, action_data, skill_bar) -> void:
 					vitals.fp = clampi(vitals.fp + action_data["valor"], 0, vitals.max_fp)
 					vitals.fp_changed.emit(vitals.fp, vitals.max_fp)
 					
+				var cd_sec = action_data.get("cooldown_ms", 1000) / 1000.0
 				if skill_bar and skill_bar.has_method("trigger_cooldown"):
-					var cd_sec = action_data.get("cooldown_ms", 1000) / 1000.0
 					skill_bar.trigger_cooldown(slot_index, cd_sec)
 			else:
 				print(">> Acabaram os itens ", action_data["nome"], " no inventário!")

@@ -67,6 +67,24 @@ func _ready() -> void:
 	var admin_scene = preload("res://ui/admin/AdminConsole.tscn")
 	var admin_ui = admin_scene.instantiate()
 	add_child(admin_ui)
+
+	# Inicializar EquipmentManager
+	var equipment_manager = EquipmentManager.new()
+	equipment_manager.name = "EquipmentManager"
+	equipment_manager.setup(inventory_manager)
+	add_child(equipment_manager)
+
+	# Inicializar EquipmentUI
+	var equip_ui_scene = preload("res://ui/equipment/EquipmentUI.tscn")
+	var equip_ui = equip_ui_scene.instantiate()
+	hud_instance.add_child(equip_ui)
+	equip_ui.setup(equipment_manager)
+
+	# Adicionar equipamentos de teste ao inventário
+	inventory_manager.add_item("espada_ferro", 1)
+	inventory_manager.add_item("capacete_couro", 1)
+	inventory_manager.add_item("armadura_couro", 1)
+	inventory_manager.add_item("anel_forca", 2)
 	
 	var inv_scene = preload("res://ui/inventory/InventoryUI.tscn")
 	var inv_ui = inv_scene.instantiate()
@@ -84,8 +102,10 @@ func _ready() -> void:
 	var p_race = GameManager.player_race
 	
 	if p_name != "" and p_race != "":
-		# Atualiza Título
-		name_tag.text = "[ " + p_race + " ]\n" + p_name
+		var p_class = GameManager.player_class
+		# Atualiza Título com Raça, Classe e Nome
+		var class_str = (" [" + p_class + "]") if p_class != "" else ""
+		name_tag.text = "[ " + p_race + class_str + " ]\n" + p_name
 		
 		# Cria cor orgânica baseada na Facção (Corita = Roxo, Bellato = Azul, Accretia = Vermelho)
 		var custom_mat = StandardMaterial3D.new()

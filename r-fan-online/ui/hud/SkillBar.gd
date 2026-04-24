@@ -87,6 +87,15 @@ func _ready() -> void:
 	# Posiciona ao lado do cadeado (lock_btn tem uns 30px de largura)
 	bag_btn.position = Vector2(size.x + 40, 10)
 
+	# --- Botão de Equipamentos ---
+	var equip_btn = Button.new()
+	equip_btn.text = "🛡"
+	equip_btn.tooltip_text = "Equipamentos (E)"
+	equip_btn.focus_mode = Control.FOCUS_NONE
+	equip_btn.pressed.connect(_on_equip_button_pressed)
+	self.add_child(equip_btn)
+	equip_btn.position = Vector2(size.x + 75, 10)
+
 	# --- CRIAR SKILLS DE TESTE PARA VOCÊ PODER ARRASTAR ---
 	var fake_skill1 = SkillResource.new()
 	fake_skill1.skill_name = "Ataque Básico"
@@ -113,6 +122,13 @@ func _on_bag_button_pressed() -> void:
 		inventory.visible = !inventory.visible
 	else:
 		print("Inventário não encontrado!")
+
+func _on_equip_button_pressed() -> void:
+	var equip_ui = get_tree().get_first_node_in_group("equipment_ui")
+	if equip_ui:
+		equip_ui.visible = !equip_ui.visible
+	else:
+		print("EquipmentUI não encontrado!")
 
 func _on_run_btn_toggled(pressed: bool) -> void:
 	is_running = pressed

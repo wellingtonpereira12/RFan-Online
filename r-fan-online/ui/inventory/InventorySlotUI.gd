@@ -35,13 +35,31 @@ func set_slot(item: Dictionary, amount: int) -> void:
 		if item.has("icon") and item["icon"] != null:
 			icon_rect.texture = item["icon"]
 			icon_rect.modulate = Color(1, 1, 1, 1)
+			self_modulate = Color(1, 1, 1, 1)
 		else:
-			# Sem ícone? Pinta o TextureRect temporariamente
+			# Sem ícone: pinta o painel de uma cor diferente por tipo
 			icon_rect.texture = null
-			icon_rect.modulate = Color(0.2, 0.6, 0.9, 1) # Azul genérico
+			icon_rect.modulate = Color(1, 1, 1, 0) # Esconde o TextureRect vazio
 			
+			var tipo = item.get("tipo", "")
+			match tipo:
+				"potion":    self_modulate = Color(0.2, 0.55, 1.0, 1)   # Azul
+				"equipment": self_modulate = Color(0.9, 0.65, 0.1, 1)   # Dourado
+				_:           self_modulate = Color(0.3, 0.3, 0.3, 1)    # Cinza
+			
+			# Mostra nome curto no label do slot (max 8 chars)
+			var short_name = item.get("nome", "?")
+			if short_name.length() > 8:
+				short_name = short_name.substr(0, 7) + "."
+			amount_label.text = short_name
+			amount_label.visible = true
+			amount_label.add_theme_font_size_override("font_size", 9)
+			return # Pula o controle de amount abaixo
+
+		self_modulate = Color(1, 1, 1, 1)
 		if amount > 1:
 			amount_label.text = str(amount)
+			amount_label.add_theme_font_size_override("font_size", 14)
 			amount_label.visible = true
 		else:
 			amount_label.visible = false
@@ -52,9 +70,11 @@ func clear_slot() -> void:
 	item_data = {}
 	item_amount = 0
 	icon_rect.texture = null
-	icon_rect.modulate = Color(1, 1, 1, 0) # Transparente quando vazio
+	icon_rect.modulate = Color(1, 1, 1, 0)
 	amount_label.visible = false
-	tooltip_text = "" # Remove a tooltip quando vazio
+	amount_label.add_theme_font_size_override("font_size", 14)
+	tooltip_text = ""
+	self_modulate = Color(1, 1, 1, 1) # Volta ao padrão do tema (fundo do Panel normal)
 	is_on_cooldown = false
 	current_cooldown = 0.0
 	cooldown_overlay.anchor_top = 1.0
@@ -105,12 +125,21 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	return {"type": "inventory_slot", "from_index": slot_index, "data": item_data}
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	return typeof(data) == TYPE_DICTIONARY and data.has("type") and data["type"] == "inventory_slot"
+	if typeof(data) != TYPE_DICTIONARY or not data.has("type"): return false
+	return data["type"] == "inventory_slot" or data["type"] == "equipment_slot"
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	var from_idx = data["from_index"]
-	if from_idx != slot_index:
-		slot_dragged.emit(from_idx, slot_index)
+	if data["type"] == "inventory_slot":
+		var from_idx = data["from_index"]
+		if from_idx != slot_index:
+			slot_dragged.emit(from_idx, slot_index)
+	elif data["type"] == "equipment_slot":
+		# Desequipa o item e devolve ao inventário (no slot que ele foi solto)
+		var eq_manager = get_tree().get_first_node_in_group("equipment_ui")
+		if eq_manager:
+			var real_manager = eq_manager.equipment_manager
+			if real_manager:
+				real_manager.unequip_item(data["from_slot"])
 
 func _gui_input(event: InputEvent) -> void:
 	# Dispara evento se o usuário clicar 2 vezes ou clicar com direito (usar item no futuro)
