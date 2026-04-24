@@ -104,20 +104,52 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 	if is_range:
 		await get_tree().create_timer(0.2).timeout
 	
-	# Cálculo de Dano com Multiplicador de Nível da Skill
-	var base_dmg = 10
-	if player.class_stats:
-		base_dmg = player.class_stats.base_physical_attack
-		
+	# --- CÁLCULO DE ACERTO / EVASÃO ---
+	var my_stats = StatusManager.get_total_status()
+	var target_stats = {} # Mobs podem ter stats simplificados ou vir de um StatusManager se forem players
+	if target.has_method("get_stats"): 
+		target_stats = target.get_stats()
+	else:
+		# Fallback para mobs simples
+		target_stats = {"dodge": 5, "block": 5, "defesa": 10}
+
+	# 1. Chance de Acerto (Accuracy vs Dodge)
+	var hit_chance = my_stats["accuracy"] - target_stats["dodge"]
+	if randf_range(0, 100) > hit_chance:
+		DamageTextManager.display_damage(0, DamageTextManager.DamageType.MISS, target.global_position)
+		_send_system_msg("[color=gray]Você errou o golpe![/color]")
+		return
+
+	# 2. Chance de Bloqueio (Shield Block)
+	if randf_range(0, 100) < target_stats["block"]:
+		DamageTextManager.display_damage(0, DamageTextManager.DamageType.BLOCK, target.global_position)
+		_send_system_msg("[color=blue]O alvo bloqueou o ataque![/color]")
+		return
+
+	# 3. Cálculo de Dano Base
+	var base_dmg = StatusManager.get_total_status()["ataque"]
 	var skill_mult = SkillManager.get_damage_multiplier(skill["key"])
-	var final_dmg = int((base_dmg + skill["dano"]) * skill_mult)
+	var raw_dmg = (base_dmg + skill["dano"]) * skill_mult
 	
-	if is_instance_valid(target) and target.has_node("VitalsComponent"):
-		target.get_node("VitalsComponent").take_damage(final_dmg)
-		SkillManager.add_xp(skill["key"]) # GANHA XP AO ACERTAR
+	# Redução de Defesa
+	var final_dmg = int(max(1, raw_dmg - target_stats["defesa"]))
+	
+	# 4. Chance de Crítico (Fixo 10% por enquanto, ou vindo de stats)
+	var is_crit = randf_range(0, 100) < 10.0
+	var damage_type = DamageTextManager.DamageType.DEALT
+	
+	if is_crit:
+		final_dmg = int(final_dmg * 1.5)
+		damage_type = DamageTextManager.DamageType.CRITICAL
+
+	# APLICAÇÃO FINAL
+	if is_instance_valid(target):
+		var target_vitals = target.get_node_or_null("VitalsComponent")
+		if not target_vitals: target_vitals = target.get_node_or_null("HealthComponent")
 		
-		var lv_label = SkillManager.get_level_label(skill["key"])
-		print("=> SKILL [", lv_label, "] (", skill["category"], "): ", skill["nome"], " causou ", final_dmg, " de dano.")
+		if target_vitals:
+			target_vitals.take_damage(final_dmg, damage_type)
+			SkillManager.add_xp(skill["key"])
 
 func use_skill_directly(skill_data: Dictionary):
 	var skill_bar = get_tree().get_first_node_in_group("skill_bar")

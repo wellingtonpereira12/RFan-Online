@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/hud/DamageNumber.gd" id="1_script"]
+
+[node name="DamageNumber" type="Label3D"]
+pixel_size = 0.0012
+billboard = 1
+double_sided = false
+no_depth_test = true
+fixed_size = true
+render_priority = 10
+outline_render_priority = 9
+text = "123"
+font_size = 32
+outline_size = 8
+script = ExtResource("1_script")

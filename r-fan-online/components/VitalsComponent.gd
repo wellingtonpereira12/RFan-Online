@@ -63,10 +63,19 @@ func restore_fp(amount: int) -> void:
 	fp = int(fp_pool)
 	fp_changed.emit(fp, max_fp)
 
-func take_damage(amount: int) -> void:
+func take_damage(amount: int, type = -1) -> void:
 	if hp <= 0: return
 	hp = clampi(hp - amount, 0, max_hp)
 	hp_changed.emit(hp, max_hp)
+	
+	# Exibir Texto de Dano
+	var final_type = type
+	if final_type == -1: # Se não foi passado um tipo específico
+		final_type = DamageTextManager.DamageType.DEALT
+		if get_parent().is_in_group("players"):
+			final_type = DamageTextManager.DamageType.RECEIVED
+	
+	DamageTextManager.display_damage(amount, final_type, get_parent().global_position)
 	
 	# Aciona modo de combate se quem tomou dano foi o player
 	if get_parent().has_method("set_in_combat"):

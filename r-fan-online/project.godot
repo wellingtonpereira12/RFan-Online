@@ -26,6 +26,7 @@ SkillDatabase="*res://core/SkillDatabase.gd"
 SettingsManager="*res://core/SettingsManager.gd"
 SkillManager="*res://core/SkillManager.gd"
 StatusManager="*res://core/StatusManager.gd"
+DamageTextManager="*res://core/DamageTextManager.gd"
 
 [input]
 
