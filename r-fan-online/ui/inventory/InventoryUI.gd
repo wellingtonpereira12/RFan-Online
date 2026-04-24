@@ -33,7 +33,11 @@ func setup(manager: InventoryManager) -> void:
 
 func _on_inventory_updated(index: int) -> void:
 	var data = inventory_manager.slots[index]
-	slot_uis[index].set_slot(data["item"], data["amount"])
+	if data["id"] != "":
+		var item_info = ItemDatabase.get_item(data["id"])
+		slot_uis[index].set_slot(item_info, data["amount"])
+	else:
+		slot_uis[index].clear_slot()
 
 func _on_slot_dragged(from_index: int, to_index: int) -> void:
 	inventory_manager.swap_slots(from_index, to_index)

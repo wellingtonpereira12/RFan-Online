@@ -8,14 +8,14 @@ extends Panel
 @onready var amount_label: Label = $AmountLabel
 
 var slot_index: int = 1
-var action_data: Resource = null # Flexível (Skill ou Item)
+var action_data: Variant = null # Flexível (SkillResource ou Dictionary de Item)
 var is_on_cooldown: bool = false
 var max_cooldown: float = 0.0
 var current_cooldown: float = 0.0
 
 signal slot_dragged(from_index: int, to_index: int)
 signal action_requested(index: int)
-signal inventory_item_dropped(data: Resource, target_index: int)
+signal inventory_item_dropped(data: Variant, target_index: int)
 
 func setup(index: int, key_text: String) -> void:
 	slot_index = index
@@ -23,15 +23,18 @@ func setup(index: int, key_text: String) -> void:
 	cooldown_overlay.anchor_top = 1.0
 	clear_slot()
 
-func set_action(data: Resource) -> void:
+func set_action(data: Variant) -> void:
 	action_data = data
-	if data:
-		if data.get("skill_name") != null:
-			icon_title.text = data.get("skill_name")
-		elif data.get("name") != null:
-			icon_title.text = data.get("name")
+	if data != null and typeof(data) != TYPE_NIL and (typeof(data) == TYPE_OBJECT or typeof(data) == TYPE_DICTIONARY):
+		if typeof(data) == TYPE_DICTIONARY:
+			icon_title.text = data.get("nome", "Item/Ação")
 		else:
-			icon_title.text = "Item/Ação"
+			if data.get("skill_name") != null:
+				icon_title.text = data.get("skill_name")
+			elif data.get("name") != null:
+				icon_title.text = data.get("name")
+			else:
+				icon_title.text = "Item/Ação"
 		
 		color_rect.color = Color(0.2, 0.4, 0.6, 1) # Slot preenchido fica azul escuro
 	else:

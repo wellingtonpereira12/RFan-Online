@@ -5,7 +5,7 @@ class_name InventorySlotUI
 @onready var amount_label: Label = $AmountLabel
 
 var slot_index: int = -1
-var item_data: ItemData = null
+var item_data: Dictionary = {}
 var item_amount: int = 0
 
 signal slot_dragged(from_index: int, to_index: int)
@@ -14,13 +14,13 @@ signal slot_clicked(index: int)
 func _ready() -> void:
 	clear_slot()
 
-func set_slot(item: ItemData, amount: int) -> void:
+func set_slot(item: Dictionary, amount: int) -> void:
 	item_data = item
 	item_amount = amount
 	
-	if item != null:
-		if item.icon:
-			icon_rect.texture = item.icon
+	if not item.is_empty():
+		if item.has("icon") and item["icon"] != null:
+			icon_rect.texture = item["icon"]
 			icon_rect.modulate = Color(1, 1, 1, 1)
 		else:
 			# Sem ícone? Pinta o TextureRect temporariamente
@@ -36,7 +36,7 @@ func set_slot(item: ItemData, amount: int) -> void:
 		clear_slot()
 
 func clear_slot() -> void:
-	item_data = null
+	item_data = {}
 	item_amount = 0
 	icon_rect.texture = null
 	icon_rect.modulate = Color(1, 1, 1, 0) # Transparente quando vazio
@@ -44,14 +44,14 @@ func clear_slot() -> void:
 
 # --- Drag & Drop Lógica Nativa ---
 func _get_drag_data(_at_position: Vector2) -> Variant:
-	if item_data == null: return null
+	if item_data.is_empty(): return null
 	
 	var preview_icon = TextureRect.new()
-	if item_data.icon:
-		preview_icon.texture = item_data.icon
+	if item_data.has("icon") and item_data["icon"] != null:
+		preview_icon.texture = item_data["icon"]
 	else:
 		var preview_lbl = Label.new()
-		preview_lbl.text = item_data.name
+		preview_lbl.text = item_data.get("nome", "Item")
 		preview_icon.add_child(preview_lbl)
 		
 	preview_icon.custom_minimum_size = size

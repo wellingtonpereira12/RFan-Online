@@ -67,12 +67,10 @@ func _ready() -> void:
 	hud_instance.add_child(inv_ui)
 	inv_ui.setup(inventory_manager)
 	
-	# Criando itens de teste no Inventário
-	var potion_hp = ItemData.new()
-	potion_hp.id = "pote_hp"
-	potion_hp.name = "Poção de HP"
-	potion_hp.max_stack = 99
-	inventory_manager.add_item(potion_hp, 120)
+	# Adiciona itens usando o banco de dados oficial!
+	inventory_manager.add_item("pote_hp_p", 120)
+	inventory_manager.add_item("pote_sp_p", 50)
+	inventory_manager.add_item("super_pote", 10)
 
 	# --- ALQUIMIA GLOBAL (Injeção de Seleção do Singleton) ---
 	var p_name = GameManager.player_name

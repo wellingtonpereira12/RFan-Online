@@ -119,15 +119,15 @@ func _try_trigger_slot(index: int) -> void:
 	if slot.action_data and not slot.is_on_cooldown:
 		action_triggered.emit(index)
 
-func _on_inventory_item_dropped(item: Resource, to_index: int) -> void:
+func _on_inventory_item_dropped(item: Variant, to_index: int) -> void:
 	# Previne duplicatas de itens do mesmo tipo na barra
 	for slot in slots:
 		if slot.action_data != null:
-			if slot.action_data == item:
+			if typeof(slot.action_data) == typeof(item) and slot.action_data == item:
 				slot.clear_slot()
-			elif item is ItemData and slot.action_data is ItemData and item.id == slot.action_data.id:
+			elif typeof(item) == TYPE_DICTIONARY and typeof(slot.action_data) == TYPE_DICTIONARY and item.get("id") == slot.action_data.get("id"):
 				slot.clear_slot()
-			elif item.get("skill_name") != null and slot.action_data.get("skill_name") != null and item.get("skill_name") == slot.action_data.get("skill_name"):
+			elif typeof(item) != TYPE_DICTIONARY and typeof(slot.action_data) != TYPE_DICTIONARY and item.get("skill_name") != null and slot.action_data.get("skill_name") != null and item.get("skill_name") == slot.action_data.get("skill_name"):
 				slot.clear_slot()
 
 	# Define o item no novo slot
@@ -142,16 +142,16 @@ func _process(_delta: float) -> void:
 		# Conta totais de cada ID no inventário
 		var item_counts = {}
 		for slot in inv_manager.slots:
-			if slot["item"] != null:
-				var id = slot["item"].id
+			if slot["id"] != "":
+				var id = slot["id"]
 				if not item_counts.has(id):
 					item_counts[id] = 0
 				item_counts[id] += slot["amount"]
 				
 		# Atualiza a interface gráfica dos atalhos
 		for slot in slots:
-			if slot.action_data is ItemData:
-				var total = item_counts.get(slot.action_data.id, 0)
+			if typeof(slot.action_data) == TYPE_DICTIONARY and slot.action_data.has("id"):
+				var total = item_counts.get(slot.action_data["id"], 0)
 				if total > 0:
 					if slot.amount_label:
 						slot.amount_label.visible = true
