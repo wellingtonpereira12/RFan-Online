@@ -4,8 +4,14 @@ extends Control
 var action_slot_scene = preload("res://ui/hud/ActionSlot.tscn")
 
 var slots: Array = []
-var is_locked: bool = true # Inicia travada por padrão, como nos MMOs
+var is_locked: bool = true
+var is_running: bool = true
+var is_auto_attack: bool = true
+var atk_cooldown_bar: ProgressBar = null
+
 signal action_triggered(slot_index: int)
+signal run_mode_changed(is_run: bool)
+signal auto_attack_changed(is_auto: bool)
 
 func _ready() -> void:
 	# Montador Dinâmico de Vagas (Gera visualmente 1 a 0)
@@ -22,6 +28,41 @@ func _ready() -> void:
 		slot.slot_dragged.connect(_on_slot_dragged)
 		slot.action_requested.connect(_on_action_requested)
 		slot.inventory_item_dropped.connect(_on_inventory_item_dropped)
+
+	# --- Botão de Correr/Andar (esquerda da barra, 2a posição) ---
+	var run_btn = Button.new()
+	run_btn.name = "RunButton"
+	run_btn.toggle_mode = true
+	run_btn.text = "🏃"
+	run_btn.tooltip_text = "Correndo (clique para andar)"
+	run_btn.button_pressed = true
+	run_btn.focus_mode = Control.FOCUS_NONE
+	run_btn.toggled.connect(_on_run_btn_toggled)
+	self.add_child(run_btn)
+	run_btn.position = Vector2(-115, 10)
+
+	# --- Botão de Ataque Auto/Manual (esquerda da barra, 1a posição) ---
+	var atk_btn = Button.new()
+	atk_btn.name = "AtkButton"
+	atk_btn.toggle_mode = true
+	atk_btn.text = "⚔️ A"
+	atk_btn.tooltip_text = "Ataque AUTO (clique para manual)"
+	atk_btn.button_pressed = true
+	atk_btn.focus_mode = Control.FOCUS_NONE
+	atk_btn.toggled.connect(_on_atk_btn_toggled)
+	self.add_child(atk_btn)
+	atk_btn.position = Vector2(-75, 10)
+
+	# --- Barrinha de Cooldown de Ataque (sob o AtkButton) ---
+	atk_cooldown_bar = ProgressBar.new()
+	atk_cooldown_bar.max_value = 1.0
+	atk_cooldown_bar.value = 1.0
+	atk_cooldown_bar.show_percentage = false
+	atk_cooldown_bar.custom_minimum_size = Vector2(37, 5)
+	atk_cooldown_bar.size = Vector2(37, 5)
+	atk_cooldown_bar.position = Vector2(-75, 40)
+	atk_cooldown_bar.modulate = Color(0.2, 1.0, 0.3, 1) # Verde brilhante
+	self.add_child(atk_cooldown_bar)
 
 	# --- Criando o Botão de Cadeado via Código ---
 	var lock_btn = Button.new()
@@ -67,12 +108,40 @@ func _on_lock_button_toggled(toggled_on: bool) -> void:
 			btn.text = "🔓"
 
 func _on_bag_button_pressed() -> void:
-	# Busca o inventário de forma global na cena para não errar o caminho!
 	var inventory = get_tree().get_first_node_in_group("inventory_ui")
 	if inventory:
 		inventory.visible = !inventory.visible
 	else:
-		print("Inventário não encontrado na tela! Lembre de adicionar a cena InventoryUI.tscn no seu jogo!")
+		print("Inventário não encontrado!")
+
+func _on_run_btn_toggled(pressed: bool) -> void:
+	is_running = pressed
+	var btn = get_node_or_null("RunButton")
+	if btn:
+		btn.text = "🏃" if pressed else "🚶"
+		btn.tooltip_text = "Correndo (clique para andar)" if pressed else "Andando (clique para correr)"
+	run_mode_changed.emit(pressed)
+
+func _on_atk_btn_toggled(pressed: bool) -> void:
+	is_auto_attack = pressed
+	var btn = get_node_or_null("AtkButton")
+	if btn:
+		btn.text = "⚔️ A" if pressed else "⚔️ M"
+		btn.tooltip_text = "Ataque AUTO (clique para manual)" if pressed else "Ataque MANUAL (clique para auto)"
+	auto_attack_changed.emit(pressed)
+
+func update_attack_cooldown(timer: float, max_time: float) -> void:
+	if atk_cooldown_bar == null: return
+	if max_time <= 0.0:
+		atk_cooldown_bar.value = 1.0
+		return
+	# ratio 0.0 = recarregando, 1.0 = pronto
+	var ratio = 1.0 - clamp(timer / max_time, 0.0, 1.0)
+	atk_cooldown_bar.value = ratio
+	# Cor: vermelho (recarregando) -> amarelo -> verde (pronto)
+	var r = 1.0 - ratio
+	var g = ratio
+	atk_cooldown_bar.modulate = Color(r, g, 0.1, 1.0)
 
 func toggle_lock(locked: bool) -> void:
 	is_locked = locked

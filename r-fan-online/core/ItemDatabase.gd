@@ -3,12 +3,13 @@ class_name ItemDatabase
 const ITEMS: Dictionary = {
 	"pote_hp_p": {
 		"id": "pote_hp_p",
-		"nome": "Potion HP Pequenaaa",
+		"nome": "Potion HP Pequena",
 		"tipo": "potion",
 		"descricao": "Recupera uma pequena quantidade de vida",
 		"efeito": "hp",
 		"valor": 50,
-		"max_stack": 99
+		"max_stack": 99,
+		"cooldown_ms": 1000
 	},
 	"pote_hp_m": {
 		"id": "pote_hp_m",
@@ -17,7 +18,8 @@ const ITEMS: Dictionary = {
 		"descricao": "Recupera vida média",
 		"efeito": "hp",
 		"valor": 150,
-		"max_stack": 99
+		"max_stack": 99,
+		"cooldown_ms": 2000
 	},
 	"pote_hp_g": {
 		"id": "pote_hp_g",
@@ -26,7 +28,8 @@ const ITEMS: Dictionary = {
 		"descricao": "Recupera muita vida",
 		"efeito": "hp",
 		"valor": 300,
-		"max_stack": 99
+		"max_stack": 99,
+		"cooldown_ms": 4000
 	},
 	"pote_sp_p": {
 		"id": "pote_sp_p",
@@ -35,7 +38,8 @@ const ITEMS: Dictionary = {
 		"descricao": "Recupera mana",
 		"efeito": "sp",
 		"valor": 50,
-		"max_stack": 99
+		"max_stack": 99,
+		"cooldown_ms": 1500
 	},
 	"pote_sp_g": {
 		"id": "pote_sp_g",
@@ -44,7 +48,8 @@ const ITEMS: Dictionary = {
 		"descricao": "Recupera muita mana",
 		"efeito": "sp",
 		"valor": 200,
-		"max_stack": 99
+		"max_stack": 99,
+		"cooldown_ms": 3000
 	},
 	"pote_fp": {
 		"id": "pote_fp",
@@ -53,16 +58,18 @@ const ITEMS: Dictionary = {
 		"descricao": "Recupera stamina",
 		"efeito": "fp",
 		"valor": 100,
-		"max_stack": 99
+		"max_stack": 99,
+		"cooldown_ms": 2500
 	},
 	"super_pote": {
 		"id": "super_pote",
 		"nome": "Super Potion",
 		"tipo": "potion",
-		"descricao": "Recupera HP e SP",
+		"descricao": "Recupera HP e SP simultaneamente",
 		"efeito": "hp_sp",
 		"valor": 300,
-		"max_stack": 99
+		"max_stack": 99,
+		"cooldown_ms": 6000
 	}
 }
 

@@ -3,12 +3,18 @@ class_name InventorySlotUI
 
 @onready var icon_rect: TextureRect = $IconRect
 @onready var amount_label: Label = $AmountLabel
+@onready var cooldown_overlay: ColorRect = $CooldownOverlay
+@onready var cooldown_label: Label = $CooldownLabel
 
 var slot_index: int = -1
 var item_data: Dictionary = {}
 var item_amount: int = 0
 var is_dragging: bool = false
 var confirm_dialog: ConfirmationDialog = null
+
+var is_on_cooldown: bool = false
+var max_cooldown: float = 0.0
+var current_cooldown: float = 0.0
 
 signal slot_dragged(from_index: int, to_index: int)
 signal slot_clicked(index: int)
@@ -49,10 +55,33 @@ func clear_slot() -> void:
 	icon_rect.modulate = Color(1, 1, 1, 0) # Transparente quando vazio
 	amount_label.visible = false
 	tooltip_text = "" # Remove a tooltip quando vazio
+	is_on_cooldown = false
+	current_cooldown = 0.0
+	cooldown_overlay.anchor_top = 1.0
+	cooldown_label.visible = false
+
+func trigger_cooldown(duration: float) -> void:
+	is_on_cooldown = true
+	max_cooldown = duration
+	current_cooldown = duration
+	cooldown_overlay.anchor_top = 0.0
+	cooldown_label.visible = true
+
+func _process(delta: float) -> void:
+	if is_on_cooldown:
+		current_cooldown -= delta
+		if current_cooldown <= 0.0:
+			is_on_cooldown = false
+			current_cooldown = 0.0
+			cooldown_overlay.anchor_top = 1.0
+			cooldown_label.visible = false
+		else:
+			cooldown_overlay.anchor_top = 1.0 - (current_cooldown / max_cooldown)
+			cooldown_label.text = str(snapped(current_cooldown, 0.1))
 
 # --- Drag & Drop Lógica Nativa ---
 func _get_drag_data(_at_position: Vector2) -> Variant:
-	if item_data.is_empty(): return null
+	if item_data.is_empty() or is_on_cooldown: return null
 	
 	var preview_icon = TextureRect.new()
 	if item_data.has("icon") and item_data["icon"] != null:
@@ -87,7 +116,8 @@ func _gui_input(event: InputEvent) -> void:
 	# Dispara evento se o usuário clicar 2 vezes ou clicar com direito (usar item no futuro)
 	if event is InputEventMouseButton and not event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
-			slot_clicked.emit(slot_index)
+			if not is_on_cooldown:
+				slot_clicked.emit(slot_index)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_END:

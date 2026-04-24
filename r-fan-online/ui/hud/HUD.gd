@@ -4,8 +4,6 @@ class_name HUD
 @onready var hp_bar: ProgressBar = $MarginContainer/VBoxContainer/HPBar
 @onready var sp_bar: ProgressBar = $MarginContainer/VBoxContainer/SPBar
 @onready var fp_bar: ProgressBar = $MarginContainer/VBoxContainer/FPBar
-@onready var run_button: Button = $RunButton
-@onready var auto_button: Button = $AutoAttackButton
 @onready var skill_bar: Control = $SkillBar
 
 @onready var target_frame: PanelContainer = $TargetFrame
@@ -15,14 +13,12 @@ class_name HUD
 signal run_toggled(is_running_mode: bool)
 signal auto_attack_mode_toggled(is_auto: bool)
 
-var is_running_state: bool = true
-var is_auto_attack_mode: bool = true
 var current_target_vitals: Node = null
 
 func _ready() -> void:
-	run_button.pressed.connect(_on_run_button_pressed)
-	auto_button.pressed.connect(_on_auto_button_pressed)
-	_update_button_text()
+	# Conecta os sinais da SkillBar (os botões de correr/auto ficam nela agora)
+	skill_bar.run_mode_changed.connect(func(v): run_toggled.emit(v))
+	skill_bar.auto_attack_changed.connect(func(v): auto_attack_mode_toggled.emit(v))
 
 # Atualizadores das Barras
 func update_hp(current: int, max_val: int) -> void:
@@ -37,34 +33,11 @@ func update_fp(current: int, max_val: int) -> void:
 	fp_bar.max_value = max_val
 	fp_bar.value = current
 
-# Atualiza a UI quando a lógica interna do Player força a voltar a andar
+# Atualiza a UI quando a lógica interna do Player força a voltar a andar (FP zerada)
 func force_walk_mode() -> void:
-	if is_running_state:
-		is_running_state = false
-		_update_button_text()
-
-func _on_run_button_pressed() -> void:
-	run_button.release_focus()
-	is_running_state = !is_running_state
-	_update_button_text()
-	run_toggled.emit(is_running_state)
-
-func _on_auto_button_pressed() -> void:
-	auto_button.release_focus()
-	is_auto_attack_mode = !is_auto_attack_mode
-	_update_button_text()
-	auto_attack_mode_toggled.emit(is_auto_attack_mode)
-
-func _update_button_text() -> void:
-	if is_running_state:
-		run_button.text = "Modo: CORRENDO"
-	else:
-		run_button.text = "Modo: ANDANDO"
-		
-	if is_auto_attack_mode:
-		auto_button.text = "Ataque: AUTO"
-	else:
-		auto_button.text = "Ataque: MANUAL"
+	var run_btn = skill_bar.get_node_or_null("RunButton")
+	if run_btn and run_btn.button_pressed:
+		run_btn.button_pressed = false # Isso vai disparar o sinal toggled automaticamente
 
 # --- Sistema de Target HUD ---
 func bind_target(enemy_node: Node) -> void:

@@ -38,8 +38,9 @@ func process_action(slot_index: int, action_data, skill_bar) -> void:
 					vitals.fp = clampi(vitals.fp + action_data["valor"], 0, vitals.max_fp)
 					vitals.fp_changed.emit(vitals.fp, vitals.max_fp)
 					
-				if skill_bar.has_method("trigger_cooldown"):
-					skill_bar.trigger_cooldown(slot_index, 1.0) # Cooldown fixo de 1 segundo
+				if skill_bar and skill_bar.has_method("trigger_cooldown"):
+					var cd_sec = action_data.get("cooldown_ms", 1000) / 1000.0
+					skill_bar.trigger_cooldown(slot_index, cd_sec)
 			else:
 				print(">> Acabaram os itens ", action_data["nome"], " no inventário!")
 		return

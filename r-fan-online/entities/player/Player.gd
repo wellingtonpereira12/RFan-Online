@@ -42,8 +42,9 @@ var auto_attack_mode_enabled: bool = true
 var run_mode_enabled: bool = true
 var is_pursuing_and_attacking: bool = false
 var basic_attack_cooldown_timer: float = 0.0
-var basic_attack_interval: float = 1.0 # 1 hit por segundo fixo na mão
+var basic_attack_interval: float = 1.0 # 1 hit por segundo
 var base_attack_range: float = 2.5
+var last_manual_attack_msec: int = -99999 # Tempo absoluto do último ataque manual
 
 func _ready() -> void:
 	# Registro global para Inimigos acharem o Jogador e Agro
@@ -303,20 +304,25 @@ func handle_mouse_click(is_double_click: bool) -> void:
 
 		# 2. Verifica se clicou em um Inimigo
 		if hit_obj.is_in_group("enemies"):
-			# Define Alvo novo ou mantém
+			var previous_target = current_target
 			current_target = hit_obj
 			hud_instance.bind_target(hit_obj)
 			
 			# Analisar Comportamento de clique baseado no Modo
 			if auto_attack_mode_enabled:
-				# MODO AUTO: 1 clique já persegue para bater infinitamente
+				# MODO AUTO: só reseta o timer se trocou de alvo
 				is_pursuing_and_attacking = true
-				basic_attack_cooldown_timer = 0.0
+				if hit_obj != previous_target:
+					basic_attack_cooldown_timer = 0.0 # Novo alvo = ataca logo
 			elif is_double_click:
-				# MODO MANUAL: 2 cliques para perseguir e dar exatamente UM hit
-				is_pursuing_and_attacking = true
-				basic_attack_cooldown_timer = 0.0
-			# Se for Modo Manual e Clique Único, apenas Seleciona o Target (já feito acima)
+				# MODO MANUAL: usa tempo absoluto para bloquear spam de qualquer velocidade
+				var now = Time.get_ticks_msec()
+				var delay_ms = int(basic_attack_interval * 1000)
+				if now - last_manual_attack_msec >= delay_ms:
+					last_manual_attack_msec = now
+					is_pursuing_and_attacking = true
+					basic_attack_cooldown_timer = basic_attack_interval
+			# Clique simples: apenas seleciona o target (já feito acima)
 				
 			return
 			
@@ -403,6 +409,9 @@ func _physics_process(delta: float) -> void:
 	# Tempo de Cooldown correndo fora da condicional pra garantir recuperação universal
 	if basic_attack_cooldown_timer > 0.0:
 		basic_attack_cooldown_timer -= delta
+
+	# Atualiza a barrinha de cooldown do botão de ataque na SkillBar
+	hud_instance.skill_bar.update_attack_cooldown(basic_attack_cooldown_timer, basic_attack_interval)
 
 	move_and_slide()
 

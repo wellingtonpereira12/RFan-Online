@@ -34,8 +34,9 @@ func setup(manager: InventoryManager) -> void:
 		grid_container.add_child(slot_ui)
 		slot_uis.append(slot_ui)
 		
-		# Conecta os sinais de Arrastar/Soltar
+		# Conecta os sinais de Arrastar/Soltar e Click
 		slot_ui.slot_dragged.connect(_on_slot_dragged)
+		slot_ui.slot_clicked.connect(_on_slot_clicked)
 
 func _on_inventory_updated(index: int) -> void:
 	var data = inventory_manager.slots[index]
@@ -47,6 +48,29 @@ func _on_inventory_updated(index: int) -> void:
 
 func _on_slot_dragged(from_index: int, to_index: int) -> void:
 	inventory_manager.swap_slots(from_index, to_index)
+
+func _on_slot_clicked(index: int) -> void:
+	var data = inventory_manager.slots[index]
+	if data["id"] != "":
+		var item_info = ItemDatabase.get_item(data["id"])
+		if item_info.is_empty(): return
+		
+		# Procura o jogador e aciona o CombatComponent para usar o item
+		var players = get_tree().get_nodes_in_group("players")
+		if players.size() > 0:
+			var player = players[0]
+			if player.has_node("CombatComponent"):
+				var combat = player.get_node("CombatComponent")
+				# Passamos -1 como slot index, pois ele não veio da barra de atalhos
+				combat.process_action(-1, item_info, null)
+				
+				# Aplica cooldown dinâmico baseado no ItemDatabase em todos os slots do mesmo item
+				var item_id = item_info.get("id", "")
+				var cooldown_duration = item_info.get("cooldown_ms", 1000) / 1000.0
+				for i in range(slot_uis.size()):
+					var s = inventory_manager.slots[i]
+					if s["id"] == item_id:
+						slot_uis[i].trigger_cooldown(cooldown_duration)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Abre/Fecha o Inventário com 'I'
