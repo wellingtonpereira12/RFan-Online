@@ -11,7 +11,9 @@ const VALID_SLOTS := {
 	"shield":      "shield",  # Mão direita obrigatoriamente
 	"boots":       "boots",
 	"accessory_1": "accessory",
-	"accessory_2": "accessory"
+	"accessory_2": "accessory",
+	"accessory_3": "accessory",
+	"accessory_4": "accessory"
 }
 
 # Qual mão cada slot representa (para validação extra)
@@ -28,7 +30,9 @@ var equipped: Dictionary = {
 	"shield":      "",
 	"boots":       "",
 	"accessory_1": "",
-	"accessory_2": ""
+	"accessory_2": "",
+	"accessory_3": "",
+	"accessory_4": ""
 }
 
 var inventory_manager: InventoryManager
@@ -112,14 +116,18 @@ func auto_equip(item_id: String) -> bool:
 	var item_slot = item_data.get("equip_slot", "")
 	if item_slot == "": return false
 
-	# Para acessórios, tenta o 1 depois o 2
+	# Para acessórios, tenta o 1, 2, 3 depois o 4
 	if item_slot == "accessory":
 		if equipped["accessory_1"] == "":
 			return equip_item(item_id, "accessory_1")
 		elif equipped["accessory_2"] == "":
 			return equip_item(item_id, "accessory_2")
+		elif equipped["accessory_3"] == "":
+			return equip_item(item_id, "accessory_3")
+		elif equipped["accessory_4"] == "":
+			return equip_item(item_id, "accessory_4")
 		else:
-			return equip_item(item_id, "accessory_1") # Substitui o 1
+			return equip_item(item_id, "accessory_1") # Substitui o 1 se todos cheios
 
 	# Para outros slots, vai direto
 	if VALID_SLOTS.has(item_slot):

@@ -15,6 +15,8 @@ const SLOT_LAYOUT := [
 	["boots",       "Botas",      4, 1],
 	["accessory_1", "Acessório 1",5, 0],
 	["accessory_2", "Acessório 2",5, 2],
+	["accessory_3", "Acessório 3",6, 0],
+	["accessory_4", "Acessório 4",6, 2],
 ]
 
 func _ready() -> void:
@@ -30,7 +32,7 @@ func _build_ui() -> void:
 	# Painel de fundo
 	var bg = Panel.new()
 	bg.name = "Background"
-	bg.custom_minimum_size = Vector2(220, 420)
+	bg.custom_minimum_size = Vector2(220, 580)
 	bg.position = Vector2(20, 20) # Posição padrão - pode ser arrastado
 	add_child(bg)
 
@@ -53,9 +55,9 @@ func _build_ui() -> void:
 	grid.position = Vector2(10, 36)
 	bg.add_child(grid)
 
-	# Preenche com 5 linhas x 3 colunas (espaços vazios com Control)
+	# Preenche com 7 linhas x 3 colunas
 	var cells: Array = []
-	for r in range(6):
+	for r in range(7):
 		for c in range(3):
 			cells.append({"row": r, "col": c, "node": null})
 
@@ -96,6 +98,10 @@ var _drag_offset: Vector2 = Vector2.ZERO
 func _on_bg_gui_input(event: InputEvent) -> void:
 	var bg = get_node_or_null("Background")
 	if bg == null: return
+	
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		get_viewport().set_input_as_handled() # Impede rotação de câmera ao clicar no fundo da janela
+		
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		_dragging_panel = event.pressed
 		if event.pressed:

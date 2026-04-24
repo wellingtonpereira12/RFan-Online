@@ -111,6 +111,10 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 
 # Clique Direto com o Mouse
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		if action_data and not is_on_cooldown:
-			action_requested.emit(slot_index)
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			get_viewport().set_input_as_handled() # Impede que o Player capture o mouse
+			
+		if event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+			if action_data and not is_on_cooldown:
+				action_requested.emit(slot_index)

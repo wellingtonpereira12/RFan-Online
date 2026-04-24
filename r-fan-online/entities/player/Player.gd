@@ -85,6 +85,8 @@ func _ready() -> void:
 	inventory_manager.add_item("capacete_couro", 1)
 	inventory_manager.add_item("armadura_couro", 1)
 	inventory_manager.add_item("anel_forca", 2)
+	inventory_manager.add_item("anel_defesa", 1)
+	inventory_manager.add_item("brinco_agilidade", 1)
 	
 	var inv_scene = preload("res://ui/inventory/InventoryUI.tscn")
 	var inv_ui = inv_scene.instantiate()
@@ -255,6 +257,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		if inv_ui and inv_ui.visible:
 			inv_ui.visible = false
 			esc_handled = true
+		
+		# 2. Fechar Equipamentos se estiver aberto
+		var eq_ui = get_tree().get_first_node_in_group("equipment_ui")
+		if eq_ui and eq_ui.visible:
+			eq_ui.visible = false
+			esc_handled = true
 			
 		# 2. Desmarcar Target e parar ataque
 		if current_target != null or is_pursuing_and_attacking:
@@ -270,6 +278,29 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Lógica Clássica de MMO: Segurar o Botão DIREITO do mouse para "Guiar" a Câmera e o Corpo
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
 		if event.pressed:
+			# SEGURANÇA TOTAL: Se o mouse estiver sobre qualquer janela aberta, NÃO captura o mouse.
+			# Isso resolve o problema do mouse ir para o centro da tela ao usar itens.
+			var mouse_pos = get_viewport().get_mouse_position()
+			
+			# Checa Inventário
+			var inv_ui = get_tree().get_first_node_in_group("inventory_ui")
+			if inv_ui and inv_ui.visible:
+				var bg = inv_ui.get_node_or_null("Background")
+				if bg and bg.get_global_rect().has_point(mouse_pos):
+					return
+					
+			# Checa Equipamentos
+			var eq_ui = get_tree().get_first_node_in_group("equipment_ui")
+			if eq_ui and eq_ui.visible:
+				var bg = eq_ui.get_node_or_null("Background")
+				if bg and bg.get_global_rect().has_point(mouse_pos):
+					return
+			
+			# Checa SkillBar (Barra de atalhos)
+			var skill_bar_node = hud_instance.get_node_or_null("SkillBar")
+			if skill_bar_node and skill_bar_node.get_global_rect().has_point(mouse_pos):
+				return
+
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

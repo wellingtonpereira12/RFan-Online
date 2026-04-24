@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8r3h1a8j2b5t"]
+[gd_scene load_steps=4 format=3 uid="uid://c8r3h1a8j2b5t"]
 
 [ext_resource type="Script" path="res://ui/menu/RaceSelection.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/ui_grid.gdshader" id="2_uishader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("2_uishader")
+shader_parameter/bg_color = Color(0.0156863, 0.0156863, 0.0235294, 1)
+shader_parameter/grid_color = Color(0.0509804, 0.0509804, 0.0784314, 1)
+shader_parameter/grid_size = 32.0
+shader_parameter/line_width = 1.0
 
 [node name="RaceSelection" type="Control"]
 layout_mode = 3
@@ -12,13 +20,22 @@ grow_vertical = 2
 script = ExtResource("1_script")
 
 [node name="BG" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bg")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.06, 0.06, 0.1, 1)
+
+[node name="Vignette" type="ColorRect" parent="BG"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.47)
 
 [node name="Center" type="CenterContainer" parent="BG"]
 layout_mode = 1
@@ -29,17 +46,17 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MainPanel" type="PanelContainer" parent="BG/Center"]
+self_modulate = Color(1, 1, 1, 0.8)
 layout_mode = 2
-custom_minimum_size = Vector2(820, 560)
+custom_minimum_size = Vector2(900, 600)
 
 [node name="VBox" type="VBoxContainer" parent="BG/Center/MainPanel"]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="TitleBar" type="ColorRect" parent="BG/Center/MainPanel/VBox"]
+[node name="TitleBar" type="Panel" parent="BG/Center/MainPanel/VBox"]
+custom_minimum_size = Vector2(0, 70)
 layout_mode = 2
-custom_minimum_size = Vector2(0, 60)
-color = Color(0.1, 0.1, 0.18, 1)
 
 [node name="Title" type="Label" parent="BG/Center/MainPanel/VBox/TitleBar"]
 layout_mode = 1
@@ -48,117 +65,168 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 26
-text = "⚔  CRIAÇÃO DE PERSONAGEM"
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 4
+theme_override_font_sizes/font_size = 32
+text = "Character Creation"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="HBox" type="HBoxContainer" parent="BG/Center/MainPanel/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 420)
-theme_override_constants/separation = 0
+size_flags_vertical = 3
+theme_override_constants/separation = 20
 
 [node name="Left" type="VBoxContainer" parent="BG/Center/MainPanel/VBox/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.45
-theme_override_constants/separation = 12
+size_flags_stretch_ratio = 1.2
+theme_override_constants/separation = 15
+
+[node name="Spacer" type="Control" parent="BG/Center/MainPanel/VBox/HBox/Left"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
 
 [node name="RaceTitle" type="Label" parent="BG/Center/MainPanel/VBox/HBox/Left"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
-text = "  ESCOLHA SUA RAÇA"
+theme_override_colors/font_color = Color(0.6, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "    CHOOSE YOUR FACTION"
 
 [node name="RaceContainer" type="HBoxContainer" parent="BG/Center/MainPanel/VBox/HBox/Left"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 alignment = 1
 
-[node name="CharPortrait" type="ColorRect" parent="BG/Center/MainPanel/VBox/HBox/Left"]
+[node name="PortraitPanel" type="Panel" parent="BG/Center/MainPanel/VBox/HBox/Left"]
 layout_mode = 2
 size_flags_vertical = 3
-color = Color(0.12, 0.12, 0.18, 1)
 
-[node name="PortraitLabel" type="Label" parent="BG/Center/MainPanel/VBox/HBox/Left/CharPortrait"]
+[node name="CharPortrait" type="ColorRect" parent="BG/Center/MainPanel/VBox/HBox/Left/PortraitPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.08, 1)
+
+[node name="Glow" type="ColorRect" parent="BG/Center/MainPanel/VBox/HBox/Left/PortraitPanel/CharPortrait"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.2, 0.5, 1, 1)
+
+[node name="Label" type="Label" parent="BG/Center/MainPanel/VBox/HBox/Left/PortraitPanel/CharPortrait"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0.4, 0.4, 0.5, 1)
-text = "[ Personagem ]"
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+text = "PREVIEW"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RaceDescLabel" type="Label" parent="BG/Center/MainPanel/VBox/HBox/Left"]
+[node name="RaceDescBox" type="Panel" parent="BG/Center/MainPanel/VBox/HBox/Left"]
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
-autowrap_mode = 2
-text = "Selecione uma raça para ver sua descrição."
 
-[node name="Divider" type="VSeparator" parent="BG/Center/MainPanel/VBox/HBox"]
-layout_mode = 2
+[node name="RaceDescLabel" type="Label" parent="BG/Center/MainPanel/VBox/HBox/Left/RaceDescBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+text = "Select a race to see its history..."
+autowrap_mode = 2
 
 [node name="Right" type="VBoxContainer" parent="BG/Center/MainPanel/VBox/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.55
-theme_override_constants/separation = 10
+theme_override_constants/separation = 15
+
+[node name="Spacer" type="Control" parent="BG/Center/MainPanel/VBox/HBox/Right"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
 
 [node name="ClassTitle" type="Label" parent="BG/Center/MainPanel/VBox/HBox/Right"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.7, 0.7, 0.9, 1)
-text = "  ESCOLHA SUA CLASSE"
+theme_override_colors/font_color = Color(0.6, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "    SELECT YOUR CLASS"
 
 [node name="SelectedClassLabel" type="Label" parent="BG/Center/MainPanel/VBox/HBox/Right"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.9, 0.9, 0.4, 1)
-text = "Classe: —"
+theme_override_colors/font_color = Color(1, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "Class: —"
 
 [node name="ClassScroll" type="ScrollContainer" parent="BG/Center/MainPanel/VBox/HBox/Right"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
 [node name="ClassContainer" type="VBoxContainer" parent="BG/Center/MainPanel/VBox/HBox/Right/ClassScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
-[node name="Bottom" type="VBoxContainer" parent="BG/Center/MainPanel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Separator" type="HSeparator" parent="BG/Center/MainPanel/VBox/Bottom"]
+[node name="Bottom" type="Panel" parent="BG/Center/MainPanel/VBox"]
+custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
 
-[node name="NameRow" type="HBoxContainer" parent="BG/Center/MainPanel/VBox/Bottom"]
-layout_mode = 2
-theme_override_constants/separation = 12
+[node name="VBox" type="VBoxContainer" parent="BG/Center/MainPanel/VBox/Bottom"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 alignment = 1
 
-[node name="NameLabel" type="Label" parent="BG/Center/MainPanel/VBox/Bottom/NameRow"]
+[node name="NameRow" type="HBoxContainer" parent="BG/Center/MainPanel/VBox/Bottom/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Nome do Personagem:"
+theme_override_constants/separation = 15
+alignment = 1
 
-[node name="NameInput" type="LineEdit" parent="BG/Center/MainPanel/VBox/Bottom/NameRow"]
-custom_minimum_size = Vector2(280, 40)
+[node name="Label" type="Label" parent="BG/Center/MainPanel/VBox/Bottom/VBox/NameRow"]
 layout_mode = 2
-placeholder_text = "Digite seu nome..."
-max_length = 20
+text = "HERO NAME:"
 
-[node name="ErrorLabel" type="Label" parent="BG/Center/MainPanel/VBox/Bottom"]
+[node name="NameInput" type="LineEdit" parent="BG/Center/MainPanel/VBox/Bottom/VBox/NameRow"]
+custom_minimum_size = Vector2(300, 45)
+layout_mode = 2
+placeholder_text = "Enter name..."
+alignment = 1
+
+[node name="ErrorLabel" type="Label" parent="BG/Center/MainPanel/VBox/Bottom/VBox"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 
-[node name="PlayButton" type="Button" parent="BG/Center/MainPanel/VBox/Bottom"]
-custom_minimum_size = Vector2(0, 50)
+[node name="PlayButton" type="Button" parent="BG/Center/MainPanel/VBox/Bottom/VBox"]
+custom_minimum_size = Vector2(300, 55)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "⚔  ENTRAR NO JOGO"
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 22
+text = "START ADVENTURE"

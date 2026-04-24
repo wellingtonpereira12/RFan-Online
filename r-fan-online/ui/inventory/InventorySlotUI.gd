@@ -3,6 +3,7 @@ class_name InventorySlotUI
 
 @onready var icon_rect: TextureRect = $IconRect
 @onready var amount_label: Label = $AmountLabel
+@onready var name_label: Label = $NameLabel
 @onready var cooldown_overlay: ColorRect = $CooldownOverlay
 @onready var cooldown_label: Label = $CooldownLabel
 
@@ -36,6 +37,7 @@ func set_slot(item: Dictionary, amount: int) -> void:
 			icon_rect.texture = item["icon"]
 			icon_rect.modulate = Color(1, 1, 1, 1)
 			self_modulate = Color(1, 1, 1, 1)
+			name_label.visible = false
 		else:
 			# Sem ícone: pinta o painel de uma cor diferente por tipo
 			icon_rect.texture = null
@@ -47,19 +49,18 @@ func set_slot(item: Dictionary, amount: int) -> void:
 				"equipment": self_modulate = Color(0.9, 0.65, 0.1, 1)   # Dourado
 				_:           self_modulate = Color(0.3, 0.3, 0.3, 1)    # Cinza
 			
-			# Mostra nome curto no label do slot (max 8 chars)
+			# Mostra nome curto no label central
 			var short_name = item.get("nome", "?")
 			if short_name.length() > 8:
 				short_name = short_name.substr(0, 7) + "."
-			amount_label.text = short_name
-			amount_label.visible = true
-			amount_label.add_theme_font_size_override("font_size", 9)
-			return # Pula o controle de amount abaixo
+			name_label.text = short_name
+			name_label.visible = true
 
-		self_modulate = Color(1, 1, 1, 1)
-		if amount > 1:
+		self_modulate = Color(1, 1, 1, 1) if item.has("icon") and item["icon"] != null else self_modulate
+		
+		# Sempre lida com a quantidade (agora mostra '1' também se você quiser)
+		if amount >= 1:
 			amount_label.text = str(amount)
-			amount_label.add_theme_font_size_override("font_size", 14)
 			amount_label.visible = true
 		else:
 			amount_label.visible = false
@@ -72,7 +73,7 @@ func clear_slot() -> void:
 	icon_rect.texture = null
 	icon_rect.modulate = Color(1, 1, 1, 0)
 	amount_label.visible = false
-	amount_label.add_theme_font_size_override("font_size", 14)
+	name_label.visible = false
 	tooltip_text = ""
 	self_modulate = Color(1, 1, 1, 1) # Volta ao padrão do tema (fundo do Panel normal)
 	is_on_cooldown = false
@@ -142,9 +143,9 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 				real_manager.unequip_item(data["from_slot"])
 
 func _gui_input(event: InputEvent) -> void:
-	# Dispara evento se o usuário clicar 2 vezes ou clicar com direito (usar item no futuro)
-	if event is InputEventMouseButton and not event.pressed:
-		if event.button_index == MOUSE_BUTTON_RIGHT:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		get_viewport().set_input_as_handled() # Impede que o Player.gd capture o mouse ao clicar na UI
+		if not event.pressed:
 			if not is_on_cooldown:
 				slot_clicked.emit(slot_index)
 

@@ -44,11 +44,20 @@ func set_item(id: String) -> void:
 		clear_slot()
 		return
 
-	# Exibe o nome no label
-	icon_rect.modulate = Color(0.9, 0.7, 0.2, 1)
-	slot_label.text = item_data.get("nome", id)
+	# Estilo unificado com o inventário (Dourado para equipamentos)
+	icon_rect.modulate = Color(1, 1, 1, 0) # Esconde o ícone vazio
+	self_modulate = Color(0.9, 0.65, 0.1, 1) # Dourado
 	
-	# Monta tooltip com nome, descrição e restrição de mão
+	# Nome centralizado (usa o slot_label que já está na cena)
+	var short_name = item_data.get("nome", id)
+	if short_name.length() > 10:
+		short_name = short_name.substr(0, 9) + "."
+	slot_label.text = short_name
+	slot_label.set_anchors_preset(Control.PRESET_CENTER) # Centraliza
+	slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	slot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	# Monta tooltip
 	var tt = item_data.get("nome", id)
 	tt += "\n" + item_data.get("descricao", "")
 	var mao = item_data.get("mao", "")
@@ -56,16 +65,19 @@ func set_item(id: String) -> void:
 		var mao_label = {"esquerda": "🤜 Mão Esquerda", "direita": "🤛 Mão Direita", "ambas": "🤜🤛 Ambas as Mãos"}.get(mao, mao)
 		tt += "\n" + mao_label
 	tooltip_text = tt
-	border.border_color = Color(0.9, 0.7, 0.2, 1)
+	border.border_color = Color(1, 1, 1, 1) # Borda branca de destaque
 
 func clear_slot() -> void:
 	item_id = ""
 	icon_rect.modulate = Color(1, 1, 1, 0)
 	border.border_color = Color(0.4, 0.4, 0.4, 1)
 	tooltip_text = slot_name + "\n(vazio)"
-	# Restaura o nome original do slot (ex: "Botas", "Escudo")
+	self_modulate = Color(1, 1, 1, 1) # Reset da cor dourada
+	# Restaura o nome original do slot e posição inferior
 	if slot_label != null:
 		slot_label.text = _pending_label if _pending_label != "" else slot_name
+		slot_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+		slot_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 
 # --- Drag & Drop ---
 func _get_drag_data(_at_position: Vector2) -> Variant:
@@ -132,6 +144,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 		equipment_manager.equipment_changed.emit(slot_name, other_id)
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and not event.pressed:
-		if event.button_index == MOUSE_BUTTON_RIGHT and item_id != "":
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		get_viewport().set_input_as_handled()
+		if not event.pressed and item_id != "":
 			slot_clicked_right.emit(slot_name)

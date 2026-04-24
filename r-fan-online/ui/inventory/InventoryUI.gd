@@ -91,13 +91,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			visible = !visible
 
 func _on_background_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed:
-			dragging = true
-			drag_offset = event.global_position - background.global_position
-			# Traz o inventário pra frente caso haja outras janelas
-			move_to_front()
-		else:
-			dragging = false
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			get_viewport().set_input_as_handled() # Bloqueia clique direito no fundo da mochila
+			
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				dragging = true
+				drag_offset = event.global_position - background.global_position
+				# Traz o inventário pra frente caso haja outras janelas
+				move_to_front()
+			else:
+				dragging = false
 	elif event is InputEventMouseMotion and dragging:
 		background.global_position = event.global_position - drag_offset

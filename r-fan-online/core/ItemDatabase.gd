@@ -145,6 +145,26 @@ const ITEMS: Dictionary = {
 		"ataque": 5,
 		"max_stack": 1,
 		"cooldown_ms": 0
+	},
+	"anel_defesa": {
+		"id": "anel_defesa",
+		"nome": "Anel da Defesa",
+		"tipo": "equipment",
+		"descricao": "Um anel que protege o portador",
+		"equip_slot": "accessory",
+		"defesa": 5,
+		"max_stack": 1,
+		"cooldown_ms": 0
+	},
+	"brinco_agilidade": {
+		"id": "brinco_agilidade",
+		"nome": "Brinco Agilidade",
+		"tipo": "equipment",
+		"descricao": "Aumenta a velocidade de reação",
+		"equip_slot": "accessory",
+		"velocidade": 3,
+		"max_stack": 1,
+		"cooldown_ms": 0
 	}
 }
 
