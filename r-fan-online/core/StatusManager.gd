@@ -4,7 +4,7 @@ signal status_updated
 
 var base_stats: Dictionary = {}
 var scaling_config: Dictionary = {}
-var all_class_scales: Dictionary = {}
+var all_class_configs: Dictionary = {}
 var player_class: String = "melee"
 
 var current_total_stats: Dictionary = {}
@@ -17,28 +17,27 @@ func _ready():
 		ExperienceManager.level_up.connect(func(_lv): calculate_status())
 
 func _load_player_data():
-	# 1. Carrega as regras globais de classe
-	var class_file = "res://database/class_scaling_config.json"
-	if FileAccess.file_exists(class_file):
-		var file = FileAccess.open(class_file, FileAccess.READ)
-		all_class_scales = JSON.parse_string(file.get_as_text())
-		print("[StatusManager] Regras de classe carregadas.")
+	# 1. Carrega as configurações globais de classe (Base + Scaling)
+	var config_file = "res://database/class_configs.json"
+	if FileAccess.file_exists(config_file):
+		var file = FileAccess.open(config_file, FileAccess.READ)
+		all_class_configs = JSON.parse_string(file.get_as_text())
+		print("[StatusManager] Configurações de classe carregadas.")
 
-	# 2. Carrega os dados do jogador específico
-	var player_file = "res://database/player_status.json"
-	if FileAccess.file_exists(player_file):
-		var file = FileAccess.open(player_file, FileAccess.READ)
-		var data = JSON.parse_string(file.get_as_text())
-		if data:
-			base_stats = data["base_stats"]
-			player_class = data.get("class", "melee")
-			
-			# Seleciona o scaling baseado na classe do jogador
-			if all_class_scales.has(player_class):
-				scaling_config = all_class_scales[player_class]
-				print("[StatusManager] Aplicando scaling para classe: ", player_class)
-			
-			print("[StatusManager] Dados do jogador carregados.")
+	# 2. Pega a classe atual do GameManager (definida no login/seleção)
+	player_class = GameManager.player_class.to_lower()
+	
+	# Aplica os dados da classe
+	if all_class_configs.has(player_class):
+		base_stats = all_class_configs[player_class]["base"]
+		scaling_config = all_class_configs[player_class]["scaling"]
+		print("[StatusManager] Sincronizado com a classe do GameManager: ", player_class)
+	else:
+		# Fallback para melee se a classe não for encontrada
+		if all_class_configs.has("melee"):
+			base_stats = all_class_configs["melee"]["base"]
+			scaling_config = all_class_configs["melee"]["scaling"]
+			print("[StatusManager] Aviso: Classe '", player_class, "' não encontrada. Usando Melee como padrão.")
 
 func calculate_status():
 	# 1. Começa com a Base (que pode escalar com o Level)

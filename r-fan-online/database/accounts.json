@@ -4,47 +4,50 @@
 			{
 				"class": "Warrior",
 				"created_at": "2026-04-23T23:45:24",
-				"exp": 950,
+				"equipment": {
+
+				},
+				"exp": 0,
 				"inventory": [
 					{
-						"amount": 0.0,
-						"id": ""
+						"amount": 1.0,
+						"id": "espada_ferro"
+					},
+					{
+						"amount": 1.0,
+						"id": "capacete_couro"
+					},
+					{
+						"amount": 1.0,
+						"id": "armadura_couro"
+					},
+					{
+						"amount": 1.0,
+						"id": "anel_forca"
+					},
+					{
+						"amount": 1.0,
+						"id": "anel_forca"
+					},
+					{
+						"amount": 1.0,
+						"id": "anel_defesa"
+					},
+					{
+						"amount": 1.0,
+						"id": "brinco_agilidade"
 					},
 					{
 						"amount": 1.0,
 						"id": "espada_ferro"
 					},
 					{
-						"amount": 1.0,
+						"amount": 20.0,
+						"id": "pote_hp_p"
+					},
+					{
+						"amount": 10.0,
 						"id": "pote_sp_p"
-					},
-					{
-						"amount": 1.0,
-						"id": "espada_ferro"
-					},
-					{
-						"amount": 0.0,
-						"id": ""
-					},
-					{
-						"amount": 0.0,
-						"id": ""
-					},
-					{
-						"amount": 0.0,
-						"id": ""
-					},
-					{
-						"amount": 0.0,
-						"id": ""
-					},
-					{
-						"amount": 0.0,
-						"id": ""
-					},
-					{
-						"amount": 0.0,
-						"id": ""
 					},
 					{
 						"amount": 0.0,
@@ -107,33 +110,9 @@
 						"id": ""
 					}
 				],
-				"level": 10,
+				"level": 50,
 				"name": "oi",
 				"race": "Bellato"
-			},
-			{
-				"class": "Warrior",
-				"created_at": "2026-04-24T16:27:45",
-				"equipment": {
-
-				},
-				"exp": 0.0,
-				"inventory": [],
-				"level": 1.0,
-				"name": "oi",
-				"race": "Cora"
-			},
-			{
-				"class": "Warrior",
-				"created_at": "2026-04-24T16:28:19",
-				"equipment": {
-
-				},
-				"exp": 0.0,
-				"inventory": [],
-				"level": 1.0,
-				"name": "oi",
-				"race": "Accretia"
 			},
 			{
 				"class": "Ranger",
@@ -141,110 +120,122 @@
 				"equipment": {
 
 				},
-				"exp": 950,
+				"exp": 660.0,
 				"inventory": [
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "espada_ferro"
 					},
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "capacete_couro"
 					},
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "armadura_couro"
 					},
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "anel_forca"
 					},
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "anel_forca"
 					},
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "anel_defesa"
 					},
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "brinco_agilidade"
 					},
 					{
-						"amount": 1,
+						"amount": 1.0,
 						"id": "espada_ferro"
 					},
 					{
-						"amount": 20,
+						"amount": 20.0,
 						"id": "pote_hp_p"
 					},
 					{
-						"amount": 10,
+						"amount": 10.0,
 						"id": "pote_sp_p"
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					},
 					{
-						"amount": 0,
+						"amount": 0.0,
 						"id": ""
 					}
 				],
-				"level": 10,
+				"level": 7.0,
+				"name": "teste",
+				"race": "Bellato"
+			},
+			{
+				"class": "Spiritualist",
+				"created_at": "2026-04-24T19:12:16",
+				"equipment": {
+
+				},
+				"exp": 0.0,
+				"inventory": [],
+				"level": 1.0,
 				"name": "teste",
 				"race": "Bellato"
 			}

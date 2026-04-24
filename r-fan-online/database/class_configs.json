@@ -1,0 +1,114 @@
+{
+	"melee": {
+		"base": {
+			"hp": 1500,
+			"sp": 200,
+			"fp": 200,
+			"ataque": 50,
+			"defesa": 30,
+			"block": 10,
+			"move_speed": 5.0,
+			"attack_speed": 1.0,
+			"accuracy": 80,
+			"dodge": 5,
+			"debuff_resist": 5,
+			"elemental": {
+				"fire": 5,
+				"water": 5,
+				"earth": 5,
+				"wind": 5
+			}
+		},
+		"scaling": {
+			"hp": 400,
+			"sp": 30,
+			"fp": 30,
+			"ataque": 15,
+			"defesa": 10
+		}
+	},
+	"spiritualist": {
+		"base": {
+			"hp": 600,
+			"sp": 1000,
+			"fp": 150,
+			"ataque": 25,
+			"defesa": 10,
+			"block": 0,
+			"move_speed": 5.0,
+			"attack_speed": 0.9,
+			"accuracy": 70,
+			"dodge": 10,
+			"debuff_resist": 25,
+			"elemental": {
+				"fire": 15,
+				"water": 15,
+				"earth": 15,
+				"wind": 15
+			}
+		},
+		"scaling": {
+			"hp": 100,
+			"sp": 300,
+			"fp": 20,
+			"ataque": 6,
+			"defesa": 3
+		}
+	},
+	"range": {
+		"base": {
+			"hp": 1000,
+			"sp": 250,
+			"fp": 800,
+			"ataque": 40,
+			"defesa": 15,
+			"block": 2,
+			"move_speed": 5.5,
+			"attack_speed": 1.2,
+			"accuracy": 95,
+			"dodge": 20,
+			"debuff_resist": 10,
+			"elemental": {
+				"fire": 10,
+				"water": 10,
+				"earth": 10,
+				"wind": 10
+			}
+		},
+		"scaling": {
+			"hp": 200,
+			"sp": 40,
+			"fp": 250,
+			"ataque": 12,
+			"defesa": 5
+		}
+	},
+	"specialist": {
+		"base": {
+			"hp": 1100,
+			"sp": 500,
+			"fp": 500,
+			"ataque": 35,
+			"defesa": 20,
+			"block": 5,
+			"move_speed": 5.2,
+			"attack_speed": 1.0,
+			"accuracy": 85,
+			"dodge": 12,
+			"debuff_resist": 15,
+			"elemental": {
+				"fire": 8,
+				"water": 8,
+				"earth": 8,
+				"wind": 8
+			}
+		},
+		"scaling": {
+			"hp": 250,
+			"sp": 150,
+			"fp": 150,
+			"ataque": 10,
+			"defesa": 7
+		}
+	}
+}

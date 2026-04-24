@@ -37,6 +37,15 @@ func setup_player(level: int, exp: int):
 	max_exp = get_exp_required_for_level(current_level)
 	exp_changed.emit(current_exp, max_exp)
 
+func set_level(level: int):
+	current_level = clamp(level, 1, MAX_LEVEL)
+	current_exp = 0 # Resetar XP ao definir nível manualmente
+	max_exp = get_exp_required_for_level(current_level)
+	
+	exp_changed.emit(current_exp, max_exp)
+	level_up.emit(current_level)
+	print("[ExperienceManager] Level definido via admin para: ", current_level)
+
 func add_exp(amount: int):
 	if current_level >= MAX_LEVEL:
 		return

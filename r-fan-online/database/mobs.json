@@ -3,11 +3,11 @@
 		"id": "bellato_guard",
 		"nome": "Guardião Bellato",
 		"tipo": "normal",
-		"hp": 10000,
+		"hp": 10,
 		"ataque": 0,
 		"defesa": 10,
 		"velocidade": 1,
-		"exp": 250,
+		"exp": 2500,
 		"drop_list": [
 			{
 				"item": "pote_hp_p",

@@ -40,7 +40,10 @@ func send_message(text: String, channel: Channel = Channel.GLOBAL):
 	var p_name = GameManager.player_name if GameManager.player_name != "" else "Player"
 	var p_race = GameManager.player_race if GameManager.player_race != "" else "Accretia" # Default para teste
 	
-	# Estrutura de dados (PENSANDO NO FUTURO MULTIPLAYER)
+	# --- SISTEMA DE COMANDOS ADMIN ---
+	if text.begins_with("/"):
+		if _process_admin_command(text):
+			return # Interrompe o envio se for um comando válido
 	var message_data = {
 		"sender": p_name,
 		"text": text.substr(0, 100), # Limite de 100 caracteres
@@ -76,3 +79,44 @@ func _save_to_log(data: Dictionary):
 	if file:
 		file.store_string(JSON.stringify(chat_history, "\t"))
 		file.close()
+
+# --- COMANDOS ADMIN (GM) ---
+func _process_admin_command(command_text: String) -> bool:
+	var parts = command_text.split(" ", false)
+	if parts.size() < 1: return false
+	
+	var cmd = parts[0].to_lower()
+	
+	# /LEVEL <VALOR>
+	if cmd == "/level" and parts.size() >= 2:
+		var val_str = parts[1]
+		var current_lv = ExperienceManager.current_level
+		var new_lv = current_lv
+		
+		if val_str.begins_with("+"):
+			new_lv += val_str.to_int()
+		elif val_str.begins_with("-"):
+			new_lv += val_str.to_int()
+		else:
+			new_lv = val_str.to_int()
+		
+		ExperienceManager.set_level(new_lv)
+		_send_system_message("Level atualizado para: " + str(ExperienceManager.current_level))
+		return true
+		
+	# /ADDEXP <VALOR>
+	if cmd == "/addexp" and parts.size() >= 2:
+		var amount = parts[1].to_int()
+		ExperienceManager.add_exp(amount)
+		_send_system_message("Adicionado " + str(amount) + " de XP.")
+		return true
+		
+	return false
+
+func _send_system_message(text: String):
+	receive_message({
+		"sender": "SISTEMA",
+		"text": text,
+		"race": GameManager.player_race,
+		"channel": Channel.LOCAL
+	})

@@ -98,13 +98,18 @@ func _on_text_submitted(new_text: String) -> void:
 		_cmd_mob(parts)
 	elif command == "reload":
 		_cmd_reload(parts)
+	elif command == "level":
+		_cmd_level(parts)
+	elif command == "addexp":
+		_cmd_addexp(parts)
 	elif command == "clear":
 		history.text = "[color=yellow]=== Painel Administrativo GM Iniciado ===[/color]"
 	elif command == "help" or command == "ajuda":
 		print_to_console("=== Lista de Comandos Disponíveis (GM) ===", "yellow")
 		print_to_console("/item <id> <quantidade> - Adiciona item ao seu inventário", "cyan")
 		print_to_console("/mob <id> [quantidade] - Spawna mobs perto de você", "cyan")
-		print_to_console("/mob list - Lista todos os IDs de mobs cadastrados", "cyan")
+		print_to_console("/level <valor> - Define o nível do personagem (ex: /level 50 ou /level +1)", "cyan")
+		print_to_console("/addexp <valor> - Adiciona XP ao personagem", "cyan")
 		print_to_console("/reload mobs - Remove mobs do mapa e recarrega o mobs.json", "cyan")
 		print_to_console("/clear - Limpa o histórico deste console", "cyan")
 		print_to_console("/ajuda - Mostra esta lista", "cyan")
@@ -207,3 +212,31 @@ func _cmd_reload(args: PackedStringArray) -> void:
 		print_to_console("SUCESSO: " + str(enemies.size()) + " mob(s) removido(s). MobDatabase recarregado! (" + str(MobDatabase.MOBS.size()) + " mobs)", "green")
 	else:
 		print_to_console("Alvo inválido. Uso: /reload mobs", "red")
+
+func _cmd_level(args: PackedStringArray) -> void:
+	if args.size() < 2:
+		print_to_console("Uso correto: /level <valor> ou /level +1 ou /level -1", "red")
+		return
+		
+	var val_str = args[1]
+	var current_lv = ExperienceManager.current_level
+	var new_lv = current_lv
+	
+	if val_str.begins_with("+"):
+		new_lv += val_str.to_int()
+	elif val_str.begins_with("-"):
+		new_lv += val_str.to_int()
+	else:
+		new_lv = val_str.to_int()
+	
+	ExperienceManager.set_level(new_lv)
+	print_to_console("SUCESSO: Nível atualizado para " + str(ExperienceManager.current_level), "green")
+
+func _cmd_addexp(args: PackedStringArray) -> void:
+	if args.size() < 2:
+		print_to_console("Uso correto: /addexp <quantidade>", "red")
+		return
+		
+	var amount = args[1].to_int()
+	ExperienceManager.add_exp(amount)
+	print_to_console("SUCESSO: Adicionado " + str(amount) + " de XP.", "green")
