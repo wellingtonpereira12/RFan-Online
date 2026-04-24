@@ -15,7 +15,7 @@
 						"id": "espada_ferro"
 					},
 					{
-						"amount": 2.0,
+						"amount": 1.0,
 						"id": "pote_sp_p"
 					},
 					{
@@ -134,6 +134,119 @@
 				"level": 1.0,
 				"name": "oi",
 				"race": "Accretia"
+			},
+			{
+				"class": "Ranger",
+				"created_at": "2026-04-24T19:07:08",
+				"equipment": {
+
+				},
+				"exp": 950,
+				"inventory": [
+					{
+						"amount": 1,
+						"id": "espada_ferro"
+					},
+					{
+						"amount": 1,
+						"id": "capacete_couro"
+					},
+					{
+						"amount": 1,
+						"id": "armadura_couro"
+					},
+					{
+						"amount": 1,
+						"id": "anel_forca"
+					},
+					{
+						"amount": 1,
+						"id": "anel_forca"
+					},
+					{
+						"amount": 1,
+						"id": "anel_defesa"
+					},
+					{
+						"amount": 1,
+						"id": "brinco_agilidade"
+					},
+					{
+						"amount": 1,
+						"id": "espada_ferro"
+					},
+					{
+						"amount": 20,
+						"id": "pote_hp_p"
+					},
+					{
+						"amount": 10,
+						"id": "pote_sp_p"
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					},
+					{
+						"amount": 0,
+						"id": ""
+					}
+				],
+				"level": 10,
+				"name": "teste",
+				"race": "Bellato"
 			}
 		],
 		"created_at": "2026-04-23T23:41:56",

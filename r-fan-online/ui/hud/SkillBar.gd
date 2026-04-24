@@ -13,6 +13,7 @@ signal action_triggered(slot_index: int)
 signal run_mode_changed(is_run: bool)
 signal auto_attack_changed(is_auto: bool)
 signal skills_pressed()
+signal status_pressed()
 signal settings_pressed()
 
 func _ready() -> void:
@@ -116,6 +117,15 @@ func _ready() -> void:
 	self.add_child(skills_btn)
 	skills_btn.position = Vector2(size.x + 145, 10)
 
+	# --- Botão de Status (Emoji) ---
+	var status_btn = Button.new()
+	status_btn.text = "📊"
+	status_btn.tooltip_text = "Status do Personagem"
+	status_btn.focus_mode = Control.FOCUS_NONE
+	status_btn.pressed.connect(func(): status_pressed.emit())
+	self.add_child(status_btn)
+	status_btn.position = Vector2(size.x + 180, 10)
+
 	# --- Botão de Configurações (Emoji) ---
 	var settings_btn = Button.new()
 	settings_btn.text = "🛠️" 
@@ -123,8 +133,8 @@ func _ready() -> void:
 	settings_btn.focus_mode = Control.FOCUS_NONE
 	settings_btn.pressed.connect(func(): settings_pressed.emit())
 	self.add_child(settings_btn)
-	# Posicionado logo após o botão de Skills (+145 -> +180)
-	settings_btn.position = Vector2(size.x + 180, 10)
+	# Posicionado após o botão de Status (+180 -> +215)
+	settings_btn.position = Vector2(size.x + 215, 10)
 
 	# --- BOTÕES DE SISTEMA FINALIZADOS ---
 

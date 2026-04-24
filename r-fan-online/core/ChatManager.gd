@@ -76,5 +76,3 @@ func _save_to_log(data: Dictionary):
 	if file:
 		file.store_string(JSON.stringify(chat_history, "\t"))
 		file.close()
-
-

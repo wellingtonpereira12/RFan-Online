@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://1xkillbarx" path="res://ui/hud/SkillBar.tscn" id="2_skillbar"]
 [ext_resource type="PackedScene" path="res://ui/skills/SkillWindow.tscn" id="3_skills"]
 [ext_resource type="PackedScene" path="res://ui/settings/SettingsMenu.tscn" id="4_settings"]
+[ext_resource type="PackedScene" path="res://ui/hud/StatusWindow.tscn" id="5_status"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0, 0, 0, 0.5)
@@ -177,6 +178,10 @@ theme_override_constants/separation = 10
 alignment = 2
 
 [node name="SkillWindow" parent="." instance=ExtResource("3_skills")]
+visible = false
+layout_mode = 1
+
+[node name="StatusWindow" parent="." instance=ExtResource("5_status")]
 visible = false
 layout_mode = 1
 

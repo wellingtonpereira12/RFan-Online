@@ -134,3 +134,13 @@ func auto_equip(item_id: String) -> bool:
 		return equip_item(item_id, item_slot)
 
 	return false
+
+func get_equipped_items_data() -> Array:
+	var items_data = []
+	for slot_name in equipped:
+		var item_id = equipped[slot_name]
+		if item_id != "":
+			var data = ItemDatabase.get_item(item_id)
+			if not data.is_empty():
+				items_data.append(data)
+	return items_data

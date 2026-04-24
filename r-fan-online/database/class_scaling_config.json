@@ -1,0 +1,30 @@
+{
+	"melee": {
+		"hp": 350,
+		"sp": 40,
+		"fp": 40,
+		"ataque": 15,
+		"defesa": 10
+	},
+	"spiritualist": {
+		"hp": 120,
+		"sp": 250,
+		"fp": 30,
+		"ataque": 8,
+		"defesa": 4
+	},
+	"range": {
+		"hp": 220,
+		"sp": 50,
+		"fp": 200,
+		"ataque": 12,
+		"defesa": 6
+	},
+	"specialist": {
+		"hp": 250,
+		"sp": 120,
+		"fp": 120,
+		"ataque": 10,
+		"defesa": 8
+	}
+}

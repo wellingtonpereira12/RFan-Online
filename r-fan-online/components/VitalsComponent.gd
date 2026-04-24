@@ -26,9 +26,25 @@ var fp_regen_rate: float = 10.0 # Quanto recupera por segundo parado/andando
 var fp_pool: float = 0.0
 
 func _ready() -> void:
-	hp = max_hp
-	sp = max_sp
-	fp = max_fp
+	# Aguarda um frame para garantir que o StatusManager calculou tudo
+	call_deferred("sync_with_status")
+
+func sync_with_status():
+	var stats = StatusManager.get_total_status()
+	if not stats.is_empty():
+		max_hp = stats["hp"]
+		max_sp = stats["sp"]
+		max_fp = stats["fp"]
+		
+		# Resetar atuais para o novo máximo (curar totalmente ao sincronizar/mudar level)
+		hp = max_hp
+		sp = max_sp
+		fp = max_fp
+		
+		hp_changed.emit(hp, max_hp)
+		sp_changed.emit(sp, max_sp)
+		fp_changed.emit(fp, max_fp)
+		print("[Vitals] Sincronizado com StatusManager: HP=", max_hp)
 	fp_pool = float(fp)
 
 func restore_health(amount: int) -> void:

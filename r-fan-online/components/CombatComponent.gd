@@ -104,16 +104,20 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 	if is_range:
 		await get_tree().create_timer(0.2).timeout
 	
-	# Cálculo de Dano
+	# Cálculo de Dano com Multiplicador de Nível da Skill
 	var base_dmg = 10
 	if player.class_stats:
 		base_dmg = player.class_stats.base_physical_attack
 		
-	var final_dmg = int(base_dmg + skill["dano"])
+	var skill_mult = SkillManager.get_damage_multiplier(skill["key"])
+	var final_dmg = int((base_dmg + skill["dano"]) * skill_mult)
 	
 	if is_instance_valid(target) and target.has_node("VitalsComponent"):
 		target.get_node("VitalsComponent").take_damage(final_dmg)
-		print("=> SKILL (", skill["category"], "): ", skill["nome"], " causou ", final_dmg, " de dano.")
+		SkillManager.add_xp(skill["key"]) # GANHA XP AO ACERTAR
+		
+		var lv_label = SkillManager.get_level_label(skill["key"])
+		print("=> SKILL [", lv_label, "] (", skill["category"], "): ", skill["nome"], " causou ", final_dmg, " de dano.")
 
 func use_skill_directly(skill_data: Dictionary):
 	var skill_bar = get_tree().get_first_node_in_group("skill_bar")

@@ -89,6 +89,7 @@ func _ready() -> void:
 	# Inicializar EquipmentManager
 	var equipment_manager = EquipmentManager.new()
 	equipment_manager.name = "EquipmentManager"
+	equipment_manager.add_to_group("equipment_manager")
 	equipment_manager.setup(inventory_manager)
 	add_child(equipment_manager)
 

@@ -1,0 +1,207 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/hud/StatusWindow.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
+bg_color = Color(0.1, 0.1, 0.1, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.3, 0.3, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp"]
+bg_color = Color(0.8, 0.2, 0.2, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sp"]
+bg_color = Color(0.2, 0.4, 0.8, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fp"]
+bg_color = Color(1, 0.8, 0, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="StatusWindow" type="PanelContainer"]
+custom_minimum_size = Vector2(350, 500)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_top = -250.0
+offset_right = 175.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
+script = ExtResource("1_script")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "STATUS DO PERSONAGEM"
+horizontal_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Content" type="VBoxContainer" parent="VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Resources" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Header" type="Label" parent="VBox/Scroll/Content/Resources"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.5, 1)
+text = "[ VIDA / RECURSOS ]"
+
+[node name="HP" type="Label" parent="VBox/Scroll/Content/Resources"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "HP: 1200 / 1200"
+
+[node name="HPBar" type="ProgressBar" parent="VBox/Scroll/Content/Resources"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp")
+value = 100.0
+show_percentage = false
+
+[node name="SP" type="Label" parent="VBox/Scroll/Content/Resources"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "SP: 600 / 600"
+
+[node name="SPBar" type="ProgressBar" parent="VBox/Scroll/Content/Resources"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_sp")
+value = 100.0
+show_percentage = false
+
+[node name="FP" type="Label" parent="VBox/Scroll/Content/Resources"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "FP: 400 / 400"
+
+[node name="FPBar" type="ProgressBar" parent="VBox/Scroll/Content/Resources"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_fp")
+value = 100.0
+show_percentage = false
+
+[node name="Combat" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="VBox/Scroll/Content/Combat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.5, 1)
+text = "[ COMBATE ]"
+
+[node name="Atk" type="Label" parent="VBox/Scroll/Content/Combat"]
+layout_mode = 2
+text = "Ataque Total: 120"
+
+[node name="Def" type="Label" parent="VBox/Scroll/Content/Combat"]
+layout_mode = 2
+text = "Defesa Total: 80"
+
+[node name="Block" type="Label" parent="VBox/Scroll/Content/Combat"]
+layout_mode = 2
+text = "Chance de Bloqueio: 10%"
+
+[node name="Movement" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="VBox/Scroll/Content/Movement"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.5, 1)
+text = "[ MOVIMENTO ]"
+
+[node name="MS" type="Label" parent="VBox/Scroll/Content/Movement"]
+layout_mode = 2
+text = "Vel. Movimento: 5.0"
+
+[node name="AS" type="Label" parent="VBox/Scroll/Content/Movement"]
+layout_mode = 2
+text = "Vel. Ataque: 1.0"
+
+[node name="Accuracy" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="VBox/Scroll/Content/Accuracy"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.5, 1)
+text = "[ PRECISÃO / EVASÃO ]"
+
+[node name="Acc" type="Label" parent="VBox/Scroll/Content/Accuracy"]
+layout_mode = 2
+text = "Chance de Acerto: 90%"
+
+[node name="Dodge" type="Label" parent="VBox/Scroll/Content/Accuracy"]
+layout_mode = 2
+text = "Chance de Esquiva: 15%"
+
+[node name="Debuff" type="Label" parent="VBox/Scroll/Content/Accuracy"]
+layout_mode = 2
+text = "Resist. Debuff: 20%"
+
+[node name="Elemental" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="VBox/Scroll/Content/Elemental"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.5, 1)
+text = "[ DEFESA ELEMENTAL ]"
+
+[node name="Fire" type="Label" parent="VBox/Scroll/Content/Elemental"]
+layout_mode = 2
+text = "Fogo: 10"
+
+[node name="Water" type="Label" parent="VBox/Scroll/Content/Elemental"]
+layout_mode = 2
+text = "Água: 5"
+
+[node name="Earth" type="Label" parent="VBox/Scroll/Content/Elemental"]
+layout_mode = 2
+text = "Terra: 8"
+
+[node name="Wind" type="Label" parent="VBox/Scroll/Content/Elemental"]
+layout_mode = 2
+text = "Vento: 12"
+
+[node name="Footer" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="CloseBtn" type="Button" parent="VBox/Footer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "FECHAR"

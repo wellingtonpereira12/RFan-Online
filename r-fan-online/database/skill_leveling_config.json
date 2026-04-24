@@ -1,0 +1,12 @@
+{
+	"levels": {
+		"1": { "xp_required": 100, "damage_mult": 1.0, "label": "Lv. 1" },
+		"2": { "xp_required": 250, "damage_mult": 1.1, "label": "Lv. 2" },
+		"3": { "xp_required": 600, "damage_mult": 1.2, "label": "Lv. 3" },
+		"4": { "xp_required": 1200, "damage_mult": 1.4, "label": "Lv. 4" },
+		"5": { "xp_required": 2500, "damage_mult": 1.6, "label": "Lv. 5" },
+		"6": { "xp_required": 5000, "damage_mult": 1.8, "label": "Lv. 6" },
+		"7": { "xp_required": 0, "damage_mult": 2.2, "label": "GM" }
+	},
+	"xp_per_use": 10
+}

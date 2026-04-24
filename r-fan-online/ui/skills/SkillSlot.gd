@@ -8,11 +8,16 @@ extends PanelContainer
 @onready var lock_label = $LockOverlay/LockLabel
 @onready var cooldown_overlay = $HBox/IconContainer/CooldownOverlay
 @onready var cooldown_label = $CooldownLabel
+@onready var xp_bar = $HBox/VBox/XPBar
 
 var skill_data: Dictionary = {}
 var is_locked: bool = false
 
 signal skill_right_clicked(data: Dictionary)
+
+func _ready():
+	SkillManager.skill_xp_updated.connect(_on_skill_xp_updated)
+	SkillManager.skill_leveled_up.connect(_on_skill_leveled_up)
 
 func setup(data: Dictionary):
 	skill_data = data
@@ -34,6 +39,32 @@ func setup(data: Dictionary):
 	else:
 		is_locked = false
 		lock_overlay.visible = false
+	
+	_update_level_ui()
+
+func _update_level_ui():
+	var status = SkillManager.get_skill_status(skill_data["key"])
+	var lv_label = SkillManager.get_level_label(skill_data["key"])
+	name_label.text = skill_data["nome"] + " [" + lv_label + "]"
+	
+	var config = SkillManager.leveling_config["levels"][str(status.level)]
+	xp_bar.max_value = config["xp_required"]
+	xp_bar.value = status.xp
+	
+	# Se for GM (level 7), a barra some ou fica cheia
+	if status.level >= 7:
+		xp_bar.visible = false
+	else:
+		xp_bar.visible = true
+
+func _on_skill_xp_updated(skill_key: String, current_xp: int, required_xp: int):
+	if skill_data.get("key") == skill_key:
+		xp_bar.max_value = required_xp
+		xp_bar.value = current_xp
+
+func _on_skill_leveled_up(skill_key: String, new_level: int):
+	if skill_data.get("key") == skill_key:
+		_update_level_ui()
 
 func _get_drag_data(_at_position):
 	if is_locked: return null

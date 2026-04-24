@@ -10,6 +10,7 @@ class_name HUD
 @onready var status_circle: ColorRect = $MarginContainer/VBoxContainer/CombatStatus/StatusCircle
 @onready var skill_bar: Control = $BottomUI/SkillBarContainer/SkillBar
 @onready var skill_window: Control = $SkillWindow
+@onready var status_window: Control = $StatusWindow
 @onready var settings_menu: Control = $SettingsMenu
 
 @onready var target_frame: PanelContainer = $TargetFrame
@@ -27,6 +28,7 @@ func _ready() -> void:
 	skill_bar.auto_attack_changed.connect(func(v): auto_attack_mode_toggled.emit(v))
 	skill_bar.skills_pressed.connect(func(): skill_window.toggle())
 	skill_bar.settings_pressed.connect(func(): settings_menu.toggle())
+	skill_bar.status_pressed.connect(func(): status_window.toggle())
 
 # Atualizadores das Barras
 func update_hp(current: int, max_val: int) -> void:

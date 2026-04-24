@@ -1,0 +1,23 @@
+{
+	"player_name": "oi",
+	"class": "melee",
+	"base_stats": {
+		"hp": 1200,
+		"sp": 600,
+		"fp": 400,
+		"ataque": 65,
+		"defesa": 30,
+		"block": 5,
+		"move_speed": 5.0,
+		"attack_speed": 1.1,
+		"accuracy": 85,
+		"dodge": 12,
+		"debuff_resist": 10,
+		"elemental": {
+			"fire": 5,
+			"water": 5,
+			"earth": 5,
+			"wind": 5
+		}
+	}
+}
