@@ -7,6 +7,8 @@ class_name InventorySlotUI
 var slot_index: int = -1
 var item_data: Dictionary = {}
 var item_amount: int = 0
+var is_dragging: bool = false
+var confirm_dialog: ConfirmationDialog = null
 
 signal slot_dragged(from_index: int, to_index: int)
 signal slot_clicked(index: int)
@@ -19,6 +21,11 @@ func set_slot(item: Dictionary, amount: int) -> void:
 	item_amount = amount
 	
 	if not item.is_empty():
+		# Define a tooltip para mostrar nome e descrição quando passar o mouse
+		tooltip_text = item.get("nome", "Item Desconhecido")
+		if item.has("descricao"):
+			tooltip_text += "\n" + item["descricao"]
+			
 		if item.has("icon") and item["icon"] != null:
 			icon_rect.texture = item["icon"]
 			icon_rect.modulate = Color(1, 1, 1, 1)
@@ -41,6 +48,7 @@ func clear_slot() -> void:
 	icon_rect.texture = null
 	icon_rect.modulate = Color(1, 1, 1, 0) # Transparente quando vazio
 	amount_label.visible = false
+	tooltip_text = "" # Remove a tooltip quando vazio
 
 # --- Drag & Drop Lógica Nativa ---
 func _get_drag_data(_at_position: Vector2) -> Variant:
@@ -63,6 +71,8 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	preview_icon.position = -size / 2
 	set_drag_preview(ctrl)
 	
+	is_dragging = true
+	
 	return {"type": "inventory_slot", "from_index": slot_index, "data": item_data}
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
@@ -78,3 +88,28 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			slot_clicked.emit(slot_index)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_END:
+		if is_dragging:
+			is_dragging = false
+			if not get_viewport().gui_is_drag_successful():
+				_ask_drop_item()
+
+func _ask_drop_item() -> void:
+	if confirm_dialog == null:
+		confirm_dialog = ConfirmationDialog.new()
+		confirm_dialog.dialog_text = "Deseja derrubar o item no chão?"
+		confirm_dialog.title = "Atenção"
+		confirm_dialog.confirmed.connect(_on_drop_confirmed)
+		add_child(confirm_dialog)
+	confirm_dialog.popup_centered()
+
+func _on_drop_confirmed() -> void:
+	var player = get_tree().get_first_node_in_group("players")
+	if player and player.has_method("drop_item_on_ground"):
+		player.drop_item_on_ground(item_data, item_amount)
+	
+	var inv_ui = get_tree().get_first_node_in_group("inventory_ui")
+	if inv_ui and inv_ui.inventory_manager:
+		inv_ui.inventory_manager.remove_item(slot_index, item_amount)

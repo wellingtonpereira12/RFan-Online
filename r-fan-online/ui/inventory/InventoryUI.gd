@@ -16,6 +16,12 @@ func _ready() -> void:
 	add_to_group("inventory_ui")
 	visible = false # Escondido por padrão
 	background.gui_input.connect(_on_background_gui_input)
+	
+	# Força a posição inicial do painel para a direita no meio
+	call_deferred("_setup_position")
+
+func _setup_position() -> void:
+	background.position = Vector2(size.x - background.size.x - 20, (size.y - background.size.y) / 2)
 
 func setup(manager: InventoryManager) -> void:
 	inventory_manager = manager

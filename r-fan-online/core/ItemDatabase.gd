@@ -3,7 +3,7 @@ class_name ItemDatabase
 const ITEMS: Dictionary = {
 	"pote_hp_p": {
 		"id": "pote_hp_p",
-		"nome": "Potion HP Pequena",
+		"nome": "Potion HP Pequenaaa",
 		"tipo": "potion",
 		"descricao": "Recupera uma pequena quantidade de vida",
 		"efeito": "hp",

@@ -23,6 +23,13 @@ func _ready() -> void:
 	if vitals:
 		vitals.died.connect(_on_died)
 		vitals.hp_changed.connect(_on_took_damage)
+		
+	# Remover Bodyblock: Inimigos e Jogadores se atravessam
+	call_deferred("_ignore_players")
+
+func _ignore_players() -> void:
+	for p in get_tree().get_nodes_in_group("players"):
+		add_collision_exception_with(p)
 
 func _physics_process(delta: float) -> void:
 	# Aplicar Gravidade

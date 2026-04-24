@@ -62,6 +62,11 @@ func _ready() -> void:
 	inventory_manager.add_to_group("inventory_manager")
 	add_child(inventory_manager)
 	
+	# Inicializar Console Admin (GM)
+	var admin_scene = preload("res://ui/admin/AdminConsole.tscn")
+	var admin_ui = admin_scene.instantiate()
+	add_child(admin_ui)
+	
 	var inv_scene = preload("res://ui/inventory/InventoryUI.tscn")
 	var inv_ui = inv_scene.instantiate()
 	hud_instance.add_child(inv_ui)
@@ -70,6 +75,7 @@ func _ready() -> void:
 	# Adiciona itens usando o banco de dados oficial!
 	inventory_manager.add_item("pote_hp_p", 120)
 	inventory_manager.add_item("pote_sp_p", 50)
+	inventory_manager.add_item("pote_fp", 99) # Adicionando a pote de FP!
 	inventory_manager.add_item("super_pote", 10)
 
 	# --- ALQUIMIA GLOBAL (Injeção de Seleção do Singleton) ---
@@ -179,13 +185,65 @@ func _on_player_died() -> void:
 	
 	print("=> [SISTEMA]: Respawn concluído com sucesso!")
 
+# --- Sistema de Inventário (Drop de Itens) ---
+func drop_item_on_ground(item_data: Dictionary, amount: int) -> void:
+	var item_node = RigidBody3D.new()
+	
+	var mesh_inst = MeshInstance3D.new()
+	var box_mesh = BoxMesh.new()
+	box_mesh.size = Vector3(0.3, 0.3, 0.3)
+	mesh_inst.mesh = box_mesh
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.84, 0.0) # Bolinha quadrada amarela (Ouro/Loot)
+	box_mesh.surface_set_material(0, mat)
+	
+	var coll = CollisionShape3D.new()
+	var box_shape = BoxShape3D.new()
+	box_shape.size = Vector3(0.3, 0.3, 0.3)
+	coll.shape = box_shape
+	
+	item_node.add_child(mesh_inst)
+	item_node.add_child(coll)
+	
+	# Adicionar à raiz da cena principal
+	get_tree().current_scene.add_child(item_node)
+	
+	# Ignorar colisão com o próprio jogador para não ser empurrado
+	item_node.add_collision_exception_with(self)
+	
+	# Deslocar para evitar spawn dentro do jogador
+	var offset = Vector3(randf_range(-1.0, 1.0), 1.5, randf_range(-1.0, 1.0))
+	item_node.global_position = global_position + offset
+	item_node.apply_central_impulse(Vector3(0, 3.0, 0))
+	
+	# Metadata para identificar o item no Raycast
+	item_node.set_meta("is_dropped_item", true)
+	item_node.set_meta("item_data", item_data)
+	item_node.set_meta("item_amount", amount)
+	
+	print("Item derrubado: ", item_data.get("nome", "Desconhecido"), " x", amount)
+
 func _unhandled_input(event: InputEvent) -> void:
-	# Cancelar Target e Ataque com ESC
+	# Cancelar Target, Ataque e Fechar Janelas com ESC
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		var esc_handled = false
+		
+		# 1. Fechar Inventário se estiver aberto
+		var inv_ui = get_tree().get_first_node_in_group("inventory_ui")
+		if inv_ui and inv_ui.visible:
+			inv_ui.visible = false
+			esc_handled = true
+			
+		# 2. Desmarcar Target e parar ataque
 		if current_target != null or is_pursuing_and_attacking:
 			current_target = null
 			hud_instance.unbind_target()
 			is_pursuing_and_attacking = false
+			esc_handled = true
+			
+		if esc_handled:
+			get_viewport().set_input_as_handled()
 			return
 
 	# Lógica Clássica de MMO: Segurar o Botão DIREITO do mouse para "Guiar" a Câmera e o Corpo
@@ -224,6 +282,26 @@ func handle_mouse_click(is_double_click: bool) -> void:
 	
 	if result and result.has("collider"):
 		var hit_obj = result.collider
+		
+		# 1. Verifica se clicou em um Item no Chão
+		if hit_obj.has_meta("is_dropped_item"):
+			var i_data = hit_obj.get_meta("item_data")
+			var i_amount = hit_obj.get_meta("item_amount")
+			
+			var inv_ui = get_tree().get_first_node_in_group("inventory_ui")
+			if inv_ui and inv_ui.inventory_manager:
+				var resto = inv_ui.inventory_manager.add_item(i_data["id"], i_amount)
+				if resto <= 0:
+					hit_obj.queue_free()
+					print("Pegou do chão: ", i_data.get("nome", "Item"), " x", i_amount)
+				elif resto < i_amount:
+					hit_obj.set_meta("item_amount", resto)
+					print("Pegou parte do item. Sobrou no chão: ", resto)
+				else:
+					print("Inventário cheio!")
+			return
+
+		# 2. Verifica se clicou em um Inimigo
 		if hit_obj.is_in_group("enemies"):
 			# Define Alvo novo ou mantém
 			current_target = hit_obj
