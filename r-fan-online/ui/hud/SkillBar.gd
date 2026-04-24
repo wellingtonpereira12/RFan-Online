@@ -13,6 +13,7 @@ signal action_triggered(slot_index: int)
 signal run_mode_changed(is_run: bool)
 signal auto_attack_changed(is_auto: bool)
 signal skills_pressed()
+signal settings_pressed()
 
 func _ready() -> void:
 	# Montador Dinâmico de Vagas (Gera visualmente 1 a 0)
@@ -114,6 +115,16 @@ func _ready() -> void:
 	skills_btn.pressed.connect(func(): skills_pressed.emit())
 	self.add_child(skills_btn)
 	skills_btn.position = Vector2(size.x + 145, 10)
+
+	# --- Botão de Configurações (Emoji) ---
+	var settings_btn = Button.new()
+	settings_btn.text = "🛠️" 
+	settings_btn.tooltip_text = "Configurações"
+	settings_btn.focus_mode = Control.FOCUS_NONE
+	settings_btn.pressed.connect(func(): settings_pressed.emit())
+	self.add_child(settings_btn)
+	# Posicionado logo após o botão de Skills (+145 -> +180)
+	settings_btn.position = Vector2(size.x + 180, 10)
 
 	# --- BOTÕES DE SISTEMA FINALIZADOS ---
 

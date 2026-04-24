@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://ui/hud/HUD.gd" id="1_hud"]
 [ext_resource type="PackedScene" uid="uid://1xkillbarx" path="res://ui/hud/SkillBar.tscn" id="2_skillbar"]
 [ext_resource type="PackedScene" path="res://ui/skills/SkillWindow.tscn" id="3_skills"]
+[ext_resource type="PackedScene" path="res://ui/settings/SettingsMenu.tscn" id="4_settings"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0, 0, 0, 0.5)
@@ -138,6 +139,7 @@ theme_override_constants/separation = 10
 alignment = 2
 
 
+
 [node name="SkillWindow" parent="." instance=ExtResource("3_skills")]
 visible = false
 layout_mode = 1
@@ -158,3 +160,6 @@ theme_override_font_sizes/font_size = 10
 text = "150 / 300 (50%)"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="SettingsMenu" parent="." instance=ExtResource("4_settings")]
+visible = false

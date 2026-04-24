@@ -1,0 +1,147 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/settings/SettingsMenu.gd" id="1_script"]
+
+[node name="SettingsMenu" type="Panel"]
+custom_minimum_size = Vector2(450, 550)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -225.0
+offset_top = -275.0
+offset_right = 225.0
+offset_bottom = 275.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "CONFIGURAÇÕES"
+
+[node name="HSeparator" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Content" type="VBoxContainer" parent="VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="ScreenSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/Scroll/Content/ScreenSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 1, 1)
+text = "VÍDEO"
+
+[node name="FullscreenRow" type="HBoxContainer" parent="VBox/Scroll/Content/ScreenSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/Scroll/Content/ScreenSection/FullscreenRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Tela Cheia"
+
+[node name="FullscreenCheck" type="CheckBox" parent="VBox/Scroll/Content/ScreenSection/FullscreenRow"]
+layout_mode = 2
+
+[node name="ResRow" type="HBoxContainer" parent="VBox/Scroll/Content/ScreenSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/Scroll/Content/ScreenSection/ResRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Resolução"
+
+[node name="ResOption" type="OptionButton" parent="VBox/Scroll/Content/ScreenSection/ResRow"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+
+[node name="AudioSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/Scroll/Content/AudioSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.8, 1, 1)
+text = "ÁUDIO"
+
+[node name="MusicRow" type="VBoxContainer" parent="VBox/Scroll/Content/AudioSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/Scroll/Content/AudioSection/MusicRow"]
+layout_mode = 2
+text = "Volume Música"
+
+[node name="MusicSlider" type="HSlider" parent="VBox/Scroll/Content/AudioSection/MusicRow"]
+layout_mode = 2
+value = 80.0
+
+[node name="SFXRow" type="VBoxContainer" parent="VBox/Scroll/Content/AudioSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/Scroll/Content/AudioSection/SFXRow"]
+layout_mode = 2
+text = "Volume Efeitos"
+
+[node name="SFXSlider" type="HSlider" parent="VBox/Scroll/Content/AudioSection/SFXRow"]
+layout_mode = 2
+value = 70.0
+
+[node name="Footer" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SaveBtn" type="Button" parent="VBox/Footer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "APLICAR E SALVAR"
+
+[node name="HBox" type="HBoxContainer" parent="VBox/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LogoutBtn" type="Button" parent="VBox/Footer/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+text = "LOGOUT"
+
+[node name="ExitBtn" type="Button" parent="VBox/Footer/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+text = "SAIR DO JOGO"
+
+[node name="ConfirmExit" type="ConfirmationDialog" parent="."]
+title = "Sair do Jogo"
+initial_position = 2
+size = Vector2i(300, 100)
+ok_button_text = "Sim"
+dialog_text = "Deseja realmente sair?"
+cancel_button_text = "Não"

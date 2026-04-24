@@ -63,6 +63,9 @@ func _ready() -> void:
 	inventory_manager.add_to_group("inventory_manager")
 	add_child(inventory_manager)
 	
+	# Configurar Cursor de Espada
+	_setup_custom_cursor()
+	
 	# Inicializar Console Admin (GM)
 	var admin_scene = preload("res://ui/admin/AdminConsole.tscn")
 	var admin_ui = admin_scene.instantiate()
@@ -229,6 +232,26 @@ func _ready() -> void:
 	# Conectar modos da UI ao Player
 	hud_instance.run_toggled.connect(_on_hud_run_toggled)
 	hud_instance.auto_attack_mode_toggled.connect(_on_hud_auto_mode_toggled)
+
+func _setup_custom_cursor():
+	var cursor_path = "res://assets/icons/sword_cursor.png"
+	if FileAccess.file_exists(cursor_path):
+		var img = Image.load_from_file(ProjectSettings.globalize_path(cursor_path))
+		var tex = ImageTexture.create_from_image(img)
+		Input.set_custom_mouse_cursor(tex, Input.CURSOR_ARROW, Vector2(0, 0))
+
+func _update_mouse_cursor():
+	var space_state = get_world_3d().direct_space_state
+	var mouse_pos = get_viewport().get_mouse_position()
+	var ray_origin = camera.project_ray_origin(mouse_pos)
+	var ray_end = ray_origin + camera.project_ray_normal(mouse_pos) * 1000.0
+	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+	var result = space_state.intersect_ray(query)
+	
+	if result and result.has("collider") and result.collider.is_in_group("enemies"):
+		Input.set_default_cursor_shape(Input.CURSOR_CROSS)
+	else:
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 func _on_hud_auto_mode_toggled(is_auto: bool) -> void:
 	auto_attack_mode_enabled = is_auto
@@ -425,24 +448,33 @@ func handle_mouse_click(is_double_click: bool) -> void:
 		# 2. Verifica se clicou em um Inimigo
 		if hit_obj.is_in_group("enemies"):
 			var previous_target = current_target
+			
+			# Se o clique for em um alvo DIFERENTE do atual: apenas SELECIONA
+			if hit_obj != previous_target:
+				current_target = hit_obj
+				hud_instance.bind_target(hit_obj)
+				# Interrompe ataque automático ao trocar de alvo (opcional, estilo RF)
+				is_pursuing_and_attacking = false 
+				print("[Combate] Alvo selecionado: ", hit_obj.name)
+				return
+			
+			# Se o clique for no MESMO alvo (segundo clique): ATACA
 			current_target = hit_obj
 			hud_instance.bind_target(hit_obj)
 			
-			# Analisar Comportamento de clique baseado no Modo
 			if auto_attack_mode_enabled:
-				# MODO AUTO: só reseta o timer se trocou de alvo
 				is_pursuing_and_attacking = true
-				if hit_obj != previous_target:
-					basic_attack_cooldown_timer = 0.0 # Novo alvo = ataca logo
-			elif is_double_click:
-				# MODO MANUAL: usa tempo absoluto para bloquear spam de qualquer velocidade
+				# Não zeramos o timer aqui para respeitar o cooldown atual
+			else:
+				# Ataque Manual (estilo clique duplo ou cliques sucessivos)
 				var now = Time.get_ticks_msec()
 				var delay_ms = int(basic_attack_interval * 1000)
 				if now - last_manual_attack_msec >= delay_ms:
 					last_manual_attack_msec = now
 					is_pursuing_and_attacking = true
-					basic_attack_cooldown_timer = basic_attack_interval
-			# Clique simples: apenas seleciona o target (já feito acima)
+					# Mantém o cooldown_timer sincronizado com o intervalo
+					if basic_attack_cooldown_timer <= 0:
+						basic_attack_cooldown_timer = basic_attack_interval
 				
 			return
 			
@@ -451,18 +483,30 @@ func handle_mouse_click(is_double_click: bool) -> void:
 	hud_instance.unbind_target()
 	is_pursuing_and_attacking = false
 
+func _process(delta: float) -> void:
+	_update_mouse_cursor()
+
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	# Pular
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = jump_velocity
+	# Handle Jump (Tecla X) ou Attack (Espaço)
+	var focus_owner = get_viewport().gui_get_focus_owner()
+	if not (focus_owner is LineEdit):
+		# ESPAÇO -> ATACAR
+		if Input.is_action_just_pressed("ui_accept"):
+			if is_instance_valid(current_target):
+				is_pursuing_and_attacking = true
+				print("[Combate] Atacando via ESPAÇO.")
+		
+		# TECLA X -> PULAR
+		if Input.is_key_pressed(KEY_X) and is_on_floor():
+			velocity.y = jump_velocity
 
 	# Obter direção de Input baseada no Teclado mas com referência absoluta da CÂMERA
 	var input_dir := Vector2.ZERO
-	var focus_owner = get_viewport().gui_get_focus_owner()
+	focus_owner = get_viewport().gui_get_focus_owner()
 	
 	if not (focus_owner is LineEdit):
 		input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")

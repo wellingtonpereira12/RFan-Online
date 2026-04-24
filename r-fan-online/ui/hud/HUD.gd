@@ -9,6 +9,7 @@ class_name HUD
 @onready var level_label: Label = $MarginContainer/VBoxContainer/LevelLabel
 @onready var skill_bar: Control = $BottomUI/SkillBarContainer/SkillBar
 @onready var skill_window: Control = $SkillWindow
+@onready var settings_menu: Control = $SettingsMenu
 
 @onready var target_frame: PanelContainer = $TargetFrame
 @onready var target_hp_bar: ProgressBar = $TargetFrame/VBoxContainer/TargetHPBar
@@ -24,6 +25,7 @@ func _ready() -> void:
 	skill_bar.run_mode_changed.connect(func(v): run_toggled.emit(v))
 	skill_bar.auto_attack_changed.connect(func(v): auto_attack_mode_toggled.emit(v))
 	skill_bar.skills_pressed.connect(func(): skill_window.toggle())
+	skill_bar.settings_pressed.connect(func(): settings_menu.show_menu())
 
 # Atualizadores das Barras
 func update_hp(current: int, max_val: int) -> void:

@@ -1013,6 +1013,48 @@
 		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
 	},
 	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (1.1s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Duplo[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 11m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 9m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Luz Sagrada[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Selecione um alvo primeiro!"
+	},
+	{
 		"channel": 1,
 		"race": "Bellato",
 		"sender": "SISTEMA",
@@ -1022,12 +1064,162 @@
 		"channel": 1,
 		"race": "Bellato",
 		"sender": "SISTEMA",
-		"text": "Habilidade em espera... (1.1s)"
+		"text": "Habilidade em espera... (1.8s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (1.4s)"
 	},
 	{
 		"channel": 1,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Disparo Duplo[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (0.3s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (2.3s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 12m / Max: 3m)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 12m / Max: 3m)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Duplo[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (0.9s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (0.3s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (2.0s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (1.3s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 12m / Max: 3m)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 12m / Max: 3m)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Luz Sagrada[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=red]SP insuficiente[/color] para usar Bola de Fogo"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=red]SP insuficiente[/color] para usar Bola de Fogo"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=red]SP insuficiente[/color] para usar Bola de Fogo"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte de Vento[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (0.8s)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte Rápido[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=red]SP insuficiente[/color] para usar Golpe Pesado"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=red]SP insuficiente[/color] para usar Ataque Giratório"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte Rápido[/color]!"
 	}
 ]

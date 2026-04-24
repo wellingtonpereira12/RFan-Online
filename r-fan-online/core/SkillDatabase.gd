@@ -2,47 +2,41 @@ extends Node
 
 const MELEE_SKILLS_PATH = "res://database/melee_skills.json"
 const RANGED_SKILLS_PATH = "res://database/ranged_skills.json"
+const FORCE_SKILLS_PATH = "res://database/force_skills.json"
 
 var skills: Dictionary = {}
 
 func _ready() -> void:
-	_load_skills()
+	_load_all_skills()
 
-func _load_skills():
-	if not FileAccess.file_exists(MELEE_SKILLS_PATH):
-		printerr("[SkillDatabase] Erro: melee_skills.json não encontrado!")
-		return
-		
-	var file = FileAccess.open(MELEE_SKILLS_PATH, FileAccess.READ)
+func _load_all_skills():
+	skills.clear()
+	_load_file(MELEE_SKILLS_PATH, "melee_skills", "melee")
+	_load_file(RANGED_SKILLS_PATH, "ranged_skills", "range")
+	_load_file(FORCE_SKILLS_PATH, "force_skills", "force")
+	print("[SkillDatabase] Total: ", skills.size(), " habilidades carregadas.")
+
+func _load_file(path: String, root_key: String, category: String):
+	if not FileAccess.file_exists(path): return
+	
+	var file = FileAccess.open(path, FileAccess.READ)
 	var content = file.get_as_text()
 	file.close()
 	
 	var json = JSON.new()
 	if json.parse(content) == OK:
 		var data = json.data
-		for skill_info in data["melee_skills"]:
-			skill_info["category"] = "melee"
-			skills[skill_info["key"]] = skill_info
-		print("[SkillDatabase] Habilidades melee carregadas.")
-		
-	# Carregar Ranged
-	if FileAccess.file_exists(RANGED_SKILLS_PATH):
-		file = FileAccess.open(RANGED_SKILLS_PATH, FileAccess.READ)
-		content = file.get_as_text()
-		file.close()
-		if json.parse(content) == OK:
-			var data = json.data
-			for skill_info in data["ranged_skills"]:
-				skill_info["category"] = "range"
+		if data.has(root_key):
+			for skill_info in data[root_key]:
+				skill_info["category"] = category
+				# Garantir que skills melee e range tenham tipo 'none' ou similar se necessário
+				if not skill_info.has("tipo"):
+					skill_info["tipo"] = "physical"
 				skills[skill_info["key"]] = skill_info
-			print("[SkillDatabase] Habilidades range carregadas.")
-			
-	print("[SkillDatabase] Total: ", skills.size(), " habilidades carregadas.")
+			print("[SkillDatabase] Categoria '", category, "' carregada.")
 
 func get_skill(key: String) -> Dictionary:
-	if skills.has(key):
-		return skills[key].duplicate()
-	return {}
+	return skills.get(key, {})
 
 func get_all_skills_by_category(category: String) -> Array:
 	var result = []
@@ -50,3 +44,13 @@ func get_all_skills_by_category(category: String) -> Array:
 		if skill["category"] == category:
 			result.append(skill)
 	return result
+
+func get_skills_by_category_and_type(category: String, type: String) -> Array:
+	var result = []
+	for skill in skills.values():
+		if skill["category"] == category and skill["tipo"] == type:
+			result.append(skill)
+	return result
+
+func reload():
+	_load_all_skills()

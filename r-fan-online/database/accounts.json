@@ -110,6 +110,30 @@
 				"level": 10,
 				"name": "oi",
 				"race": "Bellato"
+			},
+			{
+				"class": "Warrior",
+				"created_at": "2026-04-24T16:27:45",
+				"equipment": {
+
+				},
+				"exp": 0.0,
+				"inventory": [],
+				"level": 1.0,
+				"name": "oi",
+				"race": "Cora"
+			},
+			{
+				"class": "Warrior",
+				"created_at": "2026-04-24T16:28:19",
+				"equipment": {
+
+				},
+				"exp": 0.0,
+				"inventory": [],
+				"level": 1.0,
+				"name": "oi",
+				"race": "Accretia"
 			}
 		],
 		"created_at": "2026-04-23T23:41:56",

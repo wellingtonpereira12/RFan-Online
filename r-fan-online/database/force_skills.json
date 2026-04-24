@@ -1,0 +1,76 @@
+{
+	"force_skills": [
+		{
+			"id": 201,
+			"key": "holy_light",
+			"nome": "Luz Sagrada",
+			"tipo": "holy",
+			"descricao": "Dano sagrado contra inimigos das trevas.",
+			"dano": 85,
+			"custo_sp": 25,
+			"cooldown": 3.5,
+			"nivel_minimo": 5,
+			"alcance": 30.0
+		},
+		{
+			"id": 202,
+			"key": "dark_bolt",
+			"nome": "Seta Sombria",
+			"tipo": "dark",
+			"descricao": "Projeta uma esfera de energia negativa.",
+			"dano": 85,
+			"custo_sp": 25,
+			"cooldown": 3.5,
+			"nivel_minimo": 5,
+			"alcance": 30.0
+		},
+		{
+			"id": 203,
+			"key": "fire_ball",
+			"nome": "Bola de Fogo",
+			"tipo": "fire",
+			"descricao": "Lança uma bola de fogo explosiva.",
+			"dano": 100,
+			"custo_sp": 30,
+			"cooldown": 4.0,
+			"nivel_minimo": 10,
+			"alcance": 25.0
+		},
+		{
+			"id": 204,
+			"key": "water_jet",
+			"nome": "Jato de Água",
+			"tipo": "water",
+			"descricao": "Um jato de água pressurizada.",
+			"dano": 70,
+			"custo_sp": 20,
+			"cooldown": 2.5,
+			"nivel_minimo": 1,
+			"alcance": 28.0
+		},
+		{
+			"id": 205,
+			"key": "earth_spike",
+			"nome": "Espinho de Terra",
+			"tipo": "earth",
+			"descricao": "Faz brotar um espinho de pedra do chão.",
+			"dano": 110,
+			"custo_sp": 35,
+			"cooldown": 5.0,
+			"nivel_minimo": 12,
+			"alcance": 22.0
+		},
+		{
+			"id": 206,
+			"key": "wind_cutter",
+			"nome": "Corte de Vento",
+			"tipo": "wind",
+			"descricao": "Lâminas de vento invisíveis e rápidas.",
+			"dano": 60,
+			"custo_sp": 15,
+			"cooldown": 1.2,
+			"nivel_minimo": 1,
+			"alcance": 35.0
+		}
+	]
+}

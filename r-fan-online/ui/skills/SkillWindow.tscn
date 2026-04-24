@@ -38,7 +38,6 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 text = "Habilidades"
 
-
 [node name="Tabs" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
 theme_override_constants/separation = 5
@@ -53,11 +52,41 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Range"
 
-[node name="ClassBtn" type="Button" parent="VBox/Tabs"]
+[node name="ForceBtn" type="Button" parent="VBox/Tabs"]
 layout_mode = 2
 size_flags_horizontal = 3
-disabled = true
-text = "Classe"
+text = "Force"
+
+[node name="ElementalTabs" type="HBoxContainer" parent="VBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="ElemSpecialBtn" type="Button" parent="VBox/ElementalTabs"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Holy/Dark"
+
+[node name="ElemFireBtn" type="Button" parent="VBox/ElementalTabs"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Fogo"
+
+[node name="ElemWaterBtn" type="Button" parent="VBox/ElementalTabs"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Água"
+
+[node name="ElemEarthBtn" type="Button" parent="VBox/ElementalTabs"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Terra"
+
+[node name="ElemWindBtn" type="Button" parent="VBox/ElementalTabs"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Vento"
 
 [node name="Scroll" type="ScrollContainer" parent="VBox"]
 layout_mode = 2
