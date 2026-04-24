@@ -46,6 +46,11 @@ var basic_attack_interval: float = 1.0 # 1 hit por segundo
 var base_attack_range: float = 2.5
 var last_manual_attack_msec: int = -99999 # Tempo absoluto do último ataque manual
 
+# --- Sistema de Status de Batalha ---
+var is_in_combat: bool = false
+var combat_mode_timer: float = 0.0
+const COMBAT_MODE_DURATION: float = 10.0
+
 func _ready() -> void:
 	# Registro global para Inimigos acharem o Jogador e Agro
 	add_to_group("players")
@@ -252,6 +257,21 @@ func _update_mouse_cursor():
 		Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 	else:
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+func _update_combat_mode(delta: float) -> void:
+	if combat_mode_timer > 0:
+		combat_mode_timer -= delta
+		if hud_instance: 
+			hud_instance.update_combat_status(true, combat_mode_timer)
+		is_in_combat = true
+	else:
+		if is_in_combat:
+			is_in_combat = false
+			if hud_instance: 
+				hud_instance.update_combat_status(false, 0.0)
+
+func set_in_combat() -> void:
+	combat_mode_timer = COMBAT_MODE_DURATION
 
 func _on_hud_auto_mode_toggled(is_auto: bool) -> void:
 	auto_attack_mode_enabled = is_auto
@@ -485,6 +505,7 @@ func handle_mouse_click(is_double_click: bool) -> void:
 
 func _process(delta: float) -> void:
 	_update_mouse_cursor()
+	_update_combat_mode(delta)
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
@@ -592,6 +613,7 @@ func _physics_process(delta: float) -> void:
 
 # --- Sistema de Ataque Básico (Melee) ---
 func perform_attack() -> void:
+	set_in_combat()
 	if not class_stats:
 		print("Player não tem classe definida!")
 		return

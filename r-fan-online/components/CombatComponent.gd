@@ -80,6 +80,7 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 		return
 
 	# EXECUÇÃO COM SUCESSO
+	player.set_in_combat()
 	# Registrar Cooldown Global
 	global_cooldowns[skill["key"]] = Time.get_ticks_msec() + (skill["cooldown"] * 1000)
 

@@ -6,6 +6,7 @@ extends Panel
 @onready var sfx_slider = $VBox/Scroll/Content/AudioSection/SFXRow/SFXSlider
 @onready var save_btn = $VBox/Footer/SaveBtn
 @onready var logout_btn = $VBox/Footer/HBox/LogoutBtn
+@onready var char_select_btn = $VBox/Footer/HBox/CharSelectBtn
 @onready var exit_btn = $VBox/Footer/HBox/ExitBtn
 @onready var confirm_exit = $ConfirmExit
 
@@ -22,6 +23,7 @@ func _ready():
 	
 	save_btn.pressed.connect(_on_save_pressed)
 	logout_btn.pressed.connect(_on_logout_pressed)
+	char_select_btn.pressed.connect(_on_char_select_pressed)
 	exit_btn.pressed.connect(_on_exit_pressed)
 	confirm_exit.confirmed.connect(_on_exit_confirmed)
 	
@@ -43,6 +45,12 @@ func _load_current_values():
 	if idx != -1:
 		res_option.selected = idx
 
+func toggle():
+	if visible:
+		hide_menu()
+	else:
+		show_menu()
+
 func show_menu():
 	visible = true
 	move_to_front()
@@ -63,7 +71,11 @@ func _on_save_pressed():
 
 func _on_logout_pressed():
 	print("[System] Realizando Logout...")
-	# get_tree().change_scene_to_file("res://scenes/LoginScene.tscn")
+	get_tree().change_scene_to_file("res://ui/menu/LoginUI.tscn")
+
+func _on_char_select_pressed():
+	print("[System] Voltando para Seleção de Personagem...")
+	get_tree().change_scene_to_file("res://ui/menu/CharacterSelection.tscn")
 
 func _on_exit_pressed():
 	confirm_exit.popup_centered()
@@ -76,6 +88,28 @@ func _input(event):
 	if visible and event.is_action_pressed("ui_cancel"):
 		hide_menu()
 		get_viewport().set_input_as_handled()
+
+func _process(_delta: float) -> void:
+	if visible:
+		_update_logout_button_status()
+
+func _update_logout_button_status():
+	var player = get_tree().get_first_node_in_group("players")
+	if player and player.has_method("set_in_combat"):
+		if player.is_in_combat:
+			logout_btn.disabled = true
+			char_select_btn.disabled = true
+			exit_btn.disabled = true
+			logout_btn.tooltip_text = "Não é possível sair em combate!"
+			char_select_btn.tooltip_text = "Não é possível trocar de personagem em combate!"
+			exit_btn.tooltip_text = "Não é possível fechar o jogo em combate!"
+		else:
+			logout_btn.disabled = false
+			char_select_btn.disabled = false
+			exit_btn.disabled = false
+			logout_btn.tooltip_text = ""
+			char_select_btn.tooltip_text = ""
+			exit_btn.tooltip_text = ""
 
 func _on_gui_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:

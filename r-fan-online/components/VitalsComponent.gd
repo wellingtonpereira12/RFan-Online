@@ -51,6 +51,10 @@ func take_damage(amount: int) -> void:
 	if hp <= 0: return
 	hp = clampi(hp - amount, 0, max_hp)
 	hp_changed.emit(hp, max_hp)
+	
+	# Aciona modo de combate se quem tomou dano foi o player
+	if get_parent().has_method("set_in_combat"):
+		get_parent().set_in_combat()
 	if hp == 0:
 		died.emit()
 

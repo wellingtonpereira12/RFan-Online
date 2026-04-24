@@ -6,7 +6,8 @@ class_name HUD
 @onready var fp_bar: ProgressBar = $MarginContainer/VBoxContainer/FPBar
 @onready var exp_bar: ProgressBar = $BottomUI/EXPBottomContainer/EXPBarPremium
 @onready var exp_label: Label = $BottomUI/EXPBottomContainer/EXPLabel
-@onready var level_label: Label = $MarginContainer/VBoxContainer/LevelLabel
+@onready var level_label: Label = $MarginContainer/VBoxContainer/CombatStatus/LevelLabel
+@onready var status_circle: ColorRect = $MarginContainer/VBoxContainer/CombatStatus/StatusCircle
 @onready var skill_bar: Control = $BottomUI/SkillBarContainer/SkillBar
 @onready var skill_window: Control = $SkillWindow
 @onready var settings_menu: Control = $SettingsMenu
@@ -25,7 +26,7 @@ func _ready() -> void:
 	skill_bar.run_mode_changed.connect(func(v): run_toggled.emit(v))
 	skill_bar.auto_attack_changed.connect(func(v): auto_attack_mode_toggled.emit(v))
 	skill_bar.skills_pressed.connect(func(): skill_window.toggle())
-	skill_bar.settings_pressed.connect(func(): settings_menu.show_menu())
+	skill_bar.settings_pressed.connect(func(): settings_menu.toggle())
 
 # Atualizadores das Barras
 func update_hp(current: int, max_val: int) -> void:
@@ -44,12 +45,32 @@ func update_exp(current: int, max_val: int) -> void:
 	exp_bar.max_value = max_val
 	exp_bar.value = current
 	
+	_update_exp_label(current, max_val)
+
+func _update_exp_label(current, max_val):
 	var percent = 0.0
 	if max_val > 0:
 		percent = (float(current) / float(max_val)) * 100.0
-	
 	exp_label.text = str(current) + " / " + str(max_val) + " (" + str(snapped(percent, 0.01)) + "%)"
-	level_label.text = "Lv. " + str(ExperienceManager.current_level)
+	level_label.text = str(ExperienceManager.current_level)
+
+var combat_timer_ref: float = 0.0
+var blink_alpha: float = 0.0
+
+func _process(delta: float) -> void:
+	if combat_timer_ref > 0 and combat_timer_ref <= 5.0:
+		blink_alpha += delta * 10.0 # Velocidade do pisca
+		status_circle.modulate.a = 0.4 + (sin(blink_alpha) * 0.6 + 0.6) / 2.0
+	else:
+		status_circle.modulate.a = 1.0
+
+func update_combat_status(in_combat: bool, time_left: float = 0.0) -> void:
+	combat_timer_ref = time_left
+	if in_combat:
+		status_circle.color = Color(1, 0.2, 0.2, 1) # Vermelho Batalha
+	else:
+		status_circle.color = Color(0, 0.5, 1, 1) # Azul Normal
+		status_circle.modulate.a = 1.0
 
 # Atualiza a UI quando a lógica interna do Player força a voltar a andar (FP zerada)
 func force_walk_mode() -> void:
