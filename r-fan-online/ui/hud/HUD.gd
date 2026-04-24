@@ -15,8 +15,8 @@ class_name HUD
 signal run_toggled(is_running_mode: bool)
 signal auto_attack_mode_toggled(is_auto: bool)
 
-var is_running_state: bool = false
-var is_auto_attack_mode: bool = false
+var is_running_state: bool = true
+var is_auto_attack_mode: bool = true
 var current_target_vitals: Node = null
 
 func _ready() -> void:

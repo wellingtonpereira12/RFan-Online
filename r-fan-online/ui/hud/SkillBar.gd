@@ -21,9 +21,11 @@ func _ready() -> void:
 		slot.is_locked = self.is_locked
 		slot.slot_dragged.connect(_on_slot_dragged)
 		slot.action_requested.connect(_on_action_requested)
+		slot.inventory_item_dropped.connect(_on_inventory_item_dropped)
 
 	# --- Criando o Botão de Cadeado via Código ---
 	var lock_btn = Button.new()
+	lock_btn.name = "LockButton"
 	lock_btn.toggle_mode = true
 	lock_btn.text = "🔒"
 	lock_btn.button_pressed = true # Começa apertado (Fechado)
@@ -34,6 +36,15 @@ func _ready() -> void:
 	self.add_child(lock_btn)
 	# Posiciona ao lado direito da barra
 	lock_btn.position = Vector2(size.x + 5, 10)
+
+	# --- Criando o Botão da Bolsinha de Inventário ---
+	var bag_btn = Button.new()
+	bag_btn.text = "🎒"
+	bag_btn.focus_mode = Control.FOCUS_NONE
+	bag_btn.pressed.connect(_on_bag_button_pressed)
+	self.add_child(bag_btn)
+	# Posiciona ao lado do cadeado (lock_btn tem uns 30px de largura)
+	bag_btn.position = Vector2(size.x + 40, 10)
 
 	# --- CRIAR SKILLS DE TESTE PARA VOCÊ PODER ARRASTAR ---
 	var fake_skill1 = SkillResource.new()
@@ -48,11 +59,20 @@ func _ready() -> void:
 
 func _on_lock_button_toggled(toggled_on: bool) -> void:
 	toggle_lock(toggled_on)
-	var btn = get_child(get_child_count() - 1)
-	if toggled_on:
-		btn.text = "🔒"
+	var btn = get_node_or_null("LockButton")
+	if btn:
+		if toggled_on:
+			btn.text = "🔒"
+		else:
+			btn.text = "🔓"
+
+func _on_bag_button_pressed() -> void:
+	# Busca o inventário de forma global na cena para não errar o caminho!
+	var inventory = get_tree().get_first_node_in_group("inventory_ui")
+	if inventory:
+		inventory.visible = !inventory.visible
 	else:
-		btn.text = "🔓"
+		print("Inventário não encontrado na tela! Lembre de adicionar a cena InventoryUI.tscn no seu jogo!")
 
 func toggle_lock(locked: bool) -> void:
 	is_locked = locked
@@ -98,3 +118,47 @@ func _try_trigger_slot(index: int) -> void:
 	var slot = slots[index - 1]
 	if slot.action_data and not slot.is_on_cooldown:
 		action_triggered.emit(index)
+
+func _on_inventory_item_dropped(item: Resource, to_index: int) -> void:
+	# Previne duplicatas de itens do mesmo tipo na barra
+	for slot in slots:
+		if slot.action_data != null:
+			if slot.action_data == item:
+				slot.clear_slot()
+			elif item is ItemData and slot.action_data is ItemData and item.id == slot.action_data.id:
+				slot.clear_slot()
+			elif item.get("skill_name") != null and slot.action_data.get("skill_name") != null and item.get("skill_name") == slot.action_data.get("skill_name"):
+				slot.clear_slot()
+
+	# Define o item no novo slot
+	slots[to_index - 1].set_action(item)
+
+func _process(_delta: float) -> void:
+	# Sincroniza as quantidades dos itens na barra de atalhos (espelho do inventário)
+	var inv_manager = get_tree().get_first_node_in_group("inventory_manager") if get_tree().has_group("inventory_manager") else get_node_or_null("../../InventoryManager")
+	# Nota: para ser mais robusto, no Player.gd podemos adicionar add_to_group("inventory_manager")
+	
+	if inv_manager:
+		# Conta totais de cada ID no inventário
+		var item_counts = {}
+		for slot in inv_manager.slots:
+			if slot["item"] != null:
+				var id = slot["item"].id
+				if not item_counts.has(id):
+					item_counts[id] = 0
+				item_counts[id] += slot["amount"]
+				
+		# Atualiza a interface gráfica dos atalhos
+		for slot in slots:
+			if slot.action_data is ItemData:
+				var total = item_counts.get(slot.action_data.id, 0)
+				if total > 0:
+					if slot.amount_label:
+						slot.amount_label.visible = true
+						slot.amount_label.text = str(total)
+				else:
+					# Acabou o item!
+					slot.clear_slot()
+			else:
+				if slot.amount_label:
+					slot.amount_label.visible = false

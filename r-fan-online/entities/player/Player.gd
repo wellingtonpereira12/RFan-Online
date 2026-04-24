@@ -7,9 +7,10 @@ class_name Player
 @onready var vitals_component: VitalsComponent = $VitalsComponent
 @onready var combat_component: CombatComponent = $CombatComponent
 
-# HUD
+# HUD e Inventário
 var hud_scene = preload("res://ui/hud/HUD.tscn")
 var hud_instance: HUD
+var inventory_manager: InventoryManager
 
 # Nós da Câmera
 @onready var camera_pivot: Node3D = $CameraPivot
@@ -37,8 +38,8 @@ var jump_velocity: float = 4.5
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 # --- Variáveis do Sistema de Combate / Auto-Attack ---
-var auto_attack_mode_enabled: bool = false
-var run_mode_enabled: bool = false
+var auto_attack_mode_enabled: bool = true
+var run_mode_enabled: bool = true
 var is_pursuing_and_attacking: bool = false
 var basic_attack_cooldown_timer: float = 0.0
 var basic_attack_interval: float = 1.0 # 1 hit por segundo fixo na mão
@@ -54,6 +55,24 @@ func _ready() -> void:
 	# Inicializar HUD
 	hud_instance = hud_scene.instantiate()
 	add_child(hud_instance)
+	
+	# Inicializar Inventory Manager e UI automaticamente
+	inventory_manager = InventoryManager.new()
+	inventory_manager.name = "InventoryManager"
+	inventory_manager.add_to_group("inventory_manager")
+	add_child(inventory_manager)
+	
+	var inv_scene = preload("res://ui/inventory/InventoryUI.tscn")
+	var inv_ui = inv_scene.instantiate()
+	hud_instance.add_child(inv_ui)
+	inv_ui.setup(inventory_manager)
+	
+	# Criando itens de teste no Inventário
+	var potion_hp = ItemData.new()
+	potion_hp.id = "pote_hp"
+	potion_hp.name = "Poção de HP"
+	potion_hp.max_stack = 99
+	inventory_manager.add_item(potion_hp, 120)
 
 	# --- ALQUIMIA GLOBAL (Injeção de Seleção do Singleton) ---
 	var p_name = GameManager.player_name
@@ -163,6 +182,14 @@ func _on_player_died() -> void:
 	print("=> [SISTEMA]: Respawn concluído com sucesso!")
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Cancelar Target e Ataque com ESC
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		if current_target != null or is_pursuing_and_attacking:
+			current_target = null
+			hud_instance.unbind_target()
+			is_pursuing_and_attacking = false
+			return
+
 	# Lógica Clássica de MMO: Segurar o Botão DIREITO do mouse para "Guiar" a Câmera e o Corpo
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
 		if event.pressed:

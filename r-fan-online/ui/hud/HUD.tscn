@@ -31,7 +31,7 @@ step = 1.0
 value = 100.0
 
 [node name="FPBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
-modulate = Color(0.2, 1, 0.2, 1)
+modulate = Color(1, 1, 0, 1)
 custom_minimum_size = Vector2(200, 15)
 layout_mode = 2
 step = 1.0

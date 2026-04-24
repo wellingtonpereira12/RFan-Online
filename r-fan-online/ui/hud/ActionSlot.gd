@@ -5,6 +5,7 @@ extends Panel
 @onready var cooldown_overlay: ColorRect = $CooldownOverlay
 @onready var cooldown_label: Label = $CooldownLabel
 @onready var color_rect: ColorRect = $IconRect
+@onready var amount_label: Label = $AmountLabel
 
 var slot_index: int = 1
 var action_data: Resource = null # Flexível (Skill ou Item)
@@ -14,6 +15,7 @@ var current_cooldown: float = 0.0
 
 signal slot_dragged(from_index: int, to_index: int)
 signal action_requested(index: int)
+signal inventory_item_dropped(data: Resource, target_index: int)
 
 func setup(index: int, key_text: String) -> void:
 	slot_index = index
@@ -24,7 +26,13 @@ func setup(index: int, key_text: String) -> void:
 func set_action(data: Resource) -> void:
 	action_data = data
 	if data:
-		icon_title.text = data.get("skill_name") if data.get("skill_name") != null else "Item/Ação"
+		if data.get("skill_name") != null:
+			icon_title.text = data.get("skill_name")
+		elif data.get("name") != null:
+			icon_title.text = data.get("name")
+		else:
+			icon_title.text = "Item/Ação"
+		
 		color_rect.color = Color(0.2, 0.4, 0.6, 1) # Slot preenchido fica azul escuro
 	else:
 		clear_slot()
@@ -37,6 +45,7 @@ func clear_slot() -> void:
 	current_cooldown = 0.0
 	cooldown_overlay.anchor_top = 1.0
 	cooldown_label.visible = false
+	if amount_label: amount_label.visible = false
 
 func trigger_cooldown(time: float) -> void:
 	if action_data == null: return
@@ -60,6 +69,7 @@ func _process(delta: float) -> void:
 			cooldown_label.text = str(snapped(current_cooldown, 0.1))
 
 var is_locked: bool = false # Controlado pela SkillBar
+var is_dragging: bool = false # Flag para saber se este slot iniciou o drag
 
 # --- Drag and Drop Logic Nativa do Godot ---
 func _get_drag_data(_at_position: Vector2) -> Variant:
@@ -73,14 +83,28 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	preview_label.position = Vector2(-20, -20)
 	set_drag_preview(ctrl)
 	
+	is_dragging = true
 	return {"type": "action_slot", "from_index": slot_index, "data": action_data}
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_END:
+		if is_dragging:
+			is_dragging = false
+			# Se o drag não foi bem sucedido (soltou no vazio, ou na bolsa que não aceita drops), ele apaga o atalho!
+			if not get_viewport().gui_is_drag_successful():
+				clear_slot()
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if is_on_cooldown: return false
-	return typeof(data) == TYPE_DICTIONARY and data.has("type") and data["type"] == "action_slot"
+	if typeof(data) != TYPE_DICTIONARY or not data.has("type"): return false
+	return data["type"] == "action_slot" or data["type"] == "inventory_slot"
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	slot_dragged.emit(data["from_index"], slot_index)
+	if data["type"] == "action_slot":
+		slot_dragged.emit(data["from_index"], slot_index)
+	elif data["type"] == "inventory_slot":
+		# Avisa a SkillBar para gerenciar duplicatas e então setar a action
+		inventory_item_dropped.emit(data["data"], slot_index)
 
 # Clique Direto com o Mouse
 func _gui_input(event: InputEvent) -> void:
