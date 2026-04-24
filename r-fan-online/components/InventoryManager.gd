@@ -118,3 +118,10 @@ func swap_slots(from_index: int, to_index: int) -> void:
 	
 	inventory_updated.emit(from_index)
 	inventory_updated.emit(to_index)
+
+func get_total_amount(item_id: String) -> int:
+	var total = 0
+	for slot in slots:
+		if slot["id"] == item_id:
+			total += slot["amount"]
+	return total

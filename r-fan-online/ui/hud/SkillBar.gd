@@ -96,6 +96,15 @@ func _ready() -> void:
 	self.add_child(equip_btn)
 	equip_btn.position = Vector2(size.x + 75, 10)
 
+	# --- Botão de Macro Settings ---
+	var macro_btn = Button.new()
+	macro_btn.text = "⚙️" # Ícone de engrenagem para Macro/Settings
+	macro_btn.tooltip_text = "Macro Settings (Y)"
+	macro_btn.focus_mode = Control.FOCUS_NONE
+	macro_btn.pressed.connect(_on_macro_button_pressed)
+	self.add_child(macro_btn)
+	macro_btn.position = Vector2(size.x + 110, 10)
+
 	# --- CRIAR SKILLS DE TESTE PARA VOCÊ PODER ARRASTAR ---
 	var fake_skill1 = SkillResource.new()
 	fake_skill1.skill_name = "Ataque Básico"
@@ -129,6 +138,13 @@ func _on_equip_button_pressed() -> void:
 		equip_ui.visible = !equip_ui.visible
 	else:
 		print("EquipmentUI não encontrado!")
+
+func _on_macro_button_pressed() -> void:
+	var macro_ui = get_tree().get_first_node_in_group("macro_ui")
+	if macro_ui:
+		macro_ui.visible = !macro_ui.visible
+	else:
+		print("MacroUI não encontrado!")
 
 func _on_run_btn_toggled(pressed: bool) -> void:
 	is_running = pressed

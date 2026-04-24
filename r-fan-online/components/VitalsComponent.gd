@@ -36,6 +36,17 @@ func restore_health(amount: int) -> void:
 	hp = clampi(hp + amount, 0, max_hp)
 	hp_changed.emit(hp, max_hp)
 
+func restore_sp(amount: int) -> void:
+	if hp <= 0: return # Não recupera SP se estiver morto
+	sp = clampi(sp + amount, 0, max_sp)
+	sp_changed.emit(sp, max_sp)
+
+func restore_fp(amount: int) -> void:
+	if hp <= 0: return
+	fp_pool = clampf(fp_pool + float(amount), 0.0, float(max_fp))
+	fp = int(fp_pool)
+	fp_changed.emit(fp, max_fp)
+
 func take_damage(amount: int) -> void:
 	if hp <= 0: return
 	hp = clampi(hp - amount, 0, max_hp)

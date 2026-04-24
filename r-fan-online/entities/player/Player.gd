@@ -79,6 +79,16 @@ func _ready() -> void:
 	var equip_ui = equip_ui_scene.instantiate()
 	hud_instance.add_child(equip_ui)
 	equip_ui.setup(equipment_manager)
+	
+	# Inicializar MacroUI
+	var macro_scene = preload("res://ui/macro/MacroUI.tscn")
+	var macro_ui = macro_scene.instantiate()
+	hud_instance.add_child(macro_ui)
+	
+	# Inicializar Auto Potion System
+	var pot_system = AutoPotionSystem.new()
+	pot_system.name = "AutoPotionSystem"
+	add_child(pot_system)
 
 	# Adicionar equipamentos de teste ao inventário
 	inventory_manager.add_item("espada_ferro", 1)
@@ -97,7 +107,7 @@ func _ready() -> void:
 	inventory_manager.add_item("pote_hp_p", 120)
 	inventory_manager.add_item("pote_sp_p", 50)
 	inventory_manager.add_item("pote_fp", 99) # Adicionando a pote de FP!
-	inventory_manager.add_item("super_pote", 10)
+	inventory_manager.add_item("pote_fp", 10)
 
 	# --- ALQUIMIA GLOBAL (Injeção de Seleção do Singleton) ---
 	var p_name = GameManager.player_name
@@ -262,6 +272,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		var eq_ui = get_tree().get_first_node_in_group("equipment_ui")
 		if eq_ui and eq_ui.visible:
 			eq_ui.visible = false
+			esc_handled = true
+			
+		# 3. Fechar Macro se estiver aberto
+		var m_ui = get_tree().get_first_node_in_group("macro_ui")
+		if m_ui and m_ui.visible:
+			m_ui.visible = false
 			esc_handled = true
 			
 		# 2. Desmarcar Target e parar ataque

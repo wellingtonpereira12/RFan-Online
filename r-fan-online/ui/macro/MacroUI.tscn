@@ -1,0 +1,221 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6j7k8l9m0n1p"]
+
+[ext_resource type="Script" path="res://ui/macro/MacroUI.gd" id="1_macro"]
+
+[node name="MacroUI" type="Control" groups=["macro_ui"]]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_macro")
+
+[node name="Background" type="Panel" parent="."]
+custom_minimum_size = Vector2(420, 500)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -250.0
+offset_right = 210.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="Background"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 40.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "MACRO SETTINGS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TabContainer" type="TabContainer" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 45.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AutoPotion" type="VBoxContainer" parent="Background/TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Margin" type="MarginContainer" parent="Background/TabContainer/AutoPotion"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="Sections" type="VBoxContainer" parent="Background/TabContainer/AutoPotion/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="HPSection" type="VBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "HP AUTO-RECOVERY"
+
+[node name="Value" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection/Header"]
+layout_mode = 2
+text = "50%"
+
+[node name="ProgressBar" type="ProgressBar" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+value = 75.0
+show_percentage = false
+
+[node name="Status" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection/ProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+text = "1000 / 1000"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Slot" type="Panel" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection/HBox"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+
+[node name="Slider" type="HSlider" parent="Background/TabContainer/AutoPotion/Margin/Sections/HPSection/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 50.0
+
+[node name="SPSection" type="VBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SP AUTO-RECOVERY"
+
+[node name="Value" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection/Header"]
+layout_mode = 2
+text = "30%"
+
+[node name="ProgressBar" type="ProgressBar" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+value = 50.0
+show_percentage = false
+
+[node name="Status" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection/ProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+text = "500 / 1000"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Slot" type="Panel" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection/HBox"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+
+[node name="Slider" type="HSlider" parent="Background/TabContainer/AutoPotion/Margin/Sections/SPSection/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 30.0
+
+[node name="FPSection" type="VBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "FP AUTO-RECOVERY"
+
+[node name="Value" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection/Header"]
+layout_mode = 2
+text = "20%"
+
+[node name="ProgressBar" type="ProgressBar" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="Status" type="Label" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection/ProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Slot" type="Panel" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection/HBox"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+
+[node name="Slider" type="HSlider" parent="Background/TabContainer/AutoPotion/Margin/Sections/FPSection/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 20.0
+
+[node name="AutoAction" type="CenterContainer" parent="Background/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/TabContainer/AutoAction"]
+layout_mode = 2
+text = "Coming Soon..."
+
+[node name="AutoChat" type="CenterContainer" parent="Background/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/TabContainer/AutoChat"]
+layout_mode = 2
+text = "Coming Soon..."
