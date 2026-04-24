@@ -46,6 +46,12 @@ var basic_attack_interval: float = 1.0 # 1 hit por segundo
 var base_attack_range: float = 2.5
 var last_manual_attack_msec: int = -99999 # Tempo absoluto do último ataque manual
 
+# --- Sistema de Click-to-Move ---
+var nav_agent: NavigationAgent3D
+var click_target_position: Vector3 = Vector3.ZERO
+var is_moving_to_click: bool = false
+var click_marker: Node3D = null
+
 # --- Sistema de Status de Batalha ---
 var is_in_combat: bool = false
 var combat_mode_timer: float = 0.0
@@ -67,6 +73,10 @@ func _ready() -> void:
 	inventory_manager.name = "InventoryManager"
 	inventory_manager.add_to_group("inventory_manager")
 	add_child(inventory_manager)
+	
+	# Configurar Navegação
+	_setup_navigation()
+	_create_click_marker()
 	
 	# Configurar Cursor de Espada
 	_setup_custom_cursor()
@@ -238,12 +248,74 @@ func _ready() -> void:
 	hud_instance.run_toggled.connect(_on_hud_run_toggled)
 	hud_instance.auto_attack_mode_toggled.connect(_on_hud_auto_mode_toggled)
 
+func _setup_navigation():
+	nav_agent = NavigationAgent3D.new()
+	nav_agent.path_desired_distance = 0.5
+	nav_agent.target_desired_distance = 0.5
+	add_child(nav_agent)
+
+func _create_click_marker():
+	# Criar uma setinha vermelha simples
+	click_marker = Node3D.new()
+	var mesh_inst = MeshInstance3D.new()
+	var cone = CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 0.15 # Antes era 0.3
+	cone.height = 0.4        # Antes era 0.8
+	mesh_inst.mesh = cone
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1, 0, 0, 1) # Vermelho vivo
+	mat.emission_enabled = true
+	mat.emission = Color(1, 0, 0, 1)
+	mesh_inst.material_override = mat
+	
+	click_marker.add_child(mesh_inst)
+	# Rotaciona para apontar para baixo
+	mesh_inst.rotation_degrees.x = 180
+	mesh_inst.position.y = 0.2 # Baixado para colar no chão (antes era 1.0)
+	
+	get_tree().root.add_child.call_deferred(click_marker)
+	click_marker.visible = false
+
+func _stop_click_to_move():
+	is_moving_to_click = false
+	if click_marker: click_marker.visible = false
+
 func _setup_custom_cursor():
 	var cursor_path = "res://assets/icons/sword_cursor.png"
 	if FileAccess.file_exists(cursor_path):
 		var img = Image.load_from_file(ProjectSettings.globalize_path(cursor_path))
 		var tex = ImageTexture.create_from_image(img)
 		Input.set_custom_mouse_cursor(tex, Input.CURSOR_ARROW, Vector2(0, 0))
+
+func _process_auto_attack_movement():
+	if is_instance_valid(current_target):
+		var dist = global_position.distance_to(current_target.global_position)
+		if dist > base_attack_range:
+			# Precisa andar até ele
+			var dir_to_mob = global_position.direction_to(current_target.global_position)
+			dir_to_mob.y = 0
+			dir_to_mob = dir_to_mob.normalized()
+			
+			velocity.x = dir_to_mob.x * move_speed
+			velocity.z = dir_to_mob.z * move_speed
+		else:
+			# Chegou! Parar de andar e processar ataque.
+			velocity.x = 0
+			velocity.z = 0
+			if basic_attack_cooldown_timer <= 0.0:
+				perform_attack()
+				basic_attack_cooldown_timer = basic_attack_interval
+				
+				# REGRA DE OURO: Modo Manual só bate UMA vez e o comboencerra!
+				if not auto_attack_mode_enabled:
+					is_pursuing_and_attacking = false
+	else:
+		# Alvo morreu fisicamente (foi limpo do jogo)
+		current_target = null
+		is_pursuing_and_attacking = false
+		hud_instance.unbind_target()
 
 func _update_mouse_cursor():
 	var space_state = get_world_3d().direct_space_state
@@ -272,6 +344,7 @@ func _update_combat_mode(delta: float) -> void:
 
 func set_in_combat() -> void:
 	combat_mode_timer = COMBAT_MODE_DURATION
+	_stop_click_to_move() # Cancela movimento por clique ao entrar em combate
 
 func _on_hud_auto_mode_toggled(is_auto: bool) -> void:
 	auto_attack_mode_enabled = is_auto
@@ -437,7 +510,21 @@ func handle_mouse_click(is_double_click: bool) -> void:
 	
 	if result and result.has("collider"):
 		var hit_obj = result.collider
+		var hit_pos = result.position
 		
+		# 0. Clique no Chão (Click-to-Move)
+		if not hit_obj.is_in_group("enemies") and not hit_obj.has_meta("is_dropped_item"):
+			is_moving_to_click = true
+			click_target_position = hit_pos
+			print("[Click-to-Move] Indo para: ", hit_pos)
+			
+			if click_marker:
+				click_marker.global_position = hit_pos
+				click_marker.visible = true
+			
+			is_pursuing_and_attacking = false # Cancela ataque se mover pro chão
+			return
+
 		# 1. Verifica se clicou em um Item no Chão
 		if hit_obj.has_meta("is_dropped_item"):
 			var i_data = hit_obj.get_meta("item_data")
@@ -515,6 +602,10 @@ func _physics_process(delta: float) -> void:
 	# Handle Jump (Tecla X) ou Attack (Espaço)
 	var focus_owner = get_viewport().gui_get_focus_owner()
 	if not (focus_owner is LineEdit):
+		# ESC -> CANCELA CLICK-TO-MOVE
+		if Input.is_key_pressed(KEY_ESCAPE):
+			_stop_click_to_move()
+
 		# ESPAÇO -> ATACAR
 		if Input.is_action_just_pressed("ui_accept"):
 			if is_instance_valid(current_target):
@@ -531,6 +622,8 @@ func _physics_process(delta: float) -> void:
 	
 	if not (focus_owner is LineEdit):
 		input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+		if input_dir.length() > 0:
+			_stop_click_to_move() # WASD cancela movimento por clique
 		
 	var cam_dir = camera_pivot.global_basis * Vector3(input_dir.x, 0, input_dir.y)
 	cam_dir.y = 0
@@ -545,8 +638,8 @@ func _physics_process(delta: float) -> void:
 	if current_target:
 		target_dist = global_position.distance_to(current_target.global_position)
 		
-	# Só considera movimento se houver input ou se estiver perseguindo ALÉM do alcance de ataque
-	var is_moving = direction.length() > 0.0 or (is_pursuing_and_attacking and target_dist > base_attack_range)
+	# Só considera movimento se houver input, se estiver perseguindo ALÉM do alcance, ou se houver um clique no chão
+	var is_moving = direction.length() > 0.0 or (is_pursuing_and_attacking and target_dist > base_attack_range) or is_moving_to_click
 	
 	if run_mode_enabled and is_moving and vitals_component and vitals_component.fp > 0:
 		move_speed = run_speed
@@ -560,36 +653,31 @@ func _physics_process(delta: float) -> void:
 			run_mode_enabled = false
 			hud_instance.force_walk_mode()
 	
+	# Processar movimentação de Click-to-Move
+	if is_moving_to_click:
+		var dist_to_target = global_position.distance_to(click_target_position)
+		
+		if dist_to_target > 0.5:
+			var dir = global_position.direction_to(click_target_position)
+			dir.y = 0
+			dir = dir.normalized()
+			
+			velocity.x = dir.x * move_speed
+			velocity.z = dir.z * move_speed
+		else:
+			velocity.x = 0
+			velocity.z = 0
+			_stop_click_to_move()
+
 	# Processar movimentação de Auto Attack Autônoma
 	if is_pursuing_and_attacking:
-		if is_instance_valid(current_target):
-			var dist = global_position.distance_to(current_target.global_position)
-			if dist > base_attack_range:
-				# Precisa andar até ele
-				var dir_to_mob = global_position.direction_to(current_target.global_position)
-				dir_to_mob.y = 0
-				dir_to_mob = dir_to_mob.normalized()
-				
-				velocity.x = dir_to_mob.x * move_speed
-				velocity.z = dir_to_mob.z * move_speed
-			else:
-				# Chegou! Parar de andar e processar ataque.
-				velocity.x = 0
-				velocity.z = 0
-				if basic_attack_cooldown_timer <= 0.0:
-					perform_attack()
-					basic_attack_cooldown_timer = basic_attack_interval
-					
-					# REGRA DE OURO: Modo Manual só bate UMA vez e o comboencerra!
-					if not auto_attack_mode_enabled:
-						is_pursuing_and_attacking = false
-		else:
-			# Alvo morreu fisicamente (foi limpo do jogo)
-			current_target = null
-			is_pursuing_and_attacking = false
-			hud_instance.unbind_target()
+		# ... (lógica de perseguição)
+		_process_auto_attack_movement()
+	elif is_moving_to_click:
+		# Lógica de Click-to-Move (Já processada acima, não faz nada aqui)
+		pass
 	else:
-		# Processamento WASD Comum
+		# Processamento WASD Comum - SÓ SE NÃO ESTIVER CLICANDO PARA MOVER
 		if direction:
 			velocity.x = direction.x * move_speed
 			velocity.z = direction.z * move_speed
