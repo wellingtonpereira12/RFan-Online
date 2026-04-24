@@ -4,6 +4,8 @@ extends Control
 @onready var input_field = $Background/VBox/InputRow/LineEdit
 @onready var channel_btn = $Background/VBox/InputRow/ChannelBtn
 @onready var send_btn = $Background/VBox/InputRow/SendBtn
+@onready var input_row = $Background/VBox/InputRow
+@onready var close_btn = $Background/VBox/InputRow/CloseBtn
 @onready var resize_handle = $Background/ResizeHandle
 @onready var background = $Background
 
@@ -20,8 +22,11 @@ func _ready() -> void:
 	input_field.text_submitted.connect(_on_text_submitted)
 	send_btn.pressed.connect(func(): _on_text_submitted(input_field.text))
 	channel_btn.pressed.connect(_on_toggle_channel)
+	close_btn.pressed.connect(_hide_input)
 	# Conecta ao ChatManager global
 	ChatManager.message_received.connect(_on_message_received)
+	
+	input_row.visible = false # Esconde o input por padrão
 	
 	_load_history()
 	_update_channel_ui()
@@ -82,7 +87,16 @@ func _on_text_submitted(new_text: String):
 		return
 	ChatManager.send_message(new_text, current_channel)
 	input_field.clear()
+	_hide_input()
+
+func _show_input():
+	input_row.visible = true
+	input_field.grab_focus()
+
+func _hide_input():
+	input_row.visible = false
 	input_field.release_focus()
+
 
 func _on_message_received(data: Dictionary):
 	var race_color = ChatManager.RACE_COLORS.get(data["race"], "#ffffff")
@@ -91,6 +105,10 @@ func _on_message_received(data: Dictionary):
 	message_list.append_text(formatted_msg)
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept") and not input_field.has_focus():
-		input_field.grab_focus()
-		get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_T and not input_field.has_focus():
+			_show_input()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_ESCAPE and input_row.visible:
+			_hide_input()
+			get_viewport().set_input_as_handled()

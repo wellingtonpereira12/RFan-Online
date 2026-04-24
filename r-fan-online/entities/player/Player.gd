@@ -133,20 +133,7 @@ func _ready() -> void:
 	save_timer.timeout.connect(_save_player_to_db)
 	add_child(save_timer)
 
-func _give_initial_items():
-	inventory_manager.add_item("espada_ferro", 1)
-	inventory_manager.add_item("pote_hp_p", 20)
-	inventory_manager.add_item("pote_sp_p", 10)
-	_save_player_to_db()
-
-func _save_player_to_db():
-	var data_to_save = {
-		"inventory": inventory_manager.get_inventory_data()
-	}
-	AccountManager.update_character_data(GameManager.player_name, data_to_save)
-	print("[DB] Progresso de ", GameManager.player_name, " salvo automaticamente.")
-
-func _alquimia_global(): # Marcador para o próximo bloco
+	# --- ALQUIMIA GLOBAL (Injeção de Seleção do Singleton) ---
 	var p_name = GameManager.player_name
 	var p_race = GameManager.player_race
 	
@@ -536,3 +523,16 @@ func perform_attack() -> void:
 			current_target.get_node("VitalsComponent").take_damage(class_stats.base_physical_attack)
 	else:
 		print("Alvo está muito longe! (" + str(snapped(dist, 0.1)) + "m)")
+
+func _give_initial_items():
+	inventory_manager.add_item("espada_ferro", 1)
+	inventory_manager.add_item("pote_hp_p", 20)
+	inventory_manager.add_item("pote_sp_p", 10)
+	_save_player_to_db()
+
+func _save_player_to_db():
+	var data_to_save = {
+		"inventory": inventory_manager.get_inventory_data()
+	}
+	AccountManager.update_character_data(GameManager.player_name, data_to_save)
+	print("[DB] Progresso de ", GameManager.player_name, " salvo automaticamente.")

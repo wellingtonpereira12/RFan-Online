@@ -28,17 +28,52 @@
 		"timestamp": "23:38:28"
 	},
 	{
-		"channel": 0,
+		"channel": 0.0,
 		"race": "Accretia",
 		"sender": "oioi",
 		"text": "oioi",
 		"timestamp": "23:38:39"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Accretia",
 		"sender": "oioi",
 		"text": "oioi",
 		"timestamp": "23:38:44"
+	},
+	{
+		"channel": 0.0,
+		"race": "Bellato",
+		"sender": "oi",
+		"text": "wds",
+		"timestamp": "10:19:20"
+	},
+	{
+		"channel": 0.0,
+		"race": "Bellato",
+		"sender": "oi",
+		"text": "oi",
+		"timestamp": "10:25:07"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "oi",
+		"text": "oioi",
+		"timestamp": "10:25:15"
+	},
+	{
+		"channel": 0.0,
+		"race": "Bellato",
+		"sender": "oi",
+		"text": "oi",
+		"timestamp": "10:45:55"
+	},
+	{
+		"channel": 0,
+		"race": "Bellato",
+		"sender": "oi",
+		"text": "oi",
+		"timestamp": "10:58:38"
 	}
 ]

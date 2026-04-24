@@ -1,0 +1,102 @@
+{
+	"bellato_guard": {
+		"id": "bellato_guard",
+		"nome": "Guardião Bellato",
+		"tipo": "normal",
+		"hp": 10,
+		"ataque": 30,
+		"defesa": 10,
+		"velocidade": 5.0,
+		"exp": 250,
+		"drop_list": [
+			{
+				"item": "pote_hp_p",
+				"chance": 10.0
+			},
+			{
+				"item": "espada_ferro",
+				"chance": 0.05
+			}
+		]
+	},
+	"cora_soldier": {
+		"id": "cora_soldier",
+		"nome": "Soldado Cora",
+		"tipo": "normal",
+		"hp": 120,
+		"ataque": 12,
+		"defesa": 6,
+		"velocidade": 3.2,
+		"exp": 30,
+		"drop_list": [
+			{
+				"item": "pote_sp_p",
+				"chance": 0.4
+			},
+			{
+				"item": "anel_forca",
+				"chance": 0.02
+			}
+		]
+	},
+	"acc_drone": {
+		"id": "acc_drone",
+		"nome": "Drone Accretia",
+		"tipo": "normal",
+		"hp": 150,
+		"ataque": 15,
+		"defesa": 10,
+		"velocidade": 2.5,
+		"exp": 45,
+		"drop_list": [
+			{
+				"item": "pote_fp",
+				"chance": 0.6
+			},
+			{
+				"item": "capacete_couro",
+				"chance": 0.1
+			}
+		]
+	},
+	"wild_beast": {
+		"id": "wild_beast",
+		"nome": "Beast Selvagem",
+		"tipo": "elite",
+		"hp": 400,
+		"ataque": 35,
+		"defesa": 15,
+		"velocidade": 4.5,
+		"exp": 150,
+		"drop_list": [
+			{
+				"item": "pote_hp_m",
+				"chance": 0.8
+			},
+			{
+				"item": "armadura_couro",
+				"chance": 0.15
+			}
+		]
+	},
+	"mech_boss": {
+		"id": "mech_boss",
+		"nome": "Chefe Mecânico",
+		"tipo": "boss",
+		"hp": 2500,
+		"ataque": 80,
+		"defesa": 40,
+		"velocidade": 3.8,
+		"exp": 1000,
+		"drop_list": [
+			{
+				"item": "super_pote",
+				"chance": 1.0
+			},
+			{
+				"item": "brinco_agilidade",
+				"chance": 0.5
+			}
+		]
+	}
+}

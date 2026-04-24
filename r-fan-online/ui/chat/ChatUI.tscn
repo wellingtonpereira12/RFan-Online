@@ -61,8 +61,15 @@ text = "[color=#888]Chat Resizable - Press Enter to type[/color]"
 scroll_following = true
 
 [node name="InputRow" type="HBoxContainer" parent="Background/VBox"]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 5
+
+[node name="CloseBtn" type="Button" parent="Background/VBox/InputRow"]
+layout_mode = 2
+text = "X"
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+
 
 [node name="ChannelBtn" type="Button" parent="Background/VBox/InputRow"]
 custom_minimum_size = Vector2(70, 0)

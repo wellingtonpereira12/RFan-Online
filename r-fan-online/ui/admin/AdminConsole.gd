@@ -34,15 +34,22 @@ func _on_text_changed(new_text: String) -> void:
 	# Sistema de Autocomplete para itens
 	suggestion_label.text = ""
 	var parts = new_text.split(" ", false)
-	if parts.size() >= 2 and parts[0].to_lower() == "item":
+	if parts.size() >= 2:
+		var cmd = parts[0].to_lower().trim_prefix("/")
 		var search_id = parts[1].to_lower()
 		var matches = []
-		for item_id in ItemDatabase.ITEMS.keys():
-			if item_id.begins_with(search_id):
-				matches.append(item_id)
+		
+		if cmd == "item":
+			for item_id in ItemDatabase.ITEMS.keys():
+				if item_id.begins_with(search_id):
+					matches.append(item_id)
+		elif cmd == "mob":
+			for mob_id in MobDatabase.MOBS.keys():
+				if mob_id.begins_with(search_id):
+					matches.append(mob_id)
 		
 		if matches.size() > 0:
-			suggestion_label.text = "Sugestão (Pressione TAB): " + ", ".join(matches)
+			suggestion_label.text = "Sugestão (TAB): " + ", ".join(matches)
 
 # A melhor forma de tratar o TAB no LineEdit sem perder foco é checar na gui_input dele
 func _on_input_gui_input(event: InputEvent) -> void:
@@ -53,15 +60,25 @@ func _on_input_gui_input(event: InputEvent) -> void:
 func _apply_autocomplete() -> void:
 	var text = input_line.text
 	var parts = text.split(" ", false)
-	if parts.size() >= 2 and parts[0].to_lower() == "item":
+	if parts.size() >= 2:
+		var raw_cmd = parts[0]
+		var cmd = raw_cmd.to_lower().trim_prefix("/")
 		var search_id = parts[1].to_lower()
-		for item_id in ItemDatabase.ITEMS.keys():
-			if item_id.begins_with(search_id):
-				# Aplica o autocomplete com o primeiro resultado
-				input_line.text = "item " + item_id + " "
-				input_line.caret_column = input_line.text.length()
-				suggestion_label.text = ""
-				return
+		
+		if cmd == "item":
+			for item_id in ItemDatabase.ITEMS.keys():
+				if item_id.begins_with(search_id):
+					input_line.text = raw_cmd + " " + item_id + " "
+					input_line.caret_column = input_line.text.length()
+					suggestion_label.text = ""
+					return
+		elif cmd == "mob":
+			for mob_id in MobDatabase.MOBS.keys():
+				if mob_id.begins_with(search_id):
+					input_line.text = raw_cmd + " " + mob_id + " "
+					input_line.caret_column = input_line.text.length()
+					suggestion_label.text = ""
+					return
 
 func _on_text_submitted(new_text: String) -> void:
 	if new_text.strip_edges() == "": return
@@ -73,14 +90,18 @@ func _on_text_submitted(new_text: String) -> void:
 	var parts = new_text.split(" ", false)
 	if parts.size() == 0: return
 	
-	var command = parts[0].to_lower()
+	var command = parts[0].to_lower().trim_prefix("/")
 	
 	if command == "item":
 		_cmd_item(parts)
+	elif command == "mob":
+		_cmd_mob(parts)
+	elif command == "reload":
+		_cmd_reload(parts)
 	elif command == "clear":
 		history.text = "[color=yellow]=== Painel Administrativo GM Iniciado ===[/color]"
 	elif command == "help":
-		print_to_console("Comandos disponíveis: item <id> <qtd>, clear, help", "cyan")
+		print_to_console("Comandos: item <id> <qtd> | mob <id> [qtd] | mob list | reload mobs | clear | help", "cyan")
 	else:
 		print_to_console("Comando inválido: " + command, "red")
 
@@ -114,3 +135,69 @@ func _cmd_item(args: PackedStringArray) -> void:
 			print_to_console("SUCESSO: " + str(amount) + "x " + item_data["nome"] + " adicionado(s) ao inventário.", "green")
 	else:
 		print_to_console("ERRO INTERNO: InventoryManager não encontrado no mundo.", "red")
+
+func _cmd_mob(args: PackedStringArray) -> void:
+	# Aqui no futuro validar permissão de GM, por enquanto todos com acesso ao console podem usar.
+	if args.size() < 2:
+		print_to_console("Uso correto: /mob <key> [quantidade]", "red")
+		return
+		
+	var mob_key = args[1].to_lower()
+	
+	if mob_key == "list":
+		var mob_names = []
+		for k in MobDatabase.MOBS.keys():
+			mob_names.append(k + " (" + MobDatabase.MOBS[k]["nome"] + ")")
+		print_to_console("Mobs disponíveis:\n" + "\n".join(mob_names), "cyan")
+		return
+	
+	var amount = 1
+	if args.size() >= 3:
+		amount = args[2].to_int()
+		
+	# Limitar spam para não quebrar o jogo
+	amount = clampi(amount, 1, 10)
+	
+	var mob_data = MobDatabase.get_mob(mob_key)
+	if mob_data.is_empty():
+		print_to_console("ERRO: Mob não cadastrado no banco de dados.", "red")
+		return
+		
+	var player = get_tree().get_first_node_in_group("players")
+	if not player:
+		print_to_console("ERRO INTERNO: Player não encontrado no mundo para base de spawn.", "red")
+		return
+		
+	var mob_scene = preload("res://entities/enemies/AdvancedMob.tscn")
+	var spawn_radius = 5.0
+	
+	for i in range(amount):
+		var mob = mob_scene.instantiate() as Node3D
+		var rand_x = randf_range(-spawn_radius, spawn_radius)
+		var rand_z = randf_range(-spawn_radius, spawn_radius)
+		var spawn_pos = player.global_position + Vector3(rand_x, 0, rand_z)
+		
+		# O mundo é o pai do player, adicionar lá
+		player.get_parent().add_child(mob)
+		mob.global_position = spawn_pos
+		mob.setup_from_db(mob_key)
+		
+	print_to_console("SUCESSO: Spawnado " + str(amount) + " mob(s): " + mob_data["nome"], "green")
+
+func _cmd_reload(args: PackedStringArray) -> void:
+	if args.size() < 2:
+		print_to_console("Uso: /reload mobs", "red")
+		return
+
+	var target = args[1].to_lower()
+	if target == "mobs":
+		# 1. Remove todos os mobs vivos do mundo
+		var enemies = get_tree().get_nodes_in_group("enemies")
+		for e in enemies:
+			e.queue_free()
+		
+		# 2. Recarrega o banco de dados do JSON
+		MobDatabase.reload()
+		print_to_console("SUCESSO: " + str(enemies.size()) + " mob(s) removido(s). MobDatabase recarregado! (" + str(MobDatabase.MOBS.size()) + " mobs)", "green")
+	else:
+		print_to_console("Alvo inválido. Uso: /reload mobs", "red")

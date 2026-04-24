@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://cvgi4stc01ayt"]
+
+[ext_resource type="Script" path="res://entities/enemies/AdvancedMob.gd" id="1_mob"]
+[ext_resource type="Script" path="res://components/VitalsComponent.gd" id="2_vitals"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mob"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_mob"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mob"]
+albedo_color = Color(0.8, 0.2, 0.2, 1)
+
+[node name="AdvancedMob" type="CharacterBody3D" groups=["enemies"]]
+script = ExtResource("1_mob")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_mob")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_mob")
+surface_material_override/0 = SubResource("StandardMaterial3D_mob")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
+[node name="VitalsComponent" type="Node" parent="."]
+script = ExtResource("2_vitals")
+
+[node name="NameTag" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+billboard = 1
+text = "Mob Name"
+font_size = 48
+outline_size = 12
+
