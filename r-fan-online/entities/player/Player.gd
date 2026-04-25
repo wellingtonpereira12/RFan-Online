@@ -51,6 +51,7 @@ var nav_agent: NavigationAgent3D
 var click_target_position: Vector3 = Vector3.ZERO
 var is_moving_to_click: bool = false
 var click_marker: Node3D = null
+var pickup_target: Node3D = null
 
 # --- Sistema de Status de Batalha ---
 var is_in_combat: bool = false
@@ -289,6 +290,23 @@ func _create_click_marker():
 
 func _stop_click_to_move():
 	is_moving_to_click = false
+	pickup_target = null
+	if click_marker:
+		click_marker.visible = false
+	
+func _collect_item(item_node: Node3D, uid: int):
+	if uid == -1: return
+	
+	# Feedback visual imediato
+	item_node.visible = false
+	
+	# Solicita ao servidor
+	NetworkManager.send_data({
+		"type": "item_pickup",
+		"uid": uid
+	})
+	pickup_target = null
+	print("[Player] Coletando item em alcance: ", uid)
 	if click_marker: click_marker.visible = false
 
 func _setup_custom_cursor():
@@ -433,6 +451,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			is_pursuing_and_attacking = false
 			esc_handled = true
 			
+		# 4. Parar Movimento por clique
+		if is_moving_to_click:
+			_stop_click_to_move()
+			esc_handled = true
+		
 		if esc_handled:
 			get_viewport().set_input_as_handled()
 			return
@@ -510,63 +533,36 @@ func handle_mouse_click(is_double_click: bool) -> void:
 			
 			is_pursuing_and_attacking = false # Cancela ataque se mover pro chão
 			return
-
-		# 1. Verifica se clicou em um Item no Chão
+		# 1. Clique em Item
 		if hit_obj.has_meta("is_dropped_item") or hit_obj.has_meta("item_uid"):
-			var item_uid = hit_obj.get_meta("item_uid", -1)
-			
+			var item_uid = int(hit_obj.get_meta("item_uid", -1))
 			if item_uid != -1:
-				# Feedback visual imediato: esconde o item no chão
-				hit_obj.visible = false
-				
-				# Solicita coleta ao servidor
-				NetworkManager.send_data({
-					"type": "item_pickup",
-					"uid": item_uid
-				})
-				print("[Player] Solicitando coleta do item UID: ", item_uid)
-			else:
-				# Fallback para sistema antigo/local (mobs locais)
-				if hit_obj.has_meta("item_data"):
-					var i_data = hit_obj.get_meta("item_data")
-					var i_amount = hit_obj.get_meta("item_amount")
-					var inv_ui = get_tree().get_first_node_in_group("inventory_ui")
-					if inv_ui and inv_ui.inventory_manager:
-						var resto = inv_ui.inventory_manager.add_item(i_data["id"], i_amount)
-						if resto <= 0: hit_obj.queue_free()
+				var dist = global_position.distance_to(hit_obj.global_position)
+				if dist <= 2.5:
+					_collect_item(hit_obj, item_uid)
+				else:
+					pickup_target = hit_obj
+					is_moving_to_click = true
+					click_target_position = hit_obj.global_position
+					print("[Player] Indo buscar item...")
 			return
 
 		# 2. Verifica se clicou em um Inimigo
 		if hit_obj.is_in_group("enemies"):
 			var previous_target = current_target
+			_stop_click_to_move() # Para qualquer movimento de clique anterior
 			
-			# Se o clique for em um alvo DIFERENTE do atual: apenas SELECIONA
+			# Se o clique for em um alvo DIFERENTE: apenas SELECIONA
 			if hit_obj != previous_target:
 				current_target = hit_obj
 				hud_instance.bind_target(hit_obj)
-				# Interrompe ataque automático ao trocar de alvo (opcional, estilo RF)
 				is_pursuing_and_attacking = false 
 				print("[Combate] Alvo selecionado: ", hit_obj.name)
 				return
 			
 			# Se o clique for no MESMO alvo (segundo clique): ATACA
-			current_target = hit_obj
-			hud_instance.bind_target(hit_obj)
-			
-			if auto_attack_mode_enabled:
-				is_pursuing_and_attacking = true
-				# Não zeramos o timer aqui para respeitar o cooldown atual
-			else:
-				# Ataque Manual (estilo clique duplo ou cliques sucessivos)
-				var now = Time.get_ticks_msec()
-				var delay_ms = int(basic_attack_interval * 1000)
-				if now - last_manual_attack_msec >= delay_ms:
-					last_manual_attack_msec = now
-					is_pursuing_and_attacking = true
-					# Mantém o cooldown_timer sincronizado com o intervalo
-					if basic_attack_cooldown_timer <= 0:
-						basic_attack_cooldown_timer = basic_attack_interval
-				
+			is_pursuing_and_attacking = true
+			print("[Combate] Iniciando perseguição e ataque automático!")
 			return
 			
 	# Se clicou fora ou não é inimigo, desmarca
@@ -610,28 +606,25 @@ func _physics_process(delta: float) -> void:
 	cam_dir.y = 0
 	var direction := cam_dir.normalized()
 
-	# --- ENVIO DE MOVIMENTO PARA O SERVIDOR (NODE.JS) ---
-	if input_dir.length() > 0 or is_moving_to_click:
-		var network_dir = direction
-		if is_moving_to_click:
-			network_dir = global_position.direction_to(click_target_position)
-			if global_position.distance_to(click_target_position) < 0.5:
-				_stop_click_to_move()
-				network_dir = Vector3.ZERO
-		
-		NetworkManager.send_move(network_dir, delta)
-	
-	NetworkManager.send_speed_sync()
-
 	# Apenas Gravidade é local agora
 	var vertical_vel = velocity.y
 	velocity = Vector3.ZERO
 	velocity.y = vertical_vel
-	move_and_slide()
 
 	# Condições de Interrupção de teclado
 	if input_dir.length() > 0:
 		is_pursuing_and_attacking = false
+		if is_moving_to_click:
+			_stop_click_to_move()
+
+	# --- LÓGICA DE COLETA AUTOMÁTICA ---
+	if pickup_target and is_instance_valid(pickup_target):
+		if global_position.distance_to(pickup_target.global_position) <= 2.5:
+			var item_uid = int(pickup_target.get_meta("item_uid", -1))
+			_collect_item(pickup_target, item_uid)
+			_stop_click_to_move() # Para de andar ao chegar
+	elif pickup_target:
+		pickup_target = null
 
 	# --- Lógica de Consumo de FP Dinâmico ---
 	var target_dist = 0.0
@@ -698,6 +691,24 @@ func _physics_process(delta: float) -> void:
 	hud_instance.skill_bar.update_attack_cooldown(basic_attack_cooldown_timer, basic_attack_interval)
 
 	move_and_slide()
+	
+	# --- ENVIO DE MOVIMENTO PARA O SERVIDOR (NODE.JS) ---
+	# Enviamos se houver input manual, clique no chão OU perseguição de mob
+	if current_target: target_dist = global_position.distance_to(current_target.global_position)
+	
+	var is_pursuing = is_pursuing_and_attacking and target_dist > base_attack_range
+	
+	if input_dir.length() > 0 or is_moving_to_click or is_pursuing:
+		var network_dir = direction
+		if is_moving_to_click:
+			network_dir = global_position.direction_to(click_target_position)
+		elif is_pursuing:
+			network_dir = global_position.direction_to(current_target.global_position)
+		
+		var is_running = vitals_component.is_running if vitals_component else false
+		NetworkManager.send_move(network_dir, delta, is_running)
+	
+	NetworkManager.send_speed_sync()
 
 # --- Sistema de Ataque Básico (Melee) ---
 func perform_attack() -> void:
@@ -725,6 +736,17 @@ func perform_attack() -> void:
 				target_def = current_target.get_stats().get("defesa", 10)
 			
 			var final_dmg = int(max(1, total_atk - target_def))
+			
+			# Sincronização Multiplayer: Notifica o servidor sobre o dano
+			var victim_uid = current_target.get_meta("mob_uid", -1)
+			if victim_uid != -1:
+				NetworkManager.send_data({
+					"type": "entity_damage",
+					"victim_uid": victim_uid,
+					"victim_type": "mob",
+					"damage": final_dmg
+				})
+			
 			target_vitals.take_damage(final_dmg)
 	else:
 		print("Alvo está muito longe! (" + str(snapped(dist, 0.1)) + "m)")

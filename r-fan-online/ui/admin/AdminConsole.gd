@@ -196,21 +196,21 @@ func _cmd_mob(args: PackedStringArray) -> void:
 		print_to_console("ERRO INTERNO: Player não encontrado no mundo para base de spawn.", "red")
 		return
 		
-	var mob_scene = preload("res://entities/enemies/AdvancedMob.tscn")
 	var spawn_radius = 5.0
 	
 	for i in range(amount):
-		var mob = mob_scene.instantiate() as Node3D
 		var rand_x = randf_range(-spawn_radius, spawn_radius)
 		var rand_z = randf_range(-spawn_radius, spawn_radius)
 		var spawn_pos = player.global_position + Vector3(rand_x, 0, rand_z)
 		
-		# O mundo é o pai do player, adicionar lá
-		player.get_parent().add_child(mob)
-		mob.global_position = spawn_pos
-		mob.setup_from_db(mob_key)
+		# ENVIAR PARA O SERVIDOR PARA BROADCAST
+		NetworkManager.send_data({
+			"type": "admin_spawn_mob",
+			"mob_id": mob_key,
+			"pos": {"x": spawn_pos.x, "y": spawn_pos.y, "z": spawn_pos.z}
+		})
 		
-	print_to_console("SUCESSO: Spawnado " + str(amount) + " mob(s): " + mob_data["nome"], "green")
+	print_to_console("Solicitando spawn de %d x %s no servidor..." % [amount, mob_data["nome"]], "yellow")
 
 func _cmd_reload(args: PackedStringArray) -> void:
 	if args.size() < 2:

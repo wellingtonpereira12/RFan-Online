@@ -211,6 +211,15 @@ func _perform_attack() -> void:
 	# Dano Final = Ataque do Mob - Defesa do Player
 	var final_dmg = int(max(1, attack_damage - player_def))
 	
+	# Sincronização Multiplayer: Notifica o servidor sobre o dano ao player
+	if current_target.is_in_group("players"):
+		NetworkManager.send_data({
+			"type": "entity_damage",
+			"victim_uid": current_target.name, # Para players, usamos o nome
+			"victim_type": "player",
+			"damage": final_dmg
+		})
+	
 	print("[Mob ", name, "] Atacou ", current_target.name, " | Atk:", attack_damage, " - Def:", player_def, " = Dano:", final_dmg)
 	
 	target_vitals.take_damage(final_dmg)
@@ -221,6 +230,14 @@ func get_stats() -> Dictionary:
 
 func _on_death() -> void:
 	print("[Mob ", name, "] Morreu!")
+	
+	# Sincronização Multiplayer: Notifica o servidor
+	var uid = get_meta("mob_uid", -1)
+	if uid != -1:
+		NetworkManager.send_data({
+			"type": "mob_die",
+			"uid": uid
+		})
 	
 	# Dá XP ao jogador
 	var xp_reward = mob_data.get("exp", 0)

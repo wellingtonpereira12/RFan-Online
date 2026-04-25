@@ -11,6 +11,7 @@ var maps_data = {}
 var other_players = {} # id -> node
 var other_player_scene = preload("res://entities/player/OtherPlayer.tscn")
 var dropped_items = {} # uid -> node
+var other_mobs = {} # uid -> node
 
 func _ready():
 	_load_maps_data()
@@ -50,12 +51,13 @@ func login():
 		"name": GameManager.player_name
 	})
 
-func send_move(input_dir: Vector3, delta: float):
+func send_move(input_dir: Vector3, delta: float, is_running: bool = false):
 	if is_connected_to_server:
 		send_data({
 			"type": "move",
 			"input_dir": {"x": input_dir.x, "z": input_dir.z},
-			"delta": delta
+			"delta": delta,
+			"is_running": is_running
 		})
 
 func send_speed_sync():
@@ -85,19 +87,31 @@ func _on_data_received(json_str: String):
 					if maps_data.has(data.map_id):
 						GameManager.current_map_name = maps_data[data.map_id]["nome"]
 					_clear_all_dropped_items()
+					_clear_all_mobs()
 					map_changed.emit(data.map_id)
 		
 		"map_sync":
 			_sync_other_players(data.players)
 			if data.has("items"):
 				_sync_items(data.items)
+			if data.has("mobs"):
+				_sync_mobs(data.mobs)
+		
+		"mob_spawn":
+			_handle_mob_spawn(data.mob)
+		
+		"mob_remove":
+			_handle_mob_remove(int(data.uid))
+		
+		"entity_damage":
+			_handle_entity_damage(data)
 		
 		"item_drop":
 			_handle_item_drop(data.item)
 			
 		"item_remove":
 			_handle_item_remove(int(data.uid))
-			
+		
 		"pickup_success":
 			_handle_pickup_success(data.item)
 
@@ -178,3 +192,90 @@ func _clear_all_dropped_items():
 		if is_instance_valid(dropped_items[uid]):
 			dropped_items[uid].queue_free()
 	dropped_items.clear()
+
+func _sync_mobs(mob_list: Array):
+	var server_uids = []
+	for m_data in mob_list:
+		var uid = int(m_data.uid)
+		server_uids.append(uid)
+		if not other_mobs.has(uid):
+			_handle_mob_spawn(m_data)
+		else:
+			# Atualiza posição (opcional se mobs se moverem no servidor)
+			var pos = Vector3(m_data.pos.x, m_data.pos.y, m_data.pos.z)
+			other_mobs[uid].global_position = pos
+	
+	var to_remove = []
+	for uid in other_mobs.keys():
+		if not uid in server_uids:
+			to_remove.append(uid)
+	
+	for uid in to_remove:
+		if is_instance_valid(other_mobs[uid]):
+			other_mobs[uid].queue_free()
+		other_mobs.erase(uid)
+
+func _handle_mob_spawn(mob_data: Dictionary):
+	var uid = int(mob_data.uid)
+	if other_mobs.has(uid): return
+	
+	var mob_scene = preload("res://entities/enemies/AdvancedMob.tscn")
+	var new_mob = mob_scene.instantiate()
+	get_tree().root.add_child(new_mob)
+	
+	var pos = Vector3(mob_data.pos.x, mob_data.pos.y, mob_data.pos.z)
+	new_mob.global_position = pos
+	new_mob.set_meta("mob_uid", uid)
+	
+	# Setup estatísticas do MobDatabase
+	if new_mob.has_method("setup_from_db"):
+		new_mob.setup_from_db(mob_data.mob_id)
+	
+	other_mobs[uid] = new_mob
+	print("[Network] Novo mob visível: ", mob_data.mob_id, " (UID: ", uid, ")")
+
+func _clear_all_mobs():
+	for uid in other_mobs.keys():
+		if is_instance_valid(other_mobs[uid]):
+			other_mobs[uid].queue_free()
+	other_mobs.clear()
+
+func _handle_mob_remove(uid: int):
+	if other_mobs.has(uid):
+		var mob_node = other_mobs[uid]
+		if is_instance_valid(mob_node):
+			mob_node.queue_free()
+		other_mobs.erase(uid)
+		print("[Network] Mob removido do mapa: ", uid)
+
+func _handle_entity_damage(data: Dictionary):
+	var victim_uid = data.victim_uid
+	var victim_type = data.victim_type
+	var damage = int(data.damage)
+	var attacker_id = data.attacker_id
+	
+	var victim_node = null
+	
+	if victim_type == "mob":
+		var uid = int(victim_uid)
+		if other_mobs.has(uid):
+			victim_node = other_mobs[uid]
+	else:
+		# Player victim
+		if victim_uid == GameManager.player_name:
+			# Sou eu! Mas o dano já foi aplicado localmente ou será aplicado pelo server?
+			# No Godot, dano sofrido por mobs já é local.
+			# Aqui evitamos aplicar de novo se formos nós.
+			return
+		elif other_players.has(victim_uid):
+			victim_node = other_players[victim_uid]
+	
+	if is_instance_valid(victim_node):
+		# Mostra o dano visualmente (se houver componente de vida)
+		var vitals = victim_node.get_node_or_null("VitalsComponent")
+		if not vitals: vitals = victim_node.get_node_or_null("HealthComponent")
+		
+		if vitals:
+			# Aplica o dano para sincronizar as barrinhas de HP
+			vitals.take_damage(damage)
+			print("[Network] Dano Sincronizado: ", attacker_id, " causou ", damage, " em ", victim_node.name)

@@ -11,7 +11,9 @@ const maps = JSON.parse(fs.readFileSync(path.join(__dirname, '../database/maps.j
 // Estado Global (Em memória para este exemplo)
 const players = new Map();
 const droppedItems = new Map(); // id_unico -> { id_unico, item_id, map_id, pos, amount }
+const mobs = new Map(); // id_unico -> { uid, mob_id, map_id, pos, stats }
 let nextItemId = 1;
+let nextMobId = 1;
 
 console.log(`[RF-Server] Servidor rodando na porta ${PORT}`);
 
@@ -38,7 +40,11 @@ wss.on('connection', (ws) => {
                 break;
 
             case 'move':
-                handleMove(playerId, data.input_dir, data.delta);
+                if (players.has(playerId)) {
+                    const data_move = data;
+                    players.get(playerId).is_running = data.is_running || false;
+                    handleMove(playerId, data_move.input_dir, data_move.delta);
+                }
                 break;
 
             case 'request_speed':
@@ -98,6 +104,47 @@ wss.on('connection', (ws) => {
                     }
                 }
                 break;
+
+            case 'admin_spawn_mob':
+                if (players.has(playerId)) {
+                    const p = players.get(playerId);
+                    const newMob = {
+                        uid: nextMobId++,
+                        mob_id: data.mob_id,
+                        map_id: p.map_id,
+                        pos: data.pos,
+                    };
+                    mobs.set(newMob.uid, newMob);
+                    broadcastToMap(p.map_id, { type: 'mob_spawn', mob: newMob });
+                    console.log(`[Admin] ${p.name} spawnou mob ${data.mob_id} no mapa ${p.map_id}`);
+                }
+                break;
+
+            case 'mob_die':
+                if (players.has(playerId)) {
+                    const p = players.get(playerId);
+                    const mobUid = parseInt(data.uid);
+                    if (mobs.has(mobUid)) {
+                        mobs.delete(mobUid);
+                        broadcastToMap(p.map_id, { type: 'mob_remove', uid: mobUid });
+                        console.log(`[Mob] Mob ${mobUid} morreu no mapa ${p.map_id}`);
+                    }
+                }
+                break;
+
+            case 'entity_damage':
+                if (players.has(playerId)) {
+                    const p = players.get(playerId);
+                    // Retransmite o dano para todos no mapa (para verem HP e números flutuantes)
+                    broadcastToMap(p.map_id, {
+                        type: 'entity_damage',
+                        victim_uid: data.victim_uid,
+                        victim_type: data.victim_type, // 'mob' ou 'player'
+                        damage: data.damage,
+                        attacker_id: p.name
+                    });
+                }
+                break;
         }
     });
 
@@ -118,10 +165,13 @@ function handleMove(id, inputDir, delta) {
     const map = maps[p.map_id];
     
     // CÁLCULO DE VELOCIDADE (Integrado com seu sistema 1.0 - 7.0)
-    // Multiplicador: 1.0 + ((val - 1.0) * 10 / 100)
-    const bonus_pct = (p.speed_val - 1.0) * 10;
-    const multiplier = 1.0 + (bonus_pct / 100.0);
-    const move_speed = 12.0 * multiplier; // Base 12 (Run)
+    // Cálculo do multiplicador (+1% por cada 0.1 acima de 1.0)
+    const bonusPercent = Math.max(0, (p.speed_val - 1.0) * 10);
+    const multiplier = 1.0 + (bonusPercent / 100.0);
+    
+    // Velocidade Base: 12.0 se estiver correndo, 5.0 se estiver andando
+    const baseSpeed = p.is_running ? 12.0 : 5.0;
+    const move_speed = baseSpeed * multiplier;
 
     // Nova posição teórica
     let newX = p.pos.x + (inputDir.x * move_speed * delta);
@@ -183,12 +233,16 @@ function broadcastMapState(mapId) {
     const mapItems = Array.from(droppedItems.values())
         .filter(i => i.map_id === mapId);
 
+    const mapMobs = Array.from(mobs.values())
+        .filter(m => m.map_id === mapId);
+
     players.forEach(p => {
         if (p.map_id === mapId) {
             sendToPlayer(p.id, { 
                 type: 'map_sync', 
                 players: mapPlayers,
-                items: mapItems 
+                items: mapItems,
+                mobs: mapMobs
             });
         }
     });

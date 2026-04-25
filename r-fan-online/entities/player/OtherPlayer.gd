@@ -6,6 +6,7 @@ var player_id = ""
 func setup(id: String, p_name: String):
 	player_id = id
 	$NameTag.text = p_name
+	add_to_group("players")
 
 func update_position(new_pos: Vector3):
 	# Movimento suave (interpolação)

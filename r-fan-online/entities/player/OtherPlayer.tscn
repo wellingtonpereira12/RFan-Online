@@ -1,6 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://entities/player/OtherPlayer.gd" id="1_script"]
+[ext_resource type="Script" path="res://components/VitalsComponent.gd" id="2_vitals"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
 radius = 0.4
@@ -31,3 +32,6 @@ billboard = 1
 text = "Other Player"
 font_size = 48
 outline_size = 12
+
+[node name="VitalsComponent" type="Node" parent="."]
+script = ExtResource("2_vitals")
