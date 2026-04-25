@@ -1,0 +1,12 @@
+{
+  "name": "rf-online-backend",
+  "version": "1.0.0",
+  "description": "Servidor MMORPG RF Online Style",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}

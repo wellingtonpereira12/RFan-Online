@@ -4147,33 +4147,57 @@
 		"text": "Você usou [color=orange]Corte de Vento[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 14m / Max: 3m)"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Corte Rápido[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Corte de Vento[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Jato de Água[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Velocidade de ataque ajustada para [color=yellow]7.0 (+60%)[/color]"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Velocidade de ataque ajustada para [color=yellow]7.0 (+60%)[/color]"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você pegou: [color=cyan]Potion HP Pequena[/color] x20"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você pegou: [color=cyan]Potion HP Pequena[/color] x40"
 	}
 ]

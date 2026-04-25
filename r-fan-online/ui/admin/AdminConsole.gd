@@ -17,6 +17,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode == KEY_APOSTROPHE or event.keycode == KEY_QUOTELEFT:
 			toggle_console()
 			get_viewport().set_input_as_handled()
+		
+		# Tecla ESC (Fecha se estiver aberto)
+		elif event.keycode == KEY_ESCAPE and panel.visible:
+			toggle_console()
+			get_viewport().set_input_as_handled()
 
 func toggle_console() -> void:
 	panel.visible = !panel.visible
@@ -104,6 +109,12 @@ func _on_text_submitted(new_text: String) -> void:
 		_cmd_addexp(parts)
 	elif command == "speed":
 		_cmd_speed(parts)
+	elif command == "attackspeed":
+		_cmd_attackspeed(parts)
+	elif command == "map":
+		_cmd_map(parts)
+	elif command == "pos":
+		_cmd_pos(parts)
 	elif command == "clear":
 		history.text = "[color=yellow]=== Painel Administrativo GM Iniciado ===[/color]"
 	elif command == "help" or command == "ajuda":
@@ -112,7 +123,10 @@ func _on_text_submitted(new_text: String) -> void:
 		print_to_console("/mob <id> [quantidade] - Spawna mobs perto de você", "cyan")
 		print_to_console("/level <valor> - Define ou altera seu nível (1-50)", "cyan")
 		print_to_console("/addexp <valor> - Adiciona XP ao personagem", "cyan")
-		print_to_console("/speed <1.0-7.0> - Ajusta a velocidade de movimento (+1% por 0.1)", "cyan")
+		print_to_console("/speed <1.0-7.0> - Ajusta a velocidade de movimento", "cyan")
+		print_to_console("/attackspeed <1.0-7.0> - Ajusta a velocidade de ataque", "cyan")
+		print_to_console("/map <id> - Teleporta para outro mapa", "cyan")
+		print_to_console("/pos <x> <z> - Move para coordenadas específicas", "cyan")
 		print_to_console("/reload mobs - Remove mobs do mapa e recarrega o mobs.json", "cyan")
 		print_to_console("/clear - Limpa o histórico deste console", "cyan")
 		print_to_console("/ajuda - Mostra esta lista", "cyan")
@@ -262,3 +276,44 @@ func _cmd_speed(args: PackedStringArray) -> void:
 		"race": GameManager.player_race,
 		"channel": ChatManager.Channel.LOCAL
 	})
+
+func _cmd_attackspeed(args: PackedStringArray) -> void:
+	if args.size() < 2:
+		print_to_console("Uso correto: /attackspeed <valor> (Ex: /attackspeed 2.0)", "red")
+		return
+		
+	var speed_val = args[1].to_float()
+	var final_speed = AttackSpeedManager.set_attack_speed(speed_val)
+	var bonus_pct = AttackSpeedManager.get_bonus_percent(final_speed)
+	
+	print_to_console("SUCESSO: Velocidade de ataque ajustada para %.1f (+%d%%)" % [final_speed, bonus_pct], "green")
+	
+	ChatManager.receive_message({
+		"sender": "SISTEMA",
+		"text": "Velocidade de ataque ajustada para [color=yellow]%.1f (+%d%%)[/color]" % [final_speed, bonus_pct],
+		"race": GameManager.player_race,
+		"channel": ChatManager.Channel.LOCAL
+	})
+
+func _cmd_map(args: PackedStringArray) -> void:
+	if args.size() < 2:
+		print_to_console("Uso: /map <id>", "red")
+		return
+	
+	NetworkManager.send_data({
+		"type": "admin_map",
+		"target_map": args[1]
+	})
+	print_to_console("Solicitando teleporte para: " + args[1], "yellow")
+
+func _cmd_pos(args: PackedStringArray) -> void:
+	if args.size() < 3:
+		print_to_console("Uso: /pos <x> <z>", "red")
+		return
+	
+	NetworkManager.send_data({
+		"type": "admin_pos",
+		"x": args[1].to_float(),
+		"z": args[2].to_float()
+	})
+	print_to_console("Solicitando nova posição: (" + args[1] + ", " + args[2] + ")", "yellow")

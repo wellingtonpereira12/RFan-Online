@@ -72,6 +72,25 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
+[node name="World" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Header" type="Label" parent="VBox/Scroll/Content/World"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.5, 1)
+text = "[ LOCALIZAÇÃO ]"
+
+[node name="Map" type="Label" parent="VBox/Scroll/Content/World"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Mapa: ---"
+
+[node name="Pos" type="Label" parent="VBox/Scroll/Content/World"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Posição: (0, 0)"
+
 [node name="Resources" type="VBoxContainer" parent="VBox/Scroll/Content"]
 layout_mode = 2
 theme_override_constants/separation = 5

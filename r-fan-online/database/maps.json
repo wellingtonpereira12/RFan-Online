@@ -1,0 +1,40 @@
+{
+  "novus_hq": {
+    "id": "novus_hq",
+    "nome": "Quartel General Novus",
+    "level_min": 1,
+    "level_max": 50,
+    "spawn": {"x": 0, "y": 0, "z": 0},
+    "limits": {
+      "x_min": -500, "x_max": 500,
+      "z_min": -500, "z_max": 500
+    },
+    "portals": [
+      {
+        "target_map": "settler_shores",
+        "pos": {"x": 100, "y": 0, "z": 100},
+        "range": 5.0,
+        "spawn_at": {"x": -150, "y": 0, "z": -150}
+      }
+    ]
+  },
+  "settler_shores": {
+    "id": "settler_shores",
+    "nome": "Praias de Settler",
+    "level_min": 10,
+    "level_max": 50,
+    "spawn": {"x": 0, "y": 0, "z": 0},
+    "limits": {
+      "x_min": -1000, "x_max": 1000,
+      "z_min": -1000, "z_max": 1000
+    },
+    "portals": [
+      {
+        "target_map": "novus_hq",
+        "pos": {"x": -200, "y": 0, "z": -200},
+        "range": 5.0,
+        "spawn_at": {"x": 80, "y": 0, "z": 80}
+      }
+    ]
+  }
+}

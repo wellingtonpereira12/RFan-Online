@@ -1,0 +1,65 @@
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="GDScript" id="GDScript_dropped_item"]
+script/source = "extends RigidBody3D
+
+var is_frozen = false
+var life_time = 0.0
+
+func setup_from_id(item_id: String):
+	var mesh_inst = $MeshInstance3D
+	if mesh_inst and mesh_inst.mesh is BoxMesh:
+		var mat = StandardMaterial3D.new()
+		if item_id.contains(\"pote_hp\"):
+			mat.albedo_color = Color(1, 0, 0)
+		elif item_id.contains(\"pote_sp\"):
+			mat.albedo_color = Color(0, 0, 1)
+		else:
+			mat.albedo_color = Color(1, 0.84, 0) # Ouro
+		mesh_inst.material_override = mat
+
+func _ready():
+	# Impulso inicial para o item \"saltar\" do mob/player
+	apply_central_impulse(Vector3(randf_range(-1, 1), 4.0, randf_range(-1, 1)))
+	set_meta(\"is_dropped_item\", true)
+
+func _physics_process(delta):
+	if is_frozen: return
+	
+	life_time += delta
+	
+	# Só tenta congelar após 1 segundo
+	if life_time > 1.0:
+		if linear_velocity.length() < 0.2:
+			_freeze_item()
+	
+	if global_position.y < -10.0:
+		global_position.y = 0.5
+		_freeze_item()
+
+func _freeze_item():
+	is_frozen = true
+	freeze = true
+	# IMPORTANTE: Mantemos a collision_layer = 4 para o mouse conseguir clicar!
+	collision_layer = 4 
+	# Mas zeramos a mask para ele não tentar mais colidir fisicamente com o mundo
+	collision_mask = 0 
+"
+
+[sub_resource type="BoxMesh" id="BoxMesh_item"]
+size = Vector3(0.4, 0.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_item"]
+size = Vector3(0.6, 0.6, 0.6)
+
+[node name="DroppedItem" type="RigidBody3D"]
+collision_layer = 4
+collision_mask = 3
+continuous_cd = true
+script = SubResource("GDScript_dropped_item")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_item")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_item")

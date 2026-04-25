@@ -1,5 +1,8 @@
 extends PanelContainer
 
+@onready var map_label = $VBox/Scroll/Content/World/Map
+@onready var pos_label = $VBox/Scroll/Content/World/Pos
+
 @onready var hp_label = $VBox/Scroll/Content/Resources/HP
 @onready var hp_bar = $VBox/Scroll/Content/Resources/HPBar
 @onready var sp_label = $VBox/Scroll/Content/Resources/SP
@@ -94,6 +97,10 @@ func update_ui():
 			current_sp = vitals.sp
 			current_fp = vitals.fp
 	
+	map_label.text = "Mapa: " + GameManager.current_map_name
+	if player:
+		pos_label.text = "Posição: (%d, %d)" % [int(player.global_position.x), int(player.global_position.z)]
+	
 	hp_label.text = "HP: %d / %d (Regen: %.1f%%)" % [current_hp, stats["hp"], stats.get("hp_regen", 1.0)]
 	hp_bar.max_value = stats["hp"]
 	hp_bar.value = current_hp
@@ -113,7 +120,9 @@ func update_ui():
 	var speed_val = MovementSpeedManager.get_speed()
 	var bonus_pct = MovementSpeedManager.get_bonus_percent(speed_val)
 	ms_label.text = "Vel. Movimento: %.1f (+%d%%)" % [speed_val, bonus_pct]
-	as_label.text = "Vel. Ataque: %.1f" % stats["attack_speed"]
+	var as_val = AttackSpeedManager.get_attack_speed()
+	var as_bonus = AttackSpeedManager.get_bonus_percent(as_val)
+	as_label.text = "Vel. Ataque: %.1f (+%d%%)" % [as_val, as_bonus]
 	
 	acc_label.text = "Chance de Acerto: %d%%" % stats["accuracy"]
 	dodge_label.text = "Chance de Esquiva: %d%%" % stats["dodge"]

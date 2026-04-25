@@ -101,6 +101,7 @@ func _ready() -> void:
 	
 	# Inicializar Velocidade
 	update_movement_speed()
+	update_attack_speed()
 	
 	# Inicializar MacroUI
 	var macro_scene = preload("res://ui/macro/MacroUI.tscn")
@@ -388,42 +389,19 @@ func _on_player_died() -> void:
 
 # --- Sistema de Inventário (Drop de Itens) ---
 func drop_item_on_ground(item_data: Dictionary, amount: int) -> void:
-	var item_node = RigidBody3D.new()
+	# Calcula posição de drop (mais alto para evitar clipping)
+	var offset = Vector3(randf_range(-1.0, 1.0), 2.0, randf_range(-1.0, 1.0))
+	var drop_pos = global_position + offset
 	
-	var mesh_inst = MeshInstance3D.new()
-	var box_mesh = BoxMesh.new()
-	box_mesh.size = Vector3(0.3, 0.3, 0.3)
-	mesh_inst.mesh = box_mesh
+	# ENVIAR PARA O SERVIDOR
+	NetworkManager.send_data({
+		"type": "item_drop",
+		"item_id": item_data["id"],
+		"pos": {"x": drop_pos.x, "y": drop_pos.y, "z": drop_pos.z},
+		"amount": amount
+	})
 	
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.84, 0.0) # Bolinha quadrada amarela (Ouro/Loot)
-	box_mesh.surface_set_material(0, mat)
-	
-	var coll = CollisionShape3D.new()
-	var box_shape = BoxShape3D.new()
-	box_shape.size = Vector3(0.3, 0.3, 0.3)
-	coll.shape = box_shape
-	
-	item_node.add_child(mesh_inst)
-	item_node.add_child(coll)
-	
-	# Adicionar à raiz da cena principal
-	get_tree().current_scene.add_child(item_node)
-	
-	# Ignorar colisão com o próprio jogador para não ser empurrado
-	item_node.add_collision_exception_with(self)
-	
-	# Deslocar para evitar spawn dentro do jogador
-	var offset = Vector3(randf_range(-1.0, 1.0), 1.5, randf_range(-1.0, 1.0))
-	item_node.global_position = global_position + offset
-	item_node.apply_central_impulse(Vector3(0, 3.0, 0))
-	
-	# Metadata para identificar o item no Raycast
-	item_node.set_meta("is_dropped_item", true)
-	item_node.set_meta("item_data", item_data)
-	item_node.set_meta("item_amount", amount)
-	
-	print("Item derrubado: ", item_data.get("nome", "Desconhecido"), " x", amount)
+	print("[Loot] Solicitando drop manual de: ", item_data.get("nome", "item"))
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Cancelar Target, Ataque e Fechar Janelas com ESC
@@ -534,30 +512,28 @@ func handle_mouse_click(is_double_click: bool) -> void:
 			return
 
 		# 1. Verifica se clicou em um Item no Chão
-		if hit_obj.has_meta("is_dropped_item"):
-			var i_data = hit_obj.get_meta("item_data")
-			var i_amount = hit_obj.get_meta("item_amount")
+		if hit_obj.has_meta("is_dropped_item") or hit_obj.has_meta("item_uid"):
+			var item_uid = hit_obj.get_meta("item_uid", -1)
 			
-			var inv_ui = get_tree().get_first_node_in_group("inventory_ui")
-			if inv_ui and inv_ui.inventory_manager:
-				var resto = inv_ui.inventory_manager.add_item(i_data["id"], i_amount)
-				if resto <= 0:
-					hit_obj.queue_free()
-					var msg_text = "Você pegou: [color=cyan]" + i_data.get("nome", "Item") + "[/color]"
-					if i_amount > 1: msg_text += " x" + str(i_amount)
-					
-					ChatManager.receive_message({
-						"sender": "SISTEMA",
-						"text": msg_text,
-						"race": GameManager.player_race,
-						"channel": ChatManager.Channel.LOCAL
-					})
-					print("Pegou do chão: ", i_data.get("nome", "Item"), " x", i_amount)
-				elif resto < i_amount:
-					hit_obj.set_meta("item_amount", resto)
-					print("Pegou parte do item. Sobrou no chão: ", resto)
-				else:
-					print("Inventário cheio!")
+			if item_uid != -1:
+				# Feedback visual imediato: esconde o item no chão
+				hit_obj.visible = false
+				
+				# Solicita coleta ao servidor
+				NetworkManager.send_data({
+					"type": "item_pickup",
+					"uid": item_uid
+				})
+				print("[Player] Solicitando coleta do item UID: ", item_uid)
+			else:
+				# Fallback para sistema antigo/local (mobs locais)
+				if hit_obj.has_meta("item_data"):
+					var i_data = hit_obj.get_meta("item_data")
+					var i_amount = hit_obj.get_meta("item_amount")
+					var inv_ui = get_tree().get_first_node_in_group("inventory_ui")
+					if inv_ui and inv_ui.inventory_manager:
+						var resto = inv_ui.inventory_manager.add_item(i_data["id"], i_amount)
+						if resto <= 0: hit_obj.queue_free()
 			return
 
 		# 2. Verifica se clicou em um Inimigo
@@ -630,16 +606,32 @@ func _physics_process(delta: float) -> void:
 	
 	if not (focus_owner is LineEdit):
 		input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-		if input_dir.length() > 0:
-			_stop_click_to_move() # WASD cancela movimento por clique
-		
 	var cam_dir = camera_pivot.global_basis * Vector3(input_dir.x, 0, input_dir.y)
 	cam_dir.y = 0
 	var direction := cam_dir.normalized()
+
+	# --- ENVIO DE MOVIMENTO PARA O SERVIDOR (NODE.JS) ---
+	if input_dir.length() > 0 or is_moving_to_click:
+		var network_dir = direction
+		if is_moving_to_click:
+			network_dir = global_position.direction_to(click_target_position)
+			if global_position.distance_to(click_target_position) < 0.5:
+				_stop_click_to_move()
+				network_dir = Vector3.ZERO
+		
+		NetworkManager.send_move(network_dir, delta)
 	
+	NetworkManager.send_speed_sync()
+
+	# Apenas Gravidade é local agora
+	var vertical_vel = velocity.y
+	velocity = Vector3.ZERO
+	velocity.y = vertical_vel
+	move_and_slide()
+
 	# Condições de Interrupção de teclado
 	if input_dir.length() > 0:
-		is_pursuing_and_attacking = false # O usuário tocou no WASD, cancelar perseguição automátiCa!
+		is_pursuing_and_attacking = false
 
 	# --- Lógica de Consumo de FP Dinâmico ---
 	var target_dist = 0.0
@@ -763,3 +755,13 @@ func update_movement_speed():
 	run_speed = 12.0 * multiplier
 	
 	print("[Player] Velocidade atualizada: Walk=", walk_speed, " Run=", run_speed, " (", bonus_pct, "%)")
+
+func update_attack_speed():
+	var speed_val = AttackSpeedManager.get_attack_speed()
+	var bonus_pct = AttackSpeedManager.get_bonus_percent(speed_val)
+	var multiplier = 1.0 + (bonus_pct / 100.0)
+	
+	# Intervalo base é 1.0 segundo. Mais velocidade = Menos tempo de espera.
+	basic_attack_interval = 1.0 / multiplier
+	
+	print("[Player] Vel. Ataque atualizada: Intervalo=", basic_attack_interval, "s (", bonus_pct, "%)")

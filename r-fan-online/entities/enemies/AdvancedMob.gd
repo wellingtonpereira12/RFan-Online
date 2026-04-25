@@ -247,35 +247,16 @@ func _spawn_drop(item_id: String, amount: int) -> void:
 		printerr("[Mob Drop] Item não encontrado no ItemDatabase: ", item_id)
 		return
 	
-	# Cria o nó físico igual ao drop do inventário
-	var item_node = RigidBody3D.new()
+	# Calcula posição de drop (um pouco mais alto para não atravessar o chão)
+	var offset = Vector3(randf_range(-0.5, 0.5), 2.0, randf_range(-0.5, 0.5))
+	var drop_pos = global_position + offset
 	
-	var mesh_inst = MeshInstance3D.new()
-	var box_mesh = BoxMesh.new()
-	box_mesh.size = Vector3(0.3, 0.3, 0.3)
-	mesh_inst.mesh = box_mesh
+	# ENVIAR PARA O SERVIDOR
+	NetworkManager.send_data({
+		"type": "item_drop",
+		"item_id": item_id,
+		"pos": {"x": drop_pos.x, "y": drop_pos.y, "z": drop_pos.z},
+		"amount": amount
+	})
 	
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.84, 0.0) # Amarelo Ouro = Loot
-	box_mesh.surface_set_material(0, mat)
-	
-	var coll = CollisionShape3D.new()
-	var box_shape = BoxShape3D.new()
-	box_shape.size = Vector3(0.3, 0.3, 0.3)
-	coll.shape = box_shape
-	
-	item_node.add_child(mesh_inst)
-	item_node.add_child(coll)
-	
-	# Metadados idênticos ao sistema de drop do Player
-	item_node.set_meta("is_dropped_item", true)
-	item_node.set_meta("item_data", item_data)
-	item_node.set_meta("item_amount", amount)
-	
-	# Adiciona à cena e posiciona em cima do mob
-	get_tree().current_scene.add_child(item_node)
-	var offset = Vector3(randf_range(-0.5, 0.5), 1.0, randf_range(-0.5, 0.5))
-	item_node.global_position = global_position + offset
-	item_node.apply_central_impulse(Vector3(0, 4.0, 0))
-	
-	print("[Loot] ", name, " dropou: ", item_data.get("nome", item_id), " x", amount)
+	print("[Loot] Solicitando drop global de: ", item_data.get("nome", item_id))
