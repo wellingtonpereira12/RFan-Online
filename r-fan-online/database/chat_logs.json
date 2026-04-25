@@ -3673,75 +3673,273 @@
 		"text": "Habilidade em espera... (1.1s)"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Ataque Giratório[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Golpe Pesado[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Corte Rápido[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Esmagar[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Corte Rápido[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Habilidade em espera... (0.5s)"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Disparo Duplo[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Flecha Perfurante[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Corte Rápido[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Golpe Pesado[/color]!"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Você usou [color=orange]Ataque Giratório[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte Rápido[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=gray]Você errou o golpe![/color]"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=gray]Você errou o golpe![/color]"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Jato de Água[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte de Vento[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 2"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 3"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 4"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 5"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 6"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 7"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 2"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 3"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 4"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 5"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 6"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 7"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 2"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 3"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 4"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 5"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 6"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 7"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 2"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 30"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 50"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 1"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 2"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 50"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "LEVEL UP! Você agora é nível 1"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Velocidade ajustada para [color=yellow]2.0 (+10%)[/color]"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Velocidade ajustada para [color=yellow]7.0 (+60%)[/color]"
 	}
 ]

@@ -102,14 +102,17 @@ func _on_text_submitted(new_text: String) -> void:
 		_cmd_level(parts)
 	elif command == "addexp":
 		_cmd_addexp(parts)
+	elif command == "speed":
+		_cmd_speed(parts)
 	elif command == "clear":
 		history.text = "[color=yellow]=== Painel Administrativo GM Iniciado ===[/color]"
 	elif command == "help" or command == "ajuda":
 		print_to_console("=== Lista de Comandos Disponíveis (GM) ===", "yellow")
 		print_to_console("/item <id> <quantidade> - Adiciona item ao seu inventário", "cyan")
 		print_to_console("/mob <id> [quantidade] - Spawna mobs perto de você", "cyan")
-		print_to_console("/level <valor> - Define o nível do personagem (ex: /level 50 ou /level +1)", "cyan")
+		print_to_console("/level <valor> - Define ou altera seu nível (1-50)", "cyan")
 		print_to_console("/addexp <valor> - Adiciona XP ao personagem", "cyan")
+		print_to_console("/speed <1.0-7.0> - Ajusta a velocidade de movimento (+1% por 0.1)", "cyan")
 		print_to_console("/reload mobs - Remove mobs do mapa e recarrega o mobs.json", "cyan")
 		print_to_console("/clear - Limpa o histórico deste console", "cyan")
 		print_to_console("/ajuda - Mostra esta lista", "cyan")
@@ -240,3 +243,22 @@ func _cmd_addexp(args: PackedStringArray) -> void:
 	var amount = args[1].to_int()
 	ExperienceManager.add_exp(amount)
 	print_to_console("SUCESSO: Adicionado " + str(amount) + " de XP.", "green")
+
+func _cmd_speed(args: PackedStringArray) -> void:
+	if args.size() < 2:
+		print_to_console("Uso correto: /speed <valor> (Ex: /speed 3.5)", "red")
+		return
+		
+	var speed_val = args[1].to_float()
+	var final_speed = MovementSpeedManager.set_speed(speed_val)
+	var bonus_pct = MovementSpeedManager.get_bonus_percent(final_speed)
+	
+	print_to_console("SUCESSO: Velocidade ajustada para %.1f (+%d%%)" % [final_speed, bonus_pct], "green")
+	
+	# Mensagem no Chat para feedback visual ao jogador
+	ChatManager.receive_message({
+		"sender": "SISTEMA",
+		"text": "Velocidade ajustada para [color=yellow]%.1f (+%d%%)[/color]" % [final_speed, bonus_pct],
+		"race": GameManager.player_race,
+		"channel": ChatManager.Channel.LOCAL
+	})

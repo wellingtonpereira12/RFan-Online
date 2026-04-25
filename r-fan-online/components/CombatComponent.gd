@@ -126,10 +126,14 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 		_send_system_msg("[color=blue]O alvo bloqueou o ataque![/color]")
 		return
 
-	# 3. Cálculo de Dano Base
-	var base_dmg = StatusManager.get_total_status()["ataque"]
+	# 3. Cálculo de Dano Base (Pega o 'Ataque Total' do StatusManager)
+	var stats = StatusManager.get_total_status()
+	var ataque_total = stats["ataque"]
+	
+	# O dano da habilidade é somado ao ataque total do personagem
+	# e depois multiplicado pelo nível de maestria da skill
 	var skill_mult = SkillManager.get_damage_multiplier(skill["key"])
-	var raw_dmg = (base_dmg + skill["dano"]) * skill_mult
+	var raw_dmg = (ataque_total + skill["dano"]) * skill_mult
 	
 	# Redução de Defesa
 	var final_dmg = int(max(1, raw_dmg - target_stats["defesa"]))

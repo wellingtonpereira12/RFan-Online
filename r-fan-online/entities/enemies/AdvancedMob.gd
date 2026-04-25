@@ -198,11 +198,26 @@ func _look_at_target(target_pos: Vector3) -> void:
 		look_at(flat_pos, Vector3.UP)
 
 func _perform_attack() -> void:
-	if not current_target.has_node("VitalsComponent"): return
+	# Busca o componente de vida do player (ou alvo)
+	var target_vitals = current_target.get_node_or_null("VitalsComponent")
+	if not target_vitals: return
 	
-	print("[Mob ", name, "] Atacou ", current_target.name, " dando ", attack_damage, " dano.")
-	current_target.get_node("VitalsComponent").take_damage(attack_damage)
+	# --- CÁLCULO DE DEFESA DO PLAYER ---
+	var player_def = 0
+	# Se o alvo for o player, pegamos a defesa real do StatusManager
+	if current_target.is_in_group("players"):
+		player_def = StatusManager.get_total_status()["defesa"]
+	
+	# Dano Final = Ataque do Mob - Defesa do Player
+	var final_dmg = int(max(1, attack_damage - player_def))
+	
+	print("[Mob ", name, "] Atacou ", current_target.name, " | Atk:", attack_damage, " - Def:", player_def, " = Dano:", final_dmg)
+	
+	target_vitals.take_damage(final_dmg)
 	current_cooldown = attack_cooldown
+
+func get_stats() -> Dictionary:
+	return mob_data
 
 func _on_death() -> void:
 	print("[Mob ", name, "] Morreu!")

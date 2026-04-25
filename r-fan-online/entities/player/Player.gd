@@ -99,6 +99,9 @@ func _ready() -> void:
 	hud_instance.add_child(equip_ui)
 	equip_ui.setup(equipment_manager)
 	
+	# Inicializar Velocidade
+	update_movement_speed()
+	
 	# Inicializar MacroUI
 	var macro_scene = preload("res://ui/macro/MacroUI.tscn")
 	var macro_ui = macro_scene.instantiate()
@@ -145,10 +148,14 @@ func _ready() -> void:
 			var p_level = char_data.get("level", 1)
 			var p_exp = char_data.get("exp", 0)
 			ExperienceManager.setup_player(p_level, p_exp)
+			# Inicializa os status base baseados na classe e level carregados
+			StatusManager.initialize_for_player()
 			break
 	
 	if not character_found:
 		_give_initial_items()
+		# Mesmo sem personagem salvo, inicializa o StatusManager com os dados padrão do GameManager
+		StatusManager.initialize_for_player()
 
 	# Conectar sinais de XP ao HUD
 	ExperienceManager.exp_changed.connect(hud_instance.update_exp)
@@ -703,19 +710,30 @@ func _physics_process(delta: float) -> void:
 # --- Sistema de Ataque Básico (Melee) ---
 func perform_attack() -> void:
 	set_in_combat()
-	if not class_stats:
-		print("Player não tem classe definida!")
-		return
-		
+	
 	if not current_target:
 		print("Selecione um alvo primeiro (Tab)")
 		return
 		
 	var dist = global_position.distance_to(current_target.global_position)
 	if dist <= base_attack_range:
-		print("Player AUTO ATAQUE em " + current_target.name + " com " + str(class_stats.base_physical_attack) + " de dano.")
-		if current_target.has_node("VitalsComponent"):
-			current_target.get_node("VitalsComponent").take_damage(class_stats.base_physical_attack)
+		# Pega o ataque total do sistema de status centralizado
+		var total_atk = StatusManager.get_total_status()["ataque"]
+		
+		print("Player AUTO ATAQUE em " + current_target.name + " com " + str(total_atk) + " de dano.")
+		
+		# Procura o componente de vida do alvo (pode ser Vitals ou Health)
+		var target_vitals = current_target.get_node_or_null("VitalsComponent")
+		if not target_vitals: target_vitals = current_target.get_node_or_null("HealthComponent")
+		
+		if target_vitals:
+			# Calcula redução de defesa do alvo (se houver)
+			var target_def = 10 # Padrão
+			if current_target.has_method("get_stats"):
+				target_def = current_target.get_stats().get("defesa", 10)
+			
+			var final_dmg = int(max(1, total_atk - target_def))
+			target_vitals.take_damage(final_dmg)
 	else:
 		print("Alvo está muito longe! (" + str(snapped(dist, 0.1)) + "m)")
 
@@ -734,3 +752,14 @@ func _save_player_to_db():
 	}
 	AccountManager.update_character_data(GameManager.player_name, data_to_save)
 	print("[DB] Progresso de ", GameManager.player_name, " salvo automaticamente.")
+
+func update_movement_speed():
+	var speed_val = MovementSpeedManager.get_speed()
+	var bonus_pct = MovementSpeedManager.get_bonus_percent(speed_val)
+	var multiplier = 1.0 + (bonus_pct / 100.0)
+	
+	# Velocidades base (RF costuma ser 5 e 12)
+	walk_speed = 5.0 * multiplier
+	run_speed = 12.0 * multiplier
+	
+	print("[Player] Velocidade atualizada: Walk=", walk_speed, " Run=", run_speed, " (", bonus_pct, "%)")

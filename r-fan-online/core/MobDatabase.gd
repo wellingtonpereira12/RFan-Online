@@ -26,7 +26,9 @@ func reload() -> void:
 		return
 
 	MOBS = json.data
-	print("[MobDatabase] ", MOBS.size(), " mobs carregados do banco de dados.")
+	print("[MobDatabase] Banco de dados recarregado com sucesso! ", MOBS.size(), " mobs prontos.")
+	if MOBS.has("bellato_guard"):
+		print("[MobDatabase] DEBUG: HP do Guardião Bellato no JSON atual: ", MOBS["bellato_guard"]["hp"])
 
 func get_mob(key: String) -> Dictionary:
 	if MOBS.has(key):

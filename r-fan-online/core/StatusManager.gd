@@ -9,12 +9,24 @@ var player_class: String = "melee"
 
 var current_total_stats: Dictionary = {}
 
+# Mapeamento de Classes do Jogo -> Arquétipos do JSON
+const CLASS_MAPPING = {
+	"warrior": "melee",
+	"ranger": "range",
+	"spiritualist": "spiritualist",
+	"specialist": "specialist"
+}
+
 func _ready():
 	_load_player_data()
 	calculate_status()
-	# Conectar sinais globais de level up quando disponíveis
 	if ExperienceManager:
 		ExperienceManager.level_up.connect(func(_lv): calculate_status())
+
+func initialize_for_player():
+	print("[StatusManager] Inicializando para o jogador...")
+	_load_player_data()
+	calculate_status()
 
 func _load_player_data():
 	# 1. Carrega as configurações globais de classe (Base + Scaling)
@@ -24,20 +36,17 @@ func _load_player_data():
 		all_class_configs = JSON.parse_string(file.get_as_text())
 		print("[StatusManager] Configurações de classe carregadas.")
 
-	# 2. Pega a classe atual do GameManager (definida no login/seleção)
-	player_class = GameManager.player_class.to_lower()
+	# 2. Pega a classe atual do GameManager e traduz para o arquétipo
+	var raw_class = GameManager.player_class.to_lower()
+	player_class = CLASS_MAPPING.get(raw_class, "melee")
 	
 	# Aplica os dados da classe
 	if all_class_configs.has(player_class):
 		base_stats = all_class_configs[player_class]["base"]
 		scaling_config = all_class_configs[player_class]["scaling"]
-		print("[StatusManager] Sincronizado com a classe do GameManager: ", player_class)
+		print("[StatusManager] Sincronizado: Classe ", raw_class, " -> Arquétipo ", player_class)
 	else:
-		# Fallback para melee se a classe não for encontrada
-		if all_class_configs.has("melee"):
-			base_stats = all_class_configs["melee"]["base"]
-			scaling_config = all_class_configs["melee"]["scaling"]
-			print("[StatusManager] Aviso: Classe '", player_class, "' não encontrada. Usando Melee como padrão.")
+		print("[StatusManager] Erro: Arquétipo '", player_class, "' não encontrado!")
 
 func calculate_status():
 	# 1. Começa com a Base (que pode escalar com o Level)

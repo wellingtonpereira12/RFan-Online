@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="RFan online"
-run/main_scene="res://ui/menu/LoginUI.tscn"
+run/main_scene="res://levels/TestWorld.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -27,6 +27,7 @@ SettingsManager="*res://core/SettingsManager.gd"
 SkillManager="*res://core/SkillManager.gd"
 StatusManager="*res://core/StatusManager.gd"
 DamageTextManager="*res://core/DamageTextManager.gd"
+MovementSpeedManager="*res://core/MovementSpeedManager.gd"
 
 [input]
 

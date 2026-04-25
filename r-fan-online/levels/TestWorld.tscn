@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://components/VitalsComponent.gd" id="2_health"]
 [ext_resource type="Script" path="res://entities/enemies/Enemy.gd" id="3_enemygd"]
 [ext_resource type="Shader" path="res://shaders/grid.gdshader" id="4_gridshader"]
+[ext_resource type="Script" path="res://levels/TestWorld.gd" id="5_worldgd"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_floor"]
 render_priority = 0
@@ -23,6 +24,7 @@ size = Vector3(50, 1, 50)
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_enemy"]
 
 [node name="TestWorld" type="Node3D"]
+script = ExtResource("5_worldgd")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 10, 0)
@@ -41,18 +43,3 @@ surface_material_override/0 = SubResource("ShaderMaterial_floor")
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[node name="DummyEnemy" type="CharacterBody3D" parent="." groups=["enemies"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
-script = ExtResource("3_enemygd")
-
-[node name="VitalsComponent" type="Node" parent="DummyEnemy"]
-script = ExtResource("2_health")
-max_health = 500
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="DummyEnemy"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("CapsuleShape3D_enemy")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="DummyEnemy"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_enemy")

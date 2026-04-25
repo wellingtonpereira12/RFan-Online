@@ -110,7 +110,9 @@ func update_ui():
 	def_label.text = "Defesa Total: %d" % stats["defesa"]
 	block_label.text = "Chance de Bloqueio: %d%%" % stats["block"]
 	
-	ms_label.text = "Vel. Movimento: %.1f" % stats["move_speed"]
+	var speed_val = MovementSpeedManager.get_speed()
+	var bonus_pct = MovementSpeedManager.get_bonus_percent(speed_val)
+	ms_label.text = "Vel. Movimento: %.1f (+%d%%)" % [speed_val, bonus_pct]
 	as_label.text = "Vel. Ataque: %.1f" % stats["attack_speed"]
 	
 	acc_label.text = "Chance de Acerto: %d%%" % stats["accuracy"]

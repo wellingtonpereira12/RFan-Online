@@ -30,6 +30,10 @@ func _ready() -> void:
 	call_deferred("sync_with_status")
 
 func sync_with_status():
+	# SÓ sincroniza com o StatusManager se for o Player!
+	if not get_parent().is_in_group("players"):
+		return
+
 	var stats = StatusManager.get_total_status()
 	if not stats.is_empty():
 		max_hp = stats["hp"]
