@@ -12,6 +12,9 @@
 			"accuracy": 80,
 			"dodge": 5,
 			"debuff_resist": 5,
+			"hp_regen": 1.0,
+			"sp_regen": 1.0,
+			"fp_regen": 1.0,
 			"elemental": {
 				"fire": 5,
 				"water": 5,
@@ -40,6 +43,9 @@
 			"accuracy": 70,
 			"dodge": 10,
 			"debuff_resist": 25,
+			"hp_regen": 1.0,
+			"sp_regen": 1.0,
+			"fp_regen": 1.0,
 			"elemental": {
 				"fire": 15,
 				"water": 15,
@@ -68,6 +74,9 @@
 			"accuracy": 95,
 			"dodge": 20,
 			"debuff_resist": 10,
+			"hp_regen": 1.0,
+			"sp_regen": 1.0,
+			"fp_regen": 1.0,
 			"elemental": {
 				"fire": 10,
 				"water": 10,
@@ -96,6 +105,9 @@
 			"accuracy": 85,
 			"dodge": 12,
 			"debuff_resist": 15,
+			"hp_regen": 1.0,
+			"sp_regen": 1.0,
+			"fp_regen": 1.0,
 			"elemental": {
 				"fire": 8,
 				"water": 8,

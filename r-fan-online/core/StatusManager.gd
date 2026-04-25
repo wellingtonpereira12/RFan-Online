@@ -21,7 +21,7 @@ func _ready():
 	_load_player_data()
 	calculate_status()
 	if ExperienceManager:
-		ExperienceManager.level_up.connect(func(_lv): calculate_status())
+		ExperienceManager.level_up.connect(func(_lv): calculate_status(true))
 
 func initialize_for_player():
 	print("[StatusManager] Inicializando para o jogador...")
@@ -48,7 +48,7 @@ func _load_player_data():
 	else:
 		print("[StatusManager] Erro: Arquétipo '", player_class, "' não encontrado!")
 
-func calculate_status():
+func calculate_status(refill: bool = false):
 	# 1. Começa com a Base (que pode escalar com o Level)
 	var lv = 1
 	if ExperienceManager: lv = ExperienceManager.current_level
@@ -68,7 +68,7 @@ func calculate_status():
 	if player:
 		var vitals = player.get_node_or_null("VitalsComponent")
 		if vitals and vitals.has_method("sync_with_status"):
-			vitals.sync_with_status()
+			vitals.sync_with_status(refill)
 	
 	status_updated.emit()
 
@@ -79,7 +79,7 @@ func _apply_equipment_bonuses():
 	
 	# Conecta ao sinal de mudança para recalcular automaticamente se ainda não estiver conectado
 	if not equip_manager.equipment_changed.is_connected(calculate_status):
-		equip_manager.equipment_changed.connect(func(_slot, _id): calculate_status())
+		equip_manager.equipment_changed.connect(func(_slot, _id): calculate_status(false))
 	
 	var equipped_items = equip_manager.get_equipped_items_data()
 	for item in equipped_items:

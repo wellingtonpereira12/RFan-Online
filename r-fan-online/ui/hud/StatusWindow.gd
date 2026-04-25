@@ -94,15 +94,15 @@ func update_ui():
 			current_sp = vitals.sp
 			current_fp = vitals.fp
 	
-	hp_label.text = "HP: %d / %d" % [current_hp, stats["hp"]]
+	hp_label.text = "HP: %d / %d (Regen: %.1f%%)" % [current_hp, stats["hp"], stats.get("hp_regen", 1.0)]
 	hp_bar.max_value = stats["hp"]
 	hp_bar.value = current_hp
 	
-	sp_label.text = "SP: %d / %d" % [current_sp, stats["sp"]]
+	sp_label.text = "SP: %d / %d (Regen: %.1f%%)" % [current_sp, stats["sp"], stats.get("sp_regen", 1.0)]
 	sp_bar.max_value = stats["sp"]
 	sp_bar.value = current_sp
 	
-	fp_label.text = "FP: %d / %d" % [current_fp, stats["fp"]]
+	fp_label.text = "FP: %d / %d (Regen: %.1f%%)" % [current_fp, stats["fp"], stats.get("fp_regen", 1.0)]
 	fp_bar.max_value = stats["fp"]
 	fp_bar.value = current_fp
 	

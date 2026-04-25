@@ -31,14 +31,11 @@ func process_action(slot_index: int, action_data, skill_bar) -> void:
 
 func _apply_potion_effect(data: Dictionary):
 	if data["efeito"] == "hp" or data["efeito"] == "hp_sp":
-		vitals.hp = clampi(vitals.hp + data["valor"], 0, vitals.max_hp)
-		vitals.hp_changed.emit(vitals.hp, vitals.max_hp)
+		vitals.restore_health(data["valor"])
 	if data["efeito"] == "sp" or data["efeito"] == "hp_sp":
-		vitals.sp = clampi(vitals.sp + data["valor"], 0, vitals.max_sp)
-		vitals.sp_changed.emit(vitals.sp, vitals.max_sp)
+		vitals.restore_sp(data["valor"])
 	if data["efeito"] == "fp":
-		vitals.fp = clampi(vitals.fp + data["valor"], 0, vitals.max_fp)
-		vitals.fp_changed.emit(vitals.fp, vitals.max_fp)
+		vitals.restore_fp(data["valor"])
 	_send_system_msg("Você usou [color=cyan]" + data["nome"] + "[/color].")
 
 func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
@@ -114,14 +111,16 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 		target_stats = {"dodge": 5, "block": 5, "defesa": 10}
 
 	# 1. Chance de Acerto (Accuracy vs Dodge)
-	var hit_chance = my_stats["accuracy"] - target_stats["dodge"]
+	var target_dodge = target_stats.get("dodge", 5)
+	var hit_chance = my_stats["accuracy"] - target_dodge
 	if randf_range(0, 100) > hit_chance:
 		DamageTextManager.display_damage(0, DamageTextManager.DamageType.MISS, target.global_position)
 		_send_system_msg("[color=gray]Você errou o golpe![/color]")
 		return
 
 	# 2. Chance de Bloqueio (Shield Block)
-	if randf_range(0, 100) < target_stats["block"]:
+	var target_block = target_stats.get("block", 0)
+	if randf_range(0, 100) < target_block:
 		DamageTextManager.display_damage(0, DamageTextManager.DamageType.BLOCK, target.global_position)
 		_send_system_msg("[color=blue]O alvo bloqueou o ataque![/color]")
 		return
@@ -136,7 +135,8 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 	var raw_dmg = (ataque_total + skill["dano"]) * skill_mult
 	
 	# Redução de Defesa
-	var final_dmg = int(max(1, raw_dmg - target_stats["defesa"]))
+	var target_def = target_stats.get("defesa", 0)
+	var final_dmg = int(max(1, raw_dmg - target_def))
 	
 	# 4. Chance de Crítico (Fixo 10% por enquanto, ou vindo de stats)
 	var is_crit = randf_range(0, 100) < 10.0

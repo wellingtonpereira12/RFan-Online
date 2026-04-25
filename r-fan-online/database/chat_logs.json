@@ -3931,15 +3931,249 @@
 		"text": "LEVEL UP! Você agora é nível 1"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Velocidade ajustada para [color=yellow]2.0 (+10%)[/color]"
 	},
 	{
-		"channel": 1,
+		"channel": 1.0,
 		"race": "Bellato",
 		"sender": "SISTEMA",
 		"text": "Velocidade ajustada para [color=yellow]7.0 (+60%)[/color]"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 9m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 9m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 7m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 6m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (1.4s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 27m / Max: 25m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 28m / Max: 25m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 26m / Max: 25m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (2.3s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (2.1s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte Rápido[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte Rápido[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (1.0s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (0.7s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (0.4s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Jato de Água[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (1.4s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 13m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 13m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 13m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Habilidade em espera... (1.5s)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Jato de Água[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=gray]Você errou o golpe![/color]"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte de Vento[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 14m / Max: 3m)"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte Rápido[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Jato de Água[/color]!"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=gray]Você errou o golpe![/color]"
+	},
+	{
+		"channel": 1.0,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte de Vento[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "[color=yellow]Alvo fora de alcance![/color] (Dist: 14m / Max: 3m)"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte Rápido[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Disparo Preciso[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Corte de Vento[/color]!"
+	},
+	{
+		"channel": 1,
+		"race": "Bellato",
+		"sender": "SISTEMA",
+		"text": "Você usou [color=orange]Jato de Água[/color]!"
 	}
 ]
