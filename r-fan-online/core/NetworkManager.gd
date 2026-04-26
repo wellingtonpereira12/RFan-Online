@@ -43,7 +43,7 @@ func _process(_delta):
 	elif state == WebSocketPeer.STATE_CLOSED:
 		if is_connected_to_server:
 			is_connected_to_server = false
-			print("[Network] Conexão perdida.")
+			print("[Network] Conexao perdida.")
 
 func login():
 	send_data({
@@ -73,7 +73,8 @@ func send_data(data: Dictionary):
 
 func _on_data_received(json_str: String):
 	var data = JSON.parse_string(json_str)
-	if not data: return
+	if not data:
+		return
 	
 	match data.type:
 		"welcome", "pos_update", "map_change":
@@ -86,9 +87,11 @@ func _on_data_received(json_str: String):
 					GameManager.current_map_id = data.map_id
 					if maps_data.has(data.map_id):
 						GameManager.current_map_name = maps_data[data.map_id]["nome"]
+						GameManager.is_safe_zone = maps_data[data.map_id].get("safe_zone", false)
 					_clear_all_dropped_items()
 					_clear_all_mobs()
-					map_changed.emit(data.map_id)
+					print("[Network] Mapa alterado para: ", data.map_id)
+					map_changed.emit.call_deferred(data.map_id)
 		
 		"map_sync":
 			_sync_other_players(data.players)
@@ -102,6 +105,9 @@ func _on_data_received(json_str: String):
 		
 		"mob_remove":
 			_handle_mob_remove(int(data.uid))
+		
+		"mob_die":
+			_handle_mob_die(int(data.uid))
 		
 		"entity_damage":
 			_handle_entity_damage(data)
@@ -119,7 +125,8 @@ func _sync_other_players(player_list: Array):
 	var current_ids = []
 	for p_data in player_list:
 		var id = p_data.id
-		if id == GameManager.player_name: continue
+		if id == GameManager.player_name:
+			continue
 		
 		current_ids.append(id)
 		
@@ -159,7 +166,8 @@ func _sync_items(item_list: Array):
 
 func _handle_item_drop(item_data: Dictionary):
 	var uid = int(item_data.uid)
-	if dropped_items.has(uid): return
+	if dropped_items.has(uid):
+		return
 	
 	var item_scene = preload("res://entities/items/DroppedItem.tscn")
 	var new_item = item_scene.instantiate()
@@ -201,9 +209,10 @@ func _sync_mobs(mob_list: Array):
 		if not other_mobs.has(uid):
 			_handle_mob_spawn(m_data)
 		else:
-			# Atualiza posição (opcional se mobs se moverem no servidor)
-			var pos = Vector3(m_data.pos.x, m_data.pos.y, m_data.pos.z)
-			other_mobs[uid].global_position = pos
+			# O servidor atual nao simula/desloca mobs em tempo real.
+			# Reaplicar a posicao do map_sync faz o mob "teleportar"
+			# de volta ao spawn sempre que a IA local o move.
+			pass
 	
 	var to_remove = []
 	for uid in other_mobs.keys():
@@ -217,9 +226,14 @@ func _sync_mobs(mob_list: Array):
 
 func _handle_mob_spawn(mob_data: Dictionary):
 	var uid = int(mob_data.uid)
-	if other_mobs.has(uid): return
+	if other_mobs.has(uid):
+		return
 	
-	var mob_scene = preload("res://entities/enemies/AdvancedMob.tscn")
+	var mob_scene = load("res://entities/enemies/AdvancedMob.tscn")
+	if not mob_scene:
+		print("[Network] ERRO: Cena AdvancedMob.tscn nao encontrada ou corrompida!")
+		return
+		
 	var new_mob = mob_scene.instantiate()
 	get_tree().root.add_child(new_mob)
 	
@@ -227,12 +241,11 @@ func _handle_mob_spawn(mob_data: Dictionary):
 	new_mob.global_position = pos
 	new_mob.set_meta("mob_uid", uid)
 	
-	# Setup estatísticas do MobDatabase
 	if new_mob.has_method("setup_from_db"):
 		new_mob.setup_from_db(mob_data.mob_id)
 	
 	other_mobs[uid] = new_mob
-	print("[Network] Novo mob visível: ", mob_data.mob_id, " (UID: ", uid, ")")
+	print("[Network] Novo mob visivel: ", mob_data.mob_id, " (UID: ", uid, ")")
 
 func _clear_all_mobs():
 	for uid in other_mobs.keys():
@@ -244,9 +257,16 @@ func _handle_mob_remove(uid: int):
 	if other_mobs.has(uid):
 		var mob_node = other_mobs[uid]
 		if is_instance_valid(mob_node):
-			mob_node.queue_free()
+			if not mob_node.has_meta("is_dying"):
+				mob_node.queue_free()
 		other_mobs.erase(uid)
 		print("[Network] Mob removido do mapa: ", uid)
+
+func _handle_mob_die(uid: int):
+	if other_mobs.has(uid):
+		var mob_node = other_mobs[uid]
+		if is_instance_valid(mob_node) and mob_node.has_method("_on_death"):
+			mob_node._on_death()
 
 func _handle_entity_damage(data: Dictionary):
 	var victim_uid = data.victim_uid
@@ -261,21 +281,16 @@ func _handle_entity_damage(data: Dictionary):
 		if other_mobs.has(uid):
 			victim_node = other_mobs[uid]
 	else:
-		# Player victim
 		if victim_uid == GameManager.player_name:
-			# Sou eu! Mas o dano já foi aplicado localmente ou será aplicado pelo server?
-			# No Godot, dano sofrido por mobs já é local.
-			# Aqui evitamos aplicar de novo se formos nós.
 			return
 		elif other_players.has(victim_uid):
 			victim_node = other_players[victim_uid]
 	
 	if is_instance_valid(victim_node):
-		# Mostra o dano visualmente (se houver componente de vida)
 		var vitals = victim_node.get_node_or_null("VitalsComponent")
-		if not vitals: vitals = victim_node.get_node_or_null("HealthComponent")
+		if not vitals:
+			vitals = victim_node.get_node_or_null("HealthComponent")
 		
 		if vitals:
-			# Aplica o dano para sincronizar as barrinhas de HP
 			vitals.take_damage(damage)
 			print("[Network] Dano Sincronizado: ", attacker_id, " causou ", damage, " em ", victim_node.name)

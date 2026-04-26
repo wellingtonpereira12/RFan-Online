@@ -65,7 +65,7 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 
 	# Validação de Alvo
 	var target = player.current_target
-	if not target:
+	if not is_instance_valid(target):
 		_send_system_msg("Selecione um alvo primeiro!")
 		return
 
@@ -100,6 +100,9 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 	# Delay curto para "viagem" do golpe
 	if is_range:
 		await get_tree().create_timer(0.2).timeout
+
+	if not is_instance_valid(target):
+		return
 	
 	# --- CÁLCULO DE ACERTO / EVASÃO ---
 	var my_stats = StatusManager.get_total_status()
@@ -152,6 +155,16 @@ func _handle_skill_usage(slot_index: int, skill: Dictionary, skill_bar):
 		if not target_vitals: target_vitals = target.get_node_or_null("HealthComponent")
 		
 		if target_vitals:
+			var victim_uid = target.get_meta("mob_uid", -1)
+			if victim_uid != -1:
+				NetworkManager.send_data({
+					"type": "entity_damage",
+					"victim_uid": victim_uid,
+					"victim_type": "mob",
+					"damage": final_dmg,
+					"skill_key": skill_key
+				})
+
 			target_vitals.take_damage(final_dmg, damage_type)
 			SkillManager.add_xp(skill["key"])
 

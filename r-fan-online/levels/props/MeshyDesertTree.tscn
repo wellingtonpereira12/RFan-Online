@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="GDScript_1"]
+script/source = "extends Node3D
+
+func _ready():
+	var path = \"res://assets/models/props/desert_tree/desert_tree.glb\"
+	if FileAccess.file_exists(path):
+		var scene = load(path)
+		if scene:
+			var instance = scene.instantiate()
+			add_child(instance)
+			instance.scale = Vector3(1.0, 1.0, 1.0)
+	else:
+		# Fallback visual se o modelo sumir
+		var mesh_instance = MeshInstance3D.new()
+		var cyl = CylinderMesh.new()
+		cyl.height = 3.0
+		mesh_instance.mesh = cyl
+		add_child(mesh_instance)
+"
+
+[node name="MeshyDesertTree" type="Node3D"]
+
+[node name="TreeLoader" type="Node3D" parent="."]
+script = SubResource("GDScript_1")

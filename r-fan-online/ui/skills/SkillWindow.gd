@@ -18,9 +18,11 @@ const SKILL_SLOT_SCENE_PATH = "res://ui/skills/SkillSlot.tscn"
 # Variáveis para Movimentação
 var is_dragging = false
 var drag_offset = Vector2.ZERO
+var current_tab: String = "melee"
 
 func _ready() -> void:
 	visible = false
+	_apply_tab_labels()
 	melee_btn.pressed.connect(_on_melee_tab_pressed)
 	range_btn.pressed.connect(_on_range_tab_pressed)
 	force_btn.pressed.connect(_on_force_tab_pressed)
@@ -40,6 +42,11 @@ func _ready() -> void:
 	
 	# Carrega aba inicial
 	_on_melee_tab_pressed()
+
+func _apply_tab_labels():
+	melee_btn.text = "Melee"
+	force_btn.text = "Magia"
+	range_btn.text = "Classe"
 
 func _setup_race_ui():
 	var race = GameManager.player_race
@@ -61,18 +68,21 @@ func toggle():
 			_update_current_tab()
 
 func _update_current_tab():
-	if elemental_tabs.visible:
-		_on_force_tab_pressed()
-	elif range_btn.button_pressed: # No Godot 4 Button doesn't have button_pressed unless toggle_mode
-		pass # Por simplicidade vamos apenas resetar pra melee se houver dúvida
-	else:
-		_on_melee_tab_pressed()
+	match current_tab:
+		"force":
+			_on_force_tab_pressed()
+		"range":
+			_on_range_tab_pressed()
+		_:
+			_on_melee_tab_pressed()
 
 func _on_melee_tab_pressed():
+	current_tab = "melee"
 	elemental_tabs.visible = false
 	_update_list("melee")
 
 func _on_range_tab_pressed():
+	current_tab = "range"
 	elemental_tabs.visible = false
 	_update_list("range")
 
@@ -80,6 +90,7 @@ func _on_force_tab_pressed():
 	if GameManager.player_race == "Accretia":
 		_on_melee_tab_pressed()
 		return
+	current_tab = "force"
 	elemental_tabs.visible = true
 	_update_force_list_by_race_type()
 

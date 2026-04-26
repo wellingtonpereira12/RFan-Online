@@ -1,5 +1,6 @@
 extends Panel
 
+@onready var icon_texture: TextureRect = $IconTexture
 @onready var icon_title: Label = $IconTitle
 @onready var keybind_label: Label = $KeybindLabel
 @onready var cooldown_overlay: ColorRect = $CooldownOverlay
@@ -28,6 +29,7 @@ func set_action(data: Variant) -> void:
 	if data != null and typeof(data) != TYPE_NIL and (typeof(data) == TYPE_OBJECT or typeof(data) == TYPE_DICTIONARY):
 		if typeof(data) == TYPE_DICTIONARY:
 			icon_title.text = data.get("nome", "Item/Ação")
+			_load_icon(data.get("icon", ""))
 		else:
 			if data.get("skill_name") != null:
 				icon_title.text = data.get("skill_name")
@@ -35,6 +37,7 @@ func set_action(data: Variant) -> void:
 				icon_title.text = data.get("name")
 			else:
 				icon_title.text = "Item/Ação"
+			_load_icon("")
 		
 		color_rect.color = Color(0.2, 0.4, 0.6, 1) # Slot preenchido fica azul escuro
 	else:
@@ -43,12 +46,19 @@ func set_action(data: Variant) -> void:
 func clear_slot() -> void:
 	action_data = null
 	icon_title.text = ""
+	icon_texture.texture = null
 	color_rect.color = Color(0.15, 0.15, 0.15, 1)
 	is_on_cooldown = false
 	current_cooldown = 0.0
 	cooldown_overlay.anchor_top = 1.0
 	cooldown_label.visible = false
 	if amount_label: amount_label.visible = false
+
+func _load_icon(icon_path: String) -> void:
+	if icon_path != "" and ResourceLoader.exists(icon_path):
+		icon_texture.texture = load(icon_path)
+	else:
+		icon_texture.texture = null
 
 func trigger_cooldown(time: float) -> void:
 	if action_data == null: return

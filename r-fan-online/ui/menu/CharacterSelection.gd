@@ -73,8 +73,14 @@ func _on_play_character(data: Dictionary):
 	GameManager.player_race = data["race"]
 	GameManager.player_class = data["class"]
 	
-	# Vai para o mundo de teste
-	get_tree().change_scene_to_file("res://levels/TestWorld.tscn")
+	# Define o mapa inicial baseado na raça
+	match data["race"]:
+		"Accretia": GameManager.current_map_id = "accretia_hq"
+		"Cora":     GameManager.current_map_id = "cora_hq"
+		"Bellato":  GameManager.current_map_id = "bellato_hq"
+		
+	# Vai para o mundo principal (que gerencia o carregamento de mapas)
+	get_tree().change_scene_to_file("res://world/World.tscn")
 
 func _on_create_new_pressed():
 	get_tree().change_scene_to_file("res://ui/menu/RaceSelection.tscn")

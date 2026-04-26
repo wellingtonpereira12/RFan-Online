@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="RFan online"
-run/main_scene="res://levels/TestWorld.tscn"
+run/main_scene="res://world/World.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -30,6 +30,7 @@ DamageTextManager="*res://core/DamageTextManager.gd"
 MovementSpeedManager="*res://core/MovementSpeedManager.gd"
 AttackSpeedManager="*res://core/AttackSpeedManager.gd"
 NetworkManager="*res://core/NetworkManager.gd"
+MapDatabase="*res://core/MapDatabase.gd"
 
 [input]
 

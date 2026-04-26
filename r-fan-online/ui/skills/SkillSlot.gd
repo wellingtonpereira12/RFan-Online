@@ -18,11 +18,13 @@ signal skill_right_clicked(data: Dictionary)
 func _ready():
 	SkillManager.skill_xp_updated.connect(_on_skill_xp_updated)
 	SkillManager.skill_leveled_up.connect(_on_skill_leveled_up)
+	ExperienceManager.level_up.connect(_on_player_level_up)
 
 func setup(data: Dictionary):
 	skill_data = data
 	name_label.text = data["nome"]
 	desc_label.text = data["descricao"]
+	_load_icon(data.get("icon", ""))
 	
 	var cost_type = "FP" if data.get("category") == "range" else "SP"
 	var cost_val = data.get("custo_fp") if cost_type == "FP" else data.get("custo_sp")
@@ -30,17 +32,24 @@ func setup(data: Dictionary):
 	
 	info_label.text = "Dano: %d | %s: %d | CD: %.1fs%s" % [data["dano"], cost_type, cost_val, data["cooldown"], range_info]
 	
-	# Checa nível
-	var player_level = ExperienceManager.current_level
-	if player_level < data["nivel_minimo"]:
-		is_locked = true
-		lock_overlay.visible = true
-		lock_label.text = "LEVEL " + str(data["nivel_minimo"])
-	else:
-		is_locked = false
-		lock_overlay.visible = false
-	
+	_refresh_lock_state()
 	_update_level_ui()
+
+func _load_icon(icon_path: String) -> void:
+	if icon_path != "" and ResourceLoader.exists(icon_path):
+		icon_rect.texture = load(icon_path)
+	else:
+		icon_rect.texture = null
+
+func _refresh_lock_state() -> void:
+	if skill_data.is_empty():
+		return
+
+	var player_level = ExperienceManager.current_level
+	is_locked = player_level < skill_data["nivel_minimo"]
+	lock_overlay.visible = is_locked
+	if is_locked:
+		lock_label.text = "LEVEL " + str(skill_data["nivel_minimo"])
 
 func _update_level_ui():
 	var status = SkillManager.get_skill_status(skill_data["key"])
@@ -65,6 +74,9 @@ func _on_skill_xp_updated(skill_key: String, current_xp: int, required_xp: int):
 func _on_skill_leveled_up(skill_key: String, new_level: int):
 	if skill_data.get("key") == skill_key:
 		_update_level_ui()
+
+func _on_player_level_up(_new_level: int):
+	_refresh_lock_state()
 
 func _get_drag_data(_at_position):
 	if is_locked: return null

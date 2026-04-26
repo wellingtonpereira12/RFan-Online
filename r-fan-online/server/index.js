@@ -17,6 +17,30 @@ let nextMobId = 1;
 
 console.log(`[RF-Server] Servidor rodando na porta ${PORT}`);
 
+// --- INICIALIZAÇÃO DE MOBS NO MAPA ---
+function initDefaultMobs() {
+    console.log("[Server] Populando mapas com mobs iniciais...");
+    
+    // Spawnar 15 Young Flyms em Cora HQ
+    for (let i = 0; i < 15; i++) {
+        const uid = nextMobId++;
+        const mob = {
+            uid: uid,
+            mob_id: 'young_flym',
+            map_id: 'cora_hq',
+            pos: {
+                x: (Math.random() - 0.5) * 600,
+                y: 0,
+                z: (Math.random() - 0.5) * 600
+            }
+        };
+        mobs.set(uid, mob);
+    }
+    console.log(`[Server] 15 Young Flyms spawnados em cora_hq.`);
+}
+
+// initDefaultMobs(); // Desativado a pedido do usuário
+
 wss.on('connection', (ws) => {
     let playerId = null;
 
@@ -29,14 +53,14 @@ wss.on('connection', (ws) => {
                 players.set(playerId, {
                     id: playerId,
                     name: data.name,
-                    map_id: 'novus_hq',
+                    map_id: 'cora_hq',
                     pos: { x: 0, y: 0, z: 0 },
                     speed_val: 1.0,
                     ws: ws
                 });
                 console.log(`[Login] ${playerId} entrou no mundo.`);
-                sendToPlayer(playerId, { type: 'welcome', map_id: 'novus_hq', pos: { x: 0, y: 0, z: 0 } });
-                broadcastMapState('novus_hq');
+                sendToPlayer(playerId, { type: 'welcome', map_id: 'cora_hq', pos: { x: 0, y: 0, z: 0 } });
+                broadcastMapState('cora_hq');
                 break;
 
             case 'move':
@@ -55,14 +79,27 @@ wss.on('connection', (ws) => {
                 break;
 
             case 'admin_map':
-                if (players.has(playerId) && maps[data.target_map]) {
-                    const p = players.get(playerId);
-                    const oldMap = p.map_id;
-                    p.map_id = data.target_map;
-                    p.pos = { ...maps[data.target_map].spawn };
-                    sendToPlayer(playerId, { type: 'map_change', map_id: p.map_id, pos: p.pos });
-                    broadcastMapState(oldMap);
-                    broadcastMapState(p.map_id);
+                if (players.has(playerId)) {
+                    let targetId = data.target_map.toLowerCase();
+                    
+                    // Se não achar o ID exato, tenta prefixo (ex: "cora" -> "cora_hq")
+                    if (!maps[targetId]) {
+                        const found = Object.keys(maps).find(k => k.startsWith(targetId) || maps[k].nome.toLowerCase().includes(targetId));
+                        if (found) targetId = found;
+                    }
+
+                    if (maps[targetId]) {
+                        const p = players.get(playerId);
+                        const oldMap = p.map_id;
+                        p.map_id = targetId;
+                        p.pos = { ...maps[targetId].spawn };
+                        sendToPlayer(playerId, { type: 'map_change', map_id: p.map_id, pos: p.pos });
+                        broadcastMapState(oldMap);
+                        broadcastMapState(p.map_id);
+                        console.log(`[Admin] ${p.name} mudou para o mapa ${targetId}`);
+                    } else {
+                        console.log(`[Admin] Mapa não encontrado: ${data.target_map}`);
+                    }
                 }
                 break;
 
@@ -125,9 +162,17 @@ wss.on('connection', (ws) => {
                     const p = players.get(playerId);
                     const mobUid = parseInt(data.uid);
                     if (mobs.has(mobUid)) {
-                        mobs.delete(mobUid);
-                        broadcastToMap(p.map_id, { type: 'mob_remove', uid: mobUid });
-                        console.log(`[Mob] Mob ${mobUid} morreu no mapa ${p.map_id}`);
+                        // Avisa que o mob morreu para todos (tocar animação)
+                        broadcastToMap(p.map_id, { type: 'mob_die', uid: mobUid });
+                        
+                        // Aguarda 5 segundos antes de remover definitivamente do servidor
+                        setTimeout(() => {
+                            if (mobs.has(mobUid)) {
+                                mobs.delete(mobUid);
+                                broadcastToMap(p.map_id, { type: 'mob_remove', uid: mobUid });
+                                console.log(`[Mob] Mob ${mobUid} removido após animação.`);
+                            }
+                        }, 5000);
                     }
                 }
                 break;
@@ -135,6 +180,14 @@ wss.on('connection', (ws) => {
             case 'entity_damage':
                 if (players.has(playerId)) {
                     const p = players.get(playerId);
+                    const mapData = maps[p.map_id];
+                    
+                    // Validação de Safe Zone
+                    if (mapData && mapData.safe_zone) {
+                        console.log(`[SafeZone] Ataque bloqueado de ${p.name} em ${p.map_id}`);
+                        return;
+                    }
+                    
                     // Retransmite o dano para todos no mapa (para verem HP e números flutuantes)
                     broadcastToMap(p.map_id, {
                         type: 'entity_damage',
@@ -163,6 +216,10 @@ function handleMove(id, inputDir, delta) {
     if (!p) return;
 
     const map = maps[p.map_id];
+    if (!map) {
+        console.error(`[Error] Mapa não encontrado: ${p.map_id}`);
+        return;
+    }
     
     // CÁLCULO DE VELOCIDADE (Integrado com seu sistema 1.0 - 7.0)
     // Cálculo do multiplicador (+1% por cada 0.1 acima de 1.0)
@@ -178,10 +235,12 @@ function handleMove(id, inputDir, delta) {
     let newZ = p.pos.z + (inputDir.z * move_speed * delta);
 
     // VALIDAÇÃO DE LIMITES (SERVER-SIDE)
-    if (newX < map.limits.x_min) newX = map.limits.x_min;
-    if (newX > map.limits.x_max) newX = map.limits.x_max;
-    if (newZ < map.limits.z_min) newZ = map.limits.z_min;
-    if (newZ > map.limits.z_max) newZ = map.limits.z_max;
+    const limits = map.limits || { x_min: -10000, x_max: 10000, z_min: -10000, z_max: 10000 };
+    
+    if (newX < limits.x_min) newX = limits.x_min;
+    if (newX > limits.x_max) newX = limits.x_max;
+    if (newZ < limits.z_min) newZ = limits.z_min;
+    if (newZ > limits.z_max) newZ = limits.z_max;
 
     p.pos.x = newX;
     p.pos.z = newZ;

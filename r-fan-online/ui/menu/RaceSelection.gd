@@ -180,5 +180,11 @@ func _on_play_pressed() -> void:
 	}
 	AccountManager.add_character_to_account(new_char_data)
 	
-	# Inicia o jogo
-	get_tree().change_scene_to_file("res://levels/TestWorld.tscn")
+	# Define o mapa inicial baseado na raça
+	match selected_race:
+		"Accretia": GameManager.current_map_id = "accretia_hq"
+		"Cora":     GameManager.current_map_id = "cora_hq"
+		"Bellato":  GameManager.current_map_id = "bellato_hq"
+		
+	# Inicia o jogo no mundo principal
+	get_tree().change_scene_to_file("res://world/World.tscn")

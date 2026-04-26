@@ -233,30 +233,32 @@ func _ready() -> void:
 			# Lógica de Morte / Respawn
 			vitals_component.died.connect(_on_player_died)
 
-	# Inicializar a primeira Magia em Código pra teste ("Wild Smash") e Injetar Item na SkillBar
-	if combat_component and hud_instance.skill_bar:
-		var wild_smash = SkillResource.new()
-		wild_smash.skill_name = "Golpe Selvagem"
-		wild_smash.sp_cost = 20
-		wild_smash.cooldown = 3.0
-		wild_smash.damage_multiplier = 2.5
-		wild_smash.skill_range = 3.5
-		hud_instance.skill_bar.set_slot_action(1, wild_smash)
-		
-		var fake_potion = SkillResource.new()
-		fake_potion.skill_name = "Pote de HP"
-		fake_potion.cooldown = 10.0
-		hud_instance.skill_bar.set_slot_action(2, fake_potion)
-		
-		# Amarra a barra gráfica ao motor de dano do CombatComponent!
-		hud_instance.skill_bar.action_triggered.connect(func(idx): 
-			var act_data = hud_instance.skill_bar.slots[idx - 1].action_data
-			combat_component.process_action(idx, act_data, hud_instance.skill_bar)
-		)
+	_setup_skill_system()
 
 	# Conectar modos da UI ao Player
 	hud_instance.run_toggled.connect(_on_hud_run_toggled)
 	hud_instance.auto_attack_mode_toggled.connect(_on_hud_auto_mode_toggled)
+
+func _setup_skill_system() -> void:
+	if not combat_component or not hud_instance or not hud_instance.skill_bar:
+		return
+
+	if not hud_instance.skill_bar.action_triggered.is_connected(_on_skill_bar_action_triggered):
+		hud_instance.skill_bar.action_triggered.connect(_on_skill_bar_action_triggered)
+
+	_bind_default_melee_skills()
+
+func _bind_default_melee_skills() -> void:
+	var melee_skills = SkillDatabase.get_all_skills_by_category("melee")
+	melee_skills.sort_custom(func(a: Dictionary, b: Dictionary): return int(a.get("id", 0)) < int(b.get("id", 0)))
+
+	var max_slots = mini(melee_skills.size(), 4)
+	for i in range(max_slots):
+		hud_instance.skill_bar.set_slot_action(i + 1, melee_skills[i])
+
+func _on_skill_bar_action_triggered(idx: int) -> void:
+	var action_data = hud_instance.skill_bar.slots[idx - 1].action_data
+	combat_component.process_action(idx, action_data, hud_instance.skill_bar)
 
 func _setup_navigation():
 	nav_agent = NavigationAgent3D.new()
@@ -521,8 +523,17 @@ func handle_mouse_click(is_double_click: bool) -> void:
 		var hit_obj = result.collider
 		var hit_pos = result.position
 		
+		# Busca recursiva pelo pai que seja um Inimigo
+		var enemy_node = hit_obj
+		while enemy_node and not enemy_node.is_in_group("enemies") and enemy_node != get_tree().root:
+			enemy_node = enemy_node.get_parent()
+		
+		# Se não achou um inimigo na árvore, volta para o objeto original para checar itens/chão
+		if not enemy_node or not enemy_node.is_in_group("enemies"):
+			enemy_node = hit_obj
+		
 		# 0. Clique no Chão (Click-to-Move)
-		if not hit_obj.is_in_group("enemies") and not hit_obj.has_meta("is_dropped_item"):
+		if not enemy_node.is_in_group("enemies") and not hit_obj.has_meta("is_dropped_item"):
 			is_moving_to_click = true
 			click_target_position = hit_pos
 			print("[Click-to-Move] Indo para: ", hit_pos)
@@ -548,16 +559,16 @@ func handle_mouse_click(is_double_click: bool) -> void:
 			return
 
 		# 2. Verifica se clicou em um Inimigo
-		if hit_obj.is_in_group("enemies"):
+		if enemy_node.is_in_group("enemies"):
 			var previous_target = current_target
 			_stop_click_to_move() # Para qualquer movimento de clique anterior
 			
 			# Se o clique for em um alvo DIFERENTE: apenas SELECIONA
-			if hit_obj != previous_target:
-				current_target = hit_obj
-				hud_instance.bind_target(hit_obj)
+			if enemy_node != previous_target:
+				current_target = enemy_node
+				hud_instance.bind_target(enemy_node)
 				is_pursuing_and_attacking = false 
-				print("[Combate] Alvo selecionado: ", hit_obj.name)
+				print("[Combate] Alvo selecionado: ", enemy_node.name)
 				return
 			
 			# Se o clique for no MESMO alvo (segundo clique): ATACA
@@ -712,6 +723,10 @@ func _physics_process(delta: float) -> void:
 
 # --- Sistema de Ataque Básico (Melee) ---
 func perform_attack() -> void:
+	if GameManager.is_safe_zone:
+		print("[SafeZone] Ataques bloqueados nesta área.")
+		return
+		
 	set_in_combat()
 	
 	if not current_target:
@@ -747,7 +762,7 @@ func perform_attack() -> void:
 					"damage": final_dmg
 				})
 			
-			target_vitals.take_damage(final_dmg)
+			target_vitals.take_damage(final_dmg, -1, self)
 	else:
 		print("Alvo está muito longe! (" + str(snapped(dist, 0.1)) + "m)")
 

@@ -300,11 +300,12 @@ func _cmd_map(args: PackedStringArray) -> void:
 		print_to_console("Uso: /map <id>", "red")
 		return
 	
+	var target = args[1].to_lower()
 	NetworkManager.send_data({
 		"type": "admin_map",
-		"target_map": args[1]
+		"target_map": target
 	})
-	print_to_console("Solicitando teleporte para: " + args[1], "yellow")
+	print_to_console("Solicitando teleporte para: " + target, "yellow")
 
 func _cmd_pos(args: PackedStringArray) -> void:
 	if args.size() < 3:

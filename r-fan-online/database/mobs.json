@@ -8,6 +8,7 @@
 		"defesa": 0,
 		"velocidade": 1,
 		"exp": 2500,
+		"escala": 1.2,
 		"drop_list": [
 			{
 				"item": "pote_hp_p",
@@ -28,6 +29,7 @@
 		"defesa": 6,
 		"velocidade": 3.2,
 		"exp": 30,
+		"escala": 1.0,
 		"drop_list": [
 			{
 				"item": "pote_sp_p",
@@ -48,6 +50,7 @@
 		"defesa": 10,
 		"velocidade": 2.5,
 		"exp": 45,
+		"escala": 1.0,
 		"drop_list": [
 			{
 				"item": "pote_fp",
@@ -68,6 +71,7 @@
 		"defesa": 15,
 		"velocidade": 4.5,
 		"exp": 150,
+		"escala": 1.8,
 		"drop_list": [
 			{
 				"item": "pote_hp_m",
@@ -88,6 +92,7 @@
 		"defesa": 40,
 		"velocidade": 3.8,
 		"exp": 1000,
+		"escala": 5.0,
 		"drop_list": [
 			{
 				"item": "super_pote",
@@ -96,6 +101,24 @@
 			{
 				"item": "brinco_agilidade",
 				"chance": 0.5
+			}
+		]
+	},
+	"young_flym": {
+		"id": "young_flym",
+		"nome": "Young Flym",
+		"tipo": "normal",
+		"agressivo": false,
+		"hp": 22,
+		"ataque": 28,
+		"defesa": 8,
+		"velocidade": 4.0,
+		"exp": 10,
+		"escala": 0.1,
+		"drop_list": [
+			{
+				"item": "headset_a",
+				"chance": 0.01
 			}
 		]
 	}

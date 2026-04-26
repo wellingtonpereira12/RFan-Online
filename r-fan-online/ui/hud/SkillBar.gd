@@ -17,6 +17,7 @@ signal status_pressed()
 signal settings_pressed()
 
 func _ready() -> void:
+	add_to_group("skill_bar")
 	# Montador Dinâmico de Vagas (Gera visualmente 1 a 0)
 	for i in range(1, 11):
 		var slot = action_slot_scene.instantiate()
@@ -202,9 +203,9 @@ func toggle_lock(locked: bool) -> void:
 	for slot in slots:
 		slot.is_locked = locked
 
-func set_slot_action(index: int, resource: Resource) -> void:
+func set_slot_action(index: int, data: Variant) -> void:
 	if index >= 1 and index <= 10:
-		slots[index - 1].set_action(resource)
+		slots[index - 1].set_action(data)
 
 func trigger_cooldown(index: int, duration: float) -> void:
 	if index >= 1 and index <= 10:

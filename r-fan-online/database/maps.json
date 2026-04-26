@@ -1,40 +1,101 @@
 {
-  "novus_hq": {
-    "id": "novus_hq",
-    "nome": "Quartel General Novus",
+  "cora_hq": {
+    "id": 1,
+    "nome": "Cora HQ",
+    "tipo": "cidade",
     "level_min": 1,
     "level_max": 50,
-    "spawn": {"x": 0, "y": 0, "z": 0},
-    "limits": {
-      "x_min": -500, "x_max": 500,
-      "z_min": -500, "z_max": 500
-    },
-    "portals": [
-      {
-        "target_map": "settler_shores",
-        "pos": {"x": 100, "y": 0, "z": 100},
-        "range": 5.0,
-        "spawn_at": {"x": -150, "y": 0, "z": -150}
-      }
-    ]
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -1000, "x_max": 1000, "z_min": -1000, "z_max": 1000 },
+    "portals": []
   },
-  "settler_shores": {
-    "id": "settler_shores",
-    "nome": "Praias de Settler",
-    "level_min": 10,
+  "accretia_hq": {
+    "id": 2,
+    "nome": "Accretia HQ",
+    "tipo": "cidade",
+    "level_min": 1,
     "level_max": 50,
-    "spawn": {"x": 0, "y": 0, "z": 0},
-    "limits": {
-      "x_min": -1000, "x_max": 1000,
-      "z_min": -1000, "z_max": 1000
-    },
-    "portals": [
-      {
-        "target_map": "novus_hq",
-        "pos": {"x": -200, "y": 0, "z": -200},
-        "range": 5.0,
-        "spawn_at": {"x": 80, "y": 0, "z": 80}
-      }
-    ]
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -1000, "x_max": 1000, "z_min": -1000, "z_max": 1000 },
+    "portals": []
+  },
+  "bellato_hq": {
+    "id": 3,
+    "nome": "Bellato HQ",
+    "tipo": "cidade",
+    "level_min": 1,
+    "level_max": 50,
+    "safe_zone": true,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -1000, "x_max": 1000, "z_min": -1000, "z_max": 1000 },
+    "portals": []
+  },
+  "crag_mine": {
+    "id": 4,
+    "nome": "Crag Mine",
+    "tipo": "campo",
+    "level_min": 25,
+    "level_max": 50,
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -2000, "x_max": 2000, "z_min": -2000, "z_max": 2000 },
+    "portals": []
+  },
+  "ether": {
+    "id": 5,
+    "nome": "Ether",
+    "tipo": "campo",
+    "level_min": 35,
+    "level_max": 50,
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -1500, "x_max": 1500, "z_min": -1500, "z_max": 1500 },
+    "portals": []
+  },
+  "sette_desert": {
+    "id": 6,
+    "nome": "Sette Desert",
+    "tipo": "campo",
+    "level_min": 30,
+    "level_max": 45,
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -2000, "x_max": 2000, "z_min": -2000, "z_max": 2000 },
+    "portals": []
+  },
+  "elan_plateau": {
+    "id": 7,
+    "nome": "Elan Plateau",
+    "tipo": "campo",
+    "level_min": 45,
+    "level_max": 55,
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -1500, "x_max": 1500, "z_min": -1500, "z_max": 1500 },
+    "portals": []
+  },
+  "volcanic_cauldron": {
+    "id": 8,
+    "nome": "Volcanic Cauldron",
+    "tipo": "campo",
+    "level_min": 50,
+    "level_max": 65,
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -1500, "x_max": 1500, "z_min": -1500, "z_max": 1500 },
+    "portals": []
+  },
+  "outcast_land": {
+    "id": 9,
+    "nome": "Outcast Land",
+    "tipo": "campo",
+    "level_min": 55,
+    "level_max": 70,
+    "safe_zone": false,
+    "spawn": { "x": 0, "y": 0, "z": 0 },
+    "limits": { "x_min": -1500, "x_max": 1500, "z_min": -1500, "z_max": 1500 },
+    "portals": []
   }
 }

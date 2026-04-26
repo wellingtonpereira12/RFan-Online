@@ -6,6 +6,7 @@ signal hp_changed(current: int, max_val: int)
 signal sp_changed(current: int, max_val: int)
 signal fp_changed(current: int, max_val: int)
 signal died()
+signal damaged(attacker)
 
 # --- Status Máximos ---
 @export var max_hp: int = 100
@@ -94,11 +95,14 @@ func restore_fp(amount: int) -> void:
 	fp = int(fp_pool)
 	fp_changed.emit(fp, max_fp)
 
-func take_damage(amount: int, type = -1) -> void:
+func take_damage(amount: int, type = -1, attacker = null) -> void:
 	if hp <= 0: return
 	hp = clampi(hp - amount, 0, max_hp)
 	hp_pool = float(hp) # Sincroniza o pool decimal ao tomar dano
 	hp_changed.emit(hp, max_hp)
+	
+	if attacker:
+		damaged.emit(attacker)
 	
 	# Exibir Texto de Dano
 	var final_type = type
