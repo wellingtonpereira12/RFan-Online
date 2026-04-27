@@ -58,6 +58,9 @@ var is_in_combat: bool = false
 var combat_mode_timer: float = 0.0
 const COMBAT_MODE_DURATION: float = 10.0
 
+var is_dead: bool = false
+var death_ui: CanvasLayer = null
+
 func _ready() -> void:
 	# Registro global para Inimigos acharem o Jogador e Agro
 	add_to_group("players")
@@ -187,18 +190,11 @@ func _ready() -> void:
 	
 	if p_name != "" and p_race != "":
 		var p_class = GameManager.player_class
-		# Atualiza Título com Raça, Classe e Nome
 		var class_str = (" [" + p_class + "]") if p_class != "" else ""
 		name_tag.text = "[ " + p_race + class_str + " ]\n" + p_name
 		
-		# Cria cor orgânica baseada na Facção (Corita = Roxo, Bellato = Azul, Accretia = Vermelho)
-		var custom_mat = StandardMaterial3D.new()
-		match p_race:
-			"Cora": custom_mat.albedo_color = Color(0.8, 0.0, 0.8) # Roxo Intenso
-			"Bellato": custom_mat.albedo_color = Color(0.0, 0.5, 1.0) # Azul Heroico
-			"Accretia": custom_mat.albedo_color = Color(1.0, 0.2, 0.0) # Vermelho Máquina
-			
-		visual_mesh.set_surface_override_material(0, custom_mat)
+		# Inicia o carregamento do modelo 3D (Skin)
+		_load_visual_model(p_class)
 
 	# Se a classe não for definida visualmente no Godot, criamos o Guerreiro (Warrior) via código por padrão
 	if not class_stats:
@@ -238,6 +234,8 @@ func _ready() -> void:
 	# Conectar modos da UI ao Player
 	hud_instance.run_toggled.connect(_on_hud_run_toggled)
 	hud_instance.auto_attack_mode_toggled.connect(_on_hud_auto_mode_toggled)
+	
+	_create_death_ui()
 
 func _setup_skill_system() -> void:
 	if not combat_component or not hud_instance or not hud_instance.skill_bar:
@@ -384,9 +382,77 @@ func _on_hud_run_toggled(is_run_mode: bool) -> void:
 		run_mode_enabled = false
 		hud_instance.force_walk_mode()
 
+func _create_death_ui() -> void:
+	death_ui = CanvasLayer.new()
+	death_ui.layer = 100 # Ficar por cima de tudo
+	
+	var bg = ColorRect.new()
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	
+	# --- EFEITO GRAYSCALE (Preto e Branco) ---
+	var shader = Shader.new()
+	shader.code = """
+	shader_type canvas_item;
+	uniform sampler2D screen_tex : hint_screen_texture, repeat_disable, filter_nearest;
+	void fragment() {
+		vec4 c = texture(screen_tex, SCREEN_UV);
+		float gray = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+		// Deixa a tela cinza e escurece um pouquinho pra dar clima de morte
+		COLOR = vec4(vec3(gray) * 0.6, 1.0);
+	}
+	"""
+	var mat = ShaderMaterial.new()
+	mat.shader = shader
+	bg.material = mat
+	
+	death_ui.add_child(bg)
+	
+	var vbox = VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	bg.add_child(vbox)
+	
+	var label = Label.new()
+	label.text = "VOCÊ MORREU"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 42) # Fonte menor
+	label.add_theme_color_override("font_color", Color(0.8, 0.1, 0.1))
+	vbox.add_child(label)
+	
+	# Dá um espacinho entre o texto e o botão
+	var spacer = Control.new()
+	spacer.custom_minimum_size = Vector2(0, 20)
+	vbox.add_child(spacer)
+	
+	var btn = Button.new()
+	btn.text = "RENASCER"
+	btn.add_theme_font_size_override("font_size", 24)
+	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	btn.custom_minimum_size = Vector2(200, 50)
+	btn.pressed.connect(_on_respawn_btn_pressed)
+	vbox.add_child(btn)
+	
+	add_child(death_ui)
+	death_ui.visible = false
+
 # --- Sistema de Morte e Renascimento ---
 func _on_player_died() -> void:
-	print("=> [SISTEMA]: Jogador MORREU! Iniciando Respawn...")
+	print("=> [SISTEMA]: Jogador MORREU! Tela de morte ativada.")
+	is_dead = true
+	_play_anim("die")
+	
+	# Interrompe qualquer perseguição
+	is_pursuing_and_attacking = false
+	current_target = null
+	hud_instance.unbind_target()
+	_stop_click_to_move()
+	
+	death_ui.visible = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func _on_respawn_btn_pressed() -> void:
+	death_ui.visible = false
+	is_dead = false
 	
 	# Restaurar Status Full
 	vitals_component.hp = vitals_component.max_hp
@@ -397,14 +463,10 @@ func _on_player_died() -> void:
 	vitals_component.sp_changed.emit(vitals_component.sp, vitals_component.max_sp)
 	vitals_component.fp_changed.emit(vitals_component.fp, vitals_component.max_fp)
 	
-	# Interrompe qualquer perseguição
-	is_pursuing_and_attacking = false
-	current_target = null
-	hud_instance.unbind_target()
-	
 	# Teletransportar pro centro da plataforma
 	global_position = Vector3(0, 1.5, 0)
 	
+	_play_anim("idle")
 	print("=> [SISTEMA]: Respawn concluído com sucesso!")
 
 # --- Sistema de Inventário (Drop de Itens) ---
@@ -424,6 +486,8 @@ func drop_item_on_ground(item_data: Dictionary, amount: int) -> void:
 	print("[Loot] Solicitando drop manual de: ", item_data.get("nome", "item"))
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_dead: return
+	
 	# Cancelar Target, Ataque e Fechar Janelas com ESC
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		var esc_handled = false
@@ -590,6 +654,10 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
+	if is_dead:
+		move_and_slide()
+		return
+
 	# Handle Jump (Tecla X) ou Attack (Espaço)
 	var focus_owner = get_viewport().gui_get_focus_owner()
 	if not (focus_owner is LineEdit):
@@ -689,10 +757,26 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0, move_speed)
 			velocity.z = move_toward(velocity.z, 0, move_speed)
 
+	# --- Lógica de Animação de Movimento ---
+	if not is_on_floor():
+		_play_anim("jump")
+	elif Vector2(velocity.x, velocity.z).length() > 0.1:
+		if vitals_component and vitals_component.is_running:
+			_play_anim("run")
+		else:
+			_play_anim("walk")
+	else:
+		if basic_attack_cooldown_timer <= 0: # Não cancela animação de ataque se estiver parado batendo
+			_play_anim("idle")
+
 	# Atualiza Rotação VISUAL (Malha 3D) baseada puramente na direção que o boneco anda
 	if Vector2(velocity.x, velocity.z).length() > 0.1:
 		var target_angle = atan2(velocity.x, velocity.z)
+		# Gira o Capsule padrão
 		$MeshInstance3D.global_rotation.y = lerp_angle($MeshInstance3D.global_rotation.y, target_angle, 15.0 * delta)
+		# Gira o root de todos os modelos GLB
+		if is_instance_valid(_visuals_root):
+			_visuals_root.global_rotation.y = lerp_angle(_visuals_root.global_rotation.y, target_angle, 15.0 * delta)
 
 	# Tempo de Cooldown correndo fora da condicional pra garantir recuperação universal
 	if basic_attack_cooldown_timer > 0.0:
@@ -733,6 +817,8 @@ func perform_attack() -> void:
 		print("Selecione um alvo primeiro (Tab)")
 		return
 		
+	_play_anim("attack")
+	
 	var dist = global_position.distance_to(current_target.global_position)
 	if dist <= base_attack_range:
 		# Pega o ataque total do sistema de status centralizado
@@ -802,3 +888,193 @@ func update_attack_speed():
 	basic_attack_interval = 1.0 / multiplier
 	
 	print("[Player] Vel. Ataque atualizada: Intervalo=", basic_attack_interval, "s (", bonus_pct, "%)")
+
+# ==========================================
+# ====== SISTEMA DE SKIN 3D (MODELOS) ======
+# ==========================================
+var _models: Dictionary = {}
+var _anim_players: Dictionary = {}
+var _current_model: Node = null
+var _current_anim_state: String = ""
+var _visuals_root: Node3D = null
+
+func _load_visual_model(p_class_id: String) -> void:
+	if not _visuals_root:
+		_visuals_root = Node3D.new()
+		add_child(_visuals_root)
+		
+	var raw_class = p_class_id.to_lower()
+	var archetype = StatusManager.CLASS_MAPPING.get(raw_class, "melee")
+	var class_data = StatusManager.all_class_configs.get(archetype, {})
+	
+	# Tenta pegar base configs
+	var base_data = class_data.get("base", {}) if not class_data.is_empty() else {}
+	
+	# Pega os caminhos (Fallback para vazio se não existir)
+	var path_idle = base_data.get("visual_path", "")
+	var path_walk = base_data.get("visual_path_walk", path_idle)
+	var path_run = base_data.get("visual_path_run", path_walk)
+	var path_attack = base_data.get("visual_path_attack", path_idle)
+	var path_die = base_data.get("visual_path_die", path_idle)
+	var path_jump = base_data.get("visual_path_jump", path_idle)
+	
+	if path_idle == "":
+		print("[Player Skin] Nenhuma skin definida em class_configs.json para a classe: ", archetype)
+		return
+		
+	print("[Player Skin] Carregando skins para a classe: ", archetype)
+	
+	var s: float = float(base_data.get("escala", 1.0))
+	var oy: float = float(base_data.get("visual_offset_y", 0.0))
+	var ry: float = float(base_data.get("visual_rotation_y", 0.0))
+	
+	_load_and_add_model("idle", path_idle, s, oy, ry)
+	_load_and_add_model("walk", path_walk, s, oy, ry)
+	_load_and_add_model("run", path_run, s, oy, ry)
+	_load_and_add_model("attack", path_attack, s, oy, ry)
+	_load_and_add_model("die", path_die, s, oy, ry)
+	_load_and_add_model("jump", path_jump, s, oy, ry)
+	
+	# Oculta cápsula de fallback
+	if visual_mesh:
+		visual_mesh.visible = false
+	
+	call_deferred("_setup_animations_deferred")
+
+func _load_and_add_model(state_key: String, path: String, s: float, oy: float, ry: float) -> void:
+	if path == "": return
+	
+	# Reutilizar
+	var existing_model = null
+	for k in _models.keys():
+		if _models[k].has_meta("model_path") and _models[k].get_meta("model_path") == path:
+			existing_model = _models[k]
+			break
+			
+	if existing_model:
+		_models[state_key] = existing_model
+		return
+		
+	var model_res = load(path)
+	if not model_res: return
+		
+	var model_instance: Node = null
+	if model_res is PackedScene:
+		model_instance = model_res.instantiate()
+	else:
+		var gltf = GLTFDocument.new()
+		var state = GLTFState.new()
+		if gltf.append_from_file(path, state) == OK:
+			model_instance = gltf.generate_scene(state)
+			
+	if model_instance:
+		_visuals_root.add_child(model_instance)
+		_force_show_all(model_instance)
+		model_instance.visible = false
+		model_instance.set_meta("model_path", path)
+		
+		model_instance.scale = Vector3(s, s, s)
+		model_instance.rotation_degrees.y = ry
+		model_instance.position.y = oy
+		
+		_models[state_key] = model_instance
+
+func _setup_animations_deferred() -> void:
+	for state_key in _models:
+		var model = _models[state_key]
+		if not _anim_players.has(model):
+			var queue: Array = [model]
+			var player = null
+			while queue.size() > 0:
+				var current = queue.pop_front()
+				if current is AnimationPlayer:
+					player = current
+					break
+				for child in current.get_children():
+					queue.append(child)
+			if player:
+				_anim_players[model] = player
+				
+	_play_anim("idle")
+
+func _force_show_all(node: Node) -> void:
+	if node is GeometryInstance3D:
+		var gi = node as GeometryInstance3D
+		gi.visible = true
+		gi.layers = 1
+		gi.visibility_range_begin = 0.0
+		gi.visibility_range_end = 0.0
+		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	elif node is VisualInstance3D:
+		(node as VisualInstance3D).visible = true
+		(node as VisualInstance3D).layers = 1
+	for child in node.get_children():
+		_force_show_all(child)
+
+func _play_anim(anim_name: String) -> void:
+	# Trava a animação de pulo para que ela toque até o final, mesmo se encostar no chão
+	if _current_anim_state == "jump" and anim_name != "jump" and anim_name != "die":
+		var current_player: AnimationPlayer = _anim_players.get(_current_model)
+		if current_player and current_player.is_playing():
+			return
+
+	# Evita resetar a mesma animação
+	if _current_anim_state == anim_name and anim_name != "attack":
+		return
+		
+	var target_model = _models.get(anim_name)
+	if not target_model:
+		target_model = _models.get("idle")
+	if not target_model: return
+	
+	if _current_model and _current_model != target_model:
+		_current_model.visible = false
+	target_model.visible = true
+	_current_model = target_model
+	_current_anim_state = anim_name
+	
+	var player: AnimationPlayer = _anim_players.get(target_model)
+	if not player: return
+	
+	var list = player.get_animation_list()
+	if list.size() == 0: return
+	
+	var actual_anim = ""
+	
+	var keywords: Array = []
+	match anim_name:
+		"idle":   keywords = ["IDLE", "WAIT", "STAND"]
+		"walk":   keywords = ["WALK", "MOV", "PEACEWALK"]
+		"run":    keywords = ["RUN", "SPRINT", "DASH"]
+		"attack": keywords = ["ATTACK", "HIT", "STRIKE", "PUNCH", "COMBO"]
+		"die":    keywords = ["DIE", "DEATH", "DEAD"]
+		"jump":   keywords = ["JUMP", "FALL", "AIR"]
+	
+	for kw in keywords:
+		for a in list:
+			if kw in a.to_upper():
+				actual_anim = a
+				break
+		if actual_anim != "":
+			break
+			
+	if actual_anim == "":
+		for a in list:
+			if a != "RESET" and not a.ends_with("/RESET"):
+				actual_anim = a
+				break
+		if actual_anim == "":
+			actual_anim = list[0]
+			
+	if actual_anim != "" and player.has_animation(actual_anim):
+		var anim = player.get_animation(actual_anim)
+		if anim_name == "idle" or anim_name == "walk" or anim_name == "run":
+			anim.loop_mode = Animation.LOOP_LINEAR
+		else:
+			anim.loop_mode = Animation.LOOP_NONE
+		
+		# Reinicia a animação sempre que for disparada uma nova (principalmente pulo e ataque)
+		if anim_name == "attack" or anim_name == "jump" or anim_name == "die":
+			player.stop()
+			
+		player.play(actual_anim)

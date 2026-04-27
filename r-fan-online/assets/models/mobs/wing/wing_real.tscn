@@ -1,0 +1,45 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Mesh" uid="uid://ccgtlqq0embet" path="res://wing_source/mesh_0.obj" id="2"]
+[ext_resource type="Mesh" uid="uid://clq48alp06qkl" path="res://wing_source/mesh_1.obj" id="3"]
+[ext_resource type="Mesh" uid="uid://bb5b843owqvhe" path="res://wing_source/mesh_2.obj" id="4"]
+[ext_resource type="Mesh" uid="uid://b7m60q77s50wp" path="res://wing_source/mesh_3.obj" id="5"]
+[ext_resource type="Mesh" uid="uid://dqmrsa0pm6tpj" path="res://wing_source/mesh_4.obj" id="6"]
+[ext_resource type="Mesh" uid="uid://carxkoyls2yba" path="res://wing_source/mesh_5.obj" id="7"]
+[ext_resource type="Mesh" uid="uid://b34udaxunsvq1" path="res://wing_source/mesh_6.obj" id="8"]
+[ext_resource type="Mesh" uid="uid://dhtl5xy5df2ou" path="res://wing_source/mesh_7.obj" id="9"]
+[ext_resource type="Mesh" uid="uid://y4g5dppifvjr" path="res://wing_source/mesh_8.obj" id="10"]
+[ext_resource type="Mesh" uid="uid://bg6sxs87j753p" path="res://wing_source/mesh_9.obj" id="11"]
+
+[node name="WingReal" type="Node3D"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+
+[node name="Skeleton3D" type="Skeleton3D" parent="."]
+bones/0/name = "Bip01 center"
+bones/0/rest = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.00019999999494757503, 0.0, 12.884400367736816)
+bones/1/name = "Bip01 lens00"
+bones/1/parent = 0
+bones/1/rest = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.00019999999494757503, -0.7289000153541565, 12.897199630737305)
+bones/2/name = "Bip01 lens01"
+bones/2/parent = 1
+bones/2/rest = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.00019999999494757503, -2.313699960708618, 12.875399589538574)
+bones/3/name = "Bip01 propeller"
+bones/3/parent = 0
+bones/3/rest = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.00019999999494757503, 0.0, 13.280400276184082)
+
+[node name="Object03" type="MeshInstance3D" parent="Skeleton3D"]
+mesh = ExtResource("2")
+skeleton = NodePath("..")
+
+[node name="Object01" type="MeshInstance3D" parent="Skeleton3D"]
+mesh = ExtResource("4")
+skeleton = NodePath("..")
+
+[node name="Object02" type="MeshInstance3D" parent="Skeleton3D"]
+mesh = ExtResource("5")
+skeleton = NodePath("..")
+
+[node name="Wing" type="MeshInstance3D" parent="Skeleton3D"]
+mesh = ExtResource("8")
+skeleton = NodePath("..")
+

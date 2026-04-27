@@ -32,6 +32,10 @@ AttackSpeedManager="*res://core/AttackSpeedManager.gd"
 NetworkManager="*res://core/NetworkManager.gd"
 MapDatabase="*res://core/MapDatabase.gd"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/meshy-godot-plugin/plugin.cfg")
+
 [input]
 
 move_left={

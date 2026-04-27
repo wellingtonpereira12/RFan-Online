@@ -84,53 +84,138 @@ func setup_from_db(key: String) -> void:
 		vitals.max_hp = mob_data["hp"]
 		vitals.hp = vitals.max_hp
 		
-	current_state = State.PATROL
+	current_state = State.IDLE
 	_load_visual_model(key)
+	_change_state(State.PATROL)
 	print("[Mob] Spawnado: ", name, " (", mob_key, ")")
 
-func _load_visual_model(key: String) -> void:
-	var model_path = "res://assets/models/mobs/" + key + "/" + key + ".glb"
-	if ResourceLoader.exists(model_path):
-		var model_scene = load(model_path)
-		if model_scene:
-			# Remove o visual antigo (Capsula)
-			var old_mesh = get_node_or_null("MeshInstance3D")
-			if old_mesh:
-				old_mesh.visible = false
-			
-			# Instancia o modelo real
-			var model_instance = model_scene.instantiate()
-			add_child(model_instance)
-			
-			# Ajuste de escala e rotacao baseado no banco de dados
-			var s = mob_data.get("escala", 1.0)
-			model_instance.scale = Vector3(s, s, s)
-			model_instance.rotation_degrees.y = 0
-			model_instance.position.y = 0
-			
-			# Ajustar a capsula de colisao para mobs pequenos
-			var col = get_node_or_null("CollisionShape3D")
-			if col:
-				if s < 0.5:
-					col.scale = Vector3(0.5, 0.5, 0.5)
-					col.position.y = 0.5
-				else:
-					col.scale = Vector3(1.0, 1.0, 1.0)
-					col.position.y = 1.0
-			
-			# Sistema de Animacao
-			var anim_player = _find_animation_player(model_instance)
-			if anim_player:
-				_setup_animations(anim_player)
-
-func _find_animation_player(node: Node) -> AnimationPlayer:
-	if node is AnimationPlayer:
-		return node
+func _force_show_all(node: Node) -> void:
+	if node is GeometryInstance3D:
+		var gi = node as GeometryInstance3D
+		gi.visible = true
+		gi.layers = 1  # Garante que esta na layer 1 (camera padrao)
+		gi.visibility_range_begin = 0.0
+		gi.visibility_range_end = 0.0  # 0 = sem limite
+		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	elif node is VisualInstance3D:
+		(node as VisualInstance3D).visible = true
+		(node as VisualInstance3D).layers = 1
 	for child in node.get_children():
-		var found = _find_animation_player(child)
-		if found:
-			return found
+		_force_show_all(child)
+
+var _models: Dictionary = {}
+var _anim_players: Dictionary = {}
+var _current_model: Node = null
+
+func _load_visual_model(key: String) -> void:
+	var default_path: String = mob_data.get("visual_path", "").strip_edges()
+	if default_path == "":
+		var visual_key: String = mob_data.get("visual_id", key)
+		var model_dir: String = "res://assets/models/mobs/" + visual_key + "/"
+		var candidate_paths: Array[String] = [
+			model_dir + visual_key + ".tscn",
+			model_dir + visual_key + ".glb",
+		]
+		for path in candidate_paths:
+			if ResourceLoader.exists(path):
+				default_path = path
+				break
+	
+	if default_path == "":
+		print("[Mob Debug] AVISO: Nenhum modelo encontrado para '", key, "'. Usando capsula de fallback.")
+		return
+	
+	# Carrega os modelos baseados no estado. Se não houver específico, usa o padrão.
+	_load_and_add_model("idle", mob_data.get("visual_path_idle", default_path))
+	_load_and_add_model("walk", mob_data.get("visual_path_walk", default_path))
+	_load_and_add_model("attack", mob_data.get("visual_path_attack", default_path))
+	_load_and_add_model("die", mob_data.get("visual_path_die", default_path))
+	
+	# Oculta cápsula de fallback
+	var old_mesh = get_node_or_null("MeshInstance3D")
+	if old_mesh:
+		old_mesh.visible = false
+	
+	call_deferred("_setup_animations_deferred")
+
+func _load_and_add_model(state_key: String, path: String) -> void:
+	if path == "": return
+	
+	# Se já instanciamos este mesmo caminho, apenas reaproveitamos a referência (evita carregar 4x o mesmo GLB)
+	var existing_model = null
+	for k in _models.keys():
+		if _models[k].has_meta("model_path") and _models[k].get_meta("model_path") == path:
+			existing_model = _models[k]
+			break
+			
+	if existing_model:
+		_models[state_key] = existing_model
+		return
+		
+	var model_res = load(path)
+	if not model_res:
+		print("[Mob Debug] Falha ao carregar Resource: ", path)
+		return
+		
+	var model_instance: Node = null
+	if model_res is PackedScene:
+		model_instance = model_res.instantiate()
+	else:
+		var gltf = GLTFDocument.new()
+		var state = GLTFState.new()
+		if gltf.append_from_file(path, state) == OK:
+			model_instance = gltf.generate_scene(state)
+			
+	if model_instance:
+		add_child(model_instance)
+		_force_show_all(model_instance)
+		model_instance.visible = false # Oculta por padrão até ser chamado
+		model_instance.set_meta("model_path", path)
+		
+		var s: float = float(mob_data.get("escala", 1.0))
+		model_instance.scale = Vector3(s, s, s)
+		model_instance.rotation_degrees.x = float(mob_data.get("visual_rotation_x", 0.0))
+		model_instance.rotation_degrees.y = float(mob_data.get("visual_rotation_y", 0.0))
+		model_instance.rotation_degrees.z = float(mob_data.get("visual_rotation_z", 0.0))
+		model_instance.position.y = float(mob_data.get("visual_offset_y", 0.0))
+		
+		_models[state_key] = model_instance
+		print("[Mob Debug] Carregado modelo para estado '", state_key, "': ", path)
+
+func _setup_animations_deferred() -> void:
+	for state_key in _models:
+		var model = _models[state_key]
+		if not _anim_players.has(model):
+			var player = _find_animation_player_deep(model)
+			if player:
+				_anim_players[model] = player
+				print("[Mob Debug] AnimPlayer para '", state_key, "': ", player.get_animation_list())
+			else:
+				print("[Mob Debug] AVISO: Nenhum AnimationPlayer para '", state_key, "'")
+				
+	_play_anim("idle")
+
+func _find_animation_player_deep(node: Node) -> AnimationPlayer:
+	var queue: Array = [node]
+	while queue.size() > 0:
+		var current = queue.pop_front()
+		if current is AnimationPlayer:
+			return current
+		for child in current.get_children():
+			queue.append(child)
 	return null
+
+func _list_children_recursive(node: Node) -> Array:
+	var result = [node.name + " (" + node.get_class() + ")"]
+	for child in node.get_children():
+		result.append_array(_list_children_recursive(child))
+	return result
+
+func _find_all_meshes(node: Node, list: Array) -> void:
+	if node is MeshInstance3D or node is ImporterMeshInstance3D:
+		list.append(node)
+	for child in node.get_children():
+		_find_all_meshes(child, list)
 
 func _find_mesh(node: Node) -> MeshInstance3D:
 	if node is MeshInstance3D:
@@ -141,82 +226,70 @@ func _find_mesh(node: Node) -> MeshInstance3D:
 			return found
 	return null
 
-var _anim_player: AnimationPlayer = null
-func _setup_animations(player: AnimationPlayer) -> void:
-	_anim_player = player
-	print("[Mob Debug] Animacoes encontradas no modelo ", name, ": ", _anim_player.get_animation_list())
-	_play_anim("idle")
-
 func _play_anim(anim_name: String) -> void:
-	if not _anim_player:
-		print("[Mob Debug] ERRO: AnimationPlayer nao encontrado para ", name)
-		return
+	var target_model = _models.get(anim_name)
+	if not target_model:
+		target_model = _models.get("idle") # Fallback
+		
+	if not target_model: return
+	
+	# Troca o modelo visível
+	if _current_model and _current_model != target_model:
+		_current_model.visible = false
+	target_model.visible = true
+	_current_model = target_model
+	
+	var player: AnimationPlayer = _anim_players.get(target_model)
+	if not player: return
+	
+	var list = player.get_animation_list()
+	if list.size() == 0: return
 	
 	var actual_anim = ""
-	var list = _anim_player.get_animation_list()
 	
-	if anim_name == "idle":
-		for a in list:
-			if "IDLE" in a.to_upper():
-				actual_anim = a
-				break
-		if actual_anim == "":
-			actual_anim = "WARIDLE_01_00"
-	elif anim_name == "walk":
-		for a in list:
-			var ua = a.to_upper()
-			if "YOUNGFLEM" in ua and "PEACEWALK" in ua:
-				actual_anim = a
-				break
-		
-		if actual_anim == "":
+	var custom_key = "anim_" + anim_name
+	if mob_data.has(custom_key) and mob_data[custom_key] != "":
+		var target: String = mob_data[custom_key]
+		if player.has_animation(target):
+			actual_anim = target
+		else:
+			var target_up = target.to_upper()
 			for a in list:
-				if "PEACEWALK" in a.to_upper():
+				if a.to_upper() == target_up or a.to_upper().ends_with("/" + target_up):
 					actual_anim = a
 					break
+	
+	if actual_anim == "":
+		var keywords: Array = []
+		match anim_name:
+			"idle":   keywords = ["IDLE", "WAIT", "STAND"]
+			"walk":   keywords = ["WALK", "RUN", "MOV", "PEACEWALK"]
+			"attack": keywords = ["ATTACK", "HIT", "STRIKE"]
+			"die":    keywords = ["DIE", "DEATH", "DEAD"]
 		
-		if actual_anim == "":
+		for kw in keywords:
 			for a in list:
-				var ua = a.to_upper()
-				if "WALK" in ua or "RUN" in ua:
+				if kw in a.to_upper():
 					actual_anim = a
 					break
-		if actual_anim == "":
-			actual_anim = "WARWALK_01_00"
-	elif anim_name == "attack":
-		for a in list:
-			if "ATTACK" in a.to_upper():
-				actual_anim = a
+			if actual_anim != "":
 				break
-		if actual_anim == "":
-			actual_anim = "WARFORCEATTACK_01_00"
-	elif anim_name == "die":
-		for a in list:
-			var upper_a = a.to_upper()
-			if "DIE" in upper_a or "DEATH" in upper_a:
-				actual_anim = a
-				break
-		
-		if actual_anim == "":
-			if "WARDIE_01_00" in list:
-				actual_anim = "WARDIE_01_00"
-			elif "Die" in list:
-				actual_anim = "Die"
 	
-	if actual_anim == "" and list.size() > 0:
-		actual_anim = list[0]
-		
-	if actual_anim != "" and _anim_player.has_animation(actual_anim):
-		var anim = _anim_player.get_animation(actual_anim)
+	if actual_anim == "":
+		for a in list:
+			if a != "RESET" and not a.ends_with("/RESET"):
+				actual_anim = a
+				break
+		if actual_anim == "":
+			actual_anim = list[0]
+	
+	if actual_anim != "" and player.has_animation(actual_anim):
+		var anim = player.get_animation(actual_anim)
 		if anim_name == "idle" or anim_name == "walk":
 			anim.loop_mode = Animation.LOOP_LINEAR
 		else:
 			anim.loop_mode = Animation.LOOP_NONE
-			
-		print("[Mob Debug] Reproduzindo: ", actual_anim, " (Estado: ", anim_name, ")")
-		_anim_player.play(actual_anim)
-	else:
-		print("[Mob Debug] AVISO: Nenhuma animacao correspondente para '", anim_name, "' encontrada. Lista: ", list)
+		player.play(actual_anim)
 
 func _physics_process(delta: float) -> void:
 	if mob_data.is_empty() or vitals.hp <= 0:
@@ -236,9 +309,7 @@ func _process_state_machine(delta: float) -> void:
 	velocity.x = 0.0
 	velocity.z = 0.0
 	
-	if vitals.hp < vitals.max_hp * flee_health_threshold and current_state != State.FLEE:
-		_change_state(State.FLEE)
-	elif current_target == null and (current_state == State.CHASE or current_state == State.ATTACK):
+	if current_target == null and (current_state == State.CHASE or current_state == State.ATTACK):
 		_change_state(State.RETURN)
 
 	match current_state:
@@ -416,17 +487,7 @@ func _on_death() -> void:
 	current_target = null
 	set_physics_process(false)
 	
-	print("[Mob Debug] MORREU! Lista de animacoes disponiveis: ", _anim_player.get_animation_list() if _anim_player else "SEM PLAYER")
-	
-	var model = get_child(get_child_count() - 1)
-	if model:
-		var mesh = _find_mesh(model)
-		if mesh:
-			var mat = StandardMaterial3D.new()
-			mat.albedo_color = Color(1, 0, 0)
-			mat.emission_enabled = true
-			mat.emission = Color(1, 0, 0)
-			mesh.set_surface_override_material(0, mat)
+	print("[Mob Debug] MORREU!")
 	
 	$CollisionShape3D.disabled = true
 	
